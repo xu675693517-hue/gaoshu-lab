@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>微分中值定理 · 切线平行于弦</title>
+<link rel="stylesheet" href="../assets/katex/katex.min.css">
+<script src="../assets/katex/katex.min.js"></script>
+<style>
+:root{
+  --page:#f7f4ef; --surface:#ffffff; --ink:#2a2f2e; --muted:#8a908e;
+  --line:#e5dfd6; --sage:#6e8b7b; --sage-deep:#4e6a5b; --blue:#6b8899;
+  --sand:#b39a6e; --rose:#b5705f; --mauve:#93899c;
+}
+*{box-sizing:border-box}
+html{overflow-x:hidden}
+body{margin:0;padding:0;background:var(--page);color:var(--ink);
+  font-family:"Segoe UI","Microsoft YaHei",sans-serif;overflow-x:hidden;
+  -webkit-font-smoothing:antialiased}
+.wrap{max-width:860px;margin:0 auto;padding:8px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;
+  padding:12px 16px 8px;box-shadow:0 1px 3px rgba(47,53,55,.05)}
+.head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+h1{margin:0;font-size:16.5px;font-weight:600;letter-spacing:.2px}
+h1 small{font-weight:400;color:var(--muted);font-size:12.5px;margin-left:6px}
+.btns{display:flex;gap:6px}
+button{font-family:inherit;font-size:12.5px;color:var(--ink);background:#f1eee8;
+  border:1px solid var(--line);border-radius:8px;padding:4px 11px;cursor:pointer}
+button:hover{background:#eae5dc}
+button.on{background:var(--sage-deep);border-color:var(--sage-deep);color:#fbfbf8}
+.strip{min-height:40px;display:flex;align-items:center;gap:10px;overflow:hidden;
+  margin:4px 0 2px;padding:2px 0;font-size:14px;flex-wrap:nowrap}
+.strip .katex{font-size:1.02em}
+.strip .lbl{font-size:12px;color:var(--muted);white-space:nowrap;flex:0 0 auto}
+.fb{font-family:Consolas,"Courier New",monospace;font-size:12.5px;color:var(--ink)}
+#plot{display:block;width:100%;height:auto;background:#fffdfa;border:1px solid var(--line);
+  border-radius:10px}
+.ctrl{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:6px 0 4px}
+.slot{display:flex;align-items:center;gap:8px;flex:1 1 250px;min-width:210px}
+.slot label{font-size:12.5px;color:var(--muted);white-space:nowrap}
+input[type=range]{flex:1 1 auto;min-width:90px;height:20px;accent-color:var(--sage-deep);
+  background:transparent;cursor:pointer}
+.val{font-family:Consolas,"Courier New",monospace;font-size:12.5px;color:var(--sage-deep);
+  min-width:62px;text-align:right}
+.read{display:flex;gap:10px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin:0 0 5px}
+.read b{font-family:Consolas,"Courier New",monospace;color:var(--ink);font-weight:600}
+.badge{display:inline-block;font-size:11.5px;border-radius:999px;padding:1px 9px;
+  border:1px solid #cdd6cf;background:#e7ebe7;color:var(--sage-deep)}
+.badge.no{border-color:#e0d6cc;background:#f3eee7;color:var(--sand)}
+.concl{border-left:3px solid var(--sage-deep);background:#eaece7;border-radius:0 8px 8px 0;
+  padding:8px 12px;font-size:13px;line-height:1.5}
+.concl b{font-family:Consolas,"Courier New",monospace;color:var(--sage-deep)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--muted);margin:0}
+.legend i{display:inline-block;width:16px;height:0;border-top-width:2.5px;border-top-style:solid;
+  vertical-align:middle;margin-right:4px}
+svg text{font-family:"Segoe UI","Microsoft YaHei",sans-serif}
+</style>
+</head>
+<body>
+<div class="wrap"><div class="card">
+  <div class="head">
+    <h1>微分中值定理 · 切线平行于弦<small id="sub">f(x)=x³−3x+1，[−1.5, 2.5]</small></h1>
+    <div class="btns">
+      <button id="bLag" class="on">拉格朗日</button>
+      <button id="bRol">罗尔模式</button>
+      <button id="bSnap">吸附到中值点</button>
+    </div>
+  </div>
+
+  <div class="strip">
+    <span class="lbl">弦斜率与切线斜率</span>
+    <span id="mTex"></span>
+  </div>
+
+  <svg id="plot" viewBox="0 0 860 218" preserveAspectRatio="xMidYMid meet" role="img"
+       aria-label="微分中值定理示意图">
+    <defs><clipPath id="clip"><rect id="clipR" x="0" y="0" width="860" height="218"></rect></clipPath></defs>
+    <g id="gGrid"></g>
+    <g id="gAxes"></g>
+    <g id="gTicks"></g>
+    <g clip-path="url(#clip)">
+      <path id="pChordExt" fill="none" stroke="#6b8899" stroke-width="1.6" stroke-dasharray="6 5" opacity="0.85"></path>
+      <path id="pTangent" fill="none" stroke="#b5705f" stroke-width="2.2" stroke-dasharray="8 4"></path>
+      <path id="pCurve" fill="none" stroke="#6e8b7b" stroke-width="2.6" stroke-linejoin="round"></path>
+      <path id="pChord" fill="none" stroke="#6b8899" stroke-width="2.8"></path>
+      <line id="lA" stroke="#e5dfd6" stroke-width="1.2" stroke-dasharray="3 3"></line>
+      <line id="lB" stroke="#e5dfd6" stroke-width="1.2" stroke-dasharray="3 3"></line>
+      <circle id="cA" r="5" fill="#6b8899" stroke="#fffdfa" stroke-width="1.6"></circle>
+      <circle id="cB" r="5" fill="#6b8899" stroke="#fffdfa" stroke-width="1.6"></circle>
+      <circle id="cM" r="5.5" fill="#b5705f" stroke="#fffdfa" stroke-width="1.8"></circle>
+    </g>
+    <g id="gRoots"></g>
+    <g id="gLabels"></g>
+  </svg>
+
+  <div class="legend">
+    <span><i style="border-top-color:#6e8b7b"></i>曲线 y=f(x)</span>
+    <span><i style="border-top-color:#6b8899"></i>弦 AB（端点连线）</span>
+    <span><i style="border-top-color:#b5705f;border-top-style:dashed"></i>切点 c 处的切线</span>
+    <span><i style="border-top-color:#93899c"></i>○ 定理保证的中值点</span>
+  </div>
+
+  <div class="ctrl">
+    <div class="slot">
+      <label for="sc">切点位置 c =</label>
+      <input id="sc" type="range" min="-1.5" max="2.5" step="0.001" value="1.258">
+      <span class="val" id="vc">1.258</span>
+    </div>
+  </div>
+
+  <div class="read">
+    <span>弦斜率 m = <b id="rm">—</b></span>
+    <span>当前 c = <b id="rc">—</b></span>
+    <span>f′(c) = <b id="rdc">—</b></span>
+    <span>定理保证的 c：<b id="rroots">—</b></span>
+    <span id="rbadge" class="badge no">未平行</span>
+  </div>
+
+  <div class="concl" id="concl">—</div>
+</div></div>
+
+<script>
+/* ---------- 工具 ---------- */
+function tex(el, s, fb){
+  try{
+    if(typeof katex === 'undefined' || typeof katex.renderToString !== 'function')
+      throw new Error('katex unavailable');
+    el.innerHTML = katex.renderToString(s, {throwOnError:false, displayMode:false});
+  }catch(e){ el.className='fb'; el.textContent = fb; }
+}
+function niceTicks(lo, hi, n){
+  const span = hi - lo;
+  if(!(span > 0) || !isFinite(span)) return [lo];
+  const raw = span/n, mag = Math.pow(10, Math.floor(Math.log10(raw))), nm = raw/mag;
+  let st = nm <= 1 ? 1 : nm <= 2 ? 2 : nm <= 2.5 ? 2.5 : nm <= 5 ? 5 : 10;
+  st *= mag;
+  const out = [];
+  for(let v = Math.ceil(lo/st)*st; v <= hi + 1e-9; v += st) out.push(+(v.toFixed(10)));
+  return out;
+}
+function nf(v, d){ if(!isFinite(v)) return '—'; if(Math.abs(v) < 5e-13) v = 0; return v.toFixed(d); }
+const SVGNS = 'http://www.w3.org/2000/svg';
+function el(tag, attrs){
+  const e = document.createElementNS(SVGNS, tag);
+  for(const k in attrs) e.setAttribute(k, attrs[k]);
+  return e;
+}
+/* 数值求根：在 [a,b] 上扫描 f'(x)-m 的变号区间后二分 */
+function findRoots(g, a, b, N){
+  N = N || 600;
+  const out = [];
+  let px = a, pv = g(a);
+  for(let i=1;i<=N;i++){
+    const x = a + (b-a)*i/N, v = g(x);
+    if(pv === 0) out.push(px);
+    if(pv*v < 0){
+      let lo = px, hi = x, flo = pv;
+      for(let k=0;k<80;k++){
+        const mid = (lo+hi)/2, fm = g(mid);
+        if(flo*fm <= 0) hi = mid; else { lo = mid; flo = fm; }
+      }
+      out.push((lo+hi)/2);
+    }
+    px = x; pv = v;
+  }
+  if(pv === 0) out.push(b);
+  return out.filter((v,i) => i===0 || Math.abs(v-out[i-1]) > 1e-7);
+}
+
+/* ---------- 数据 ---------- */
+const F  = x => x*x*x - 3*x + 1;
+const DF = x => 3*x*x - 3;
+const MODES = {
+  lag: {a:-1.5, b:2.5, sub:'f(x)=x³−3x+1，[−1.5, 2.5]（拉格朗日）', ftex:'f(x)=x^{3}-3x+1'},
+  rol: {a:-Math.sqrt(3), b:Math.sqrt(3), sub:'罗尔模式：f(a)=f(b)=1，[−√3, √3]', ftex:'f(x)=x^{3}-3x+1'}
+};
+let mode = 'lag';
+
+/* ---------- 画布 ---------- */
+const W = 860, H = 218, ML = 50, MR = 18, MT = 12, MB = 32;
+const PX0 = ML, PX1 = W - MR, PY0 = MT, PY1 = H - MB;
+
+function render(){
+  const M = MODES[mode], a = M.a, b = M.b;
+  const fa = F(a), fb = F(b);
+  const m = (fb - fa)/(b - a);
+  const g = x => DF(x) - m;
+  const roots = findRoots(g, a, b);
+
+  const svRaw = +document.getElementById('sc').value;
+  let cv = svRaw, snapped = false;
+  for(let i = 0; i < roots.length; i++){
+    if(Math.abs(roots[i] - svRaw) < 0.03){ cv = roots[i]; snapped = true; }
+  }
+  const fc = F(cv), dc = DF(cv);
+  const diff = Math.abs(dc - m);
+  const isPar = diff < 2e-6;
+
+  /* 画布范围 */
+  const xMin = a - 0.42, xMax = b + 0.42;
+  let lo = Infinity, hi = -Infinity;
+  const push = v => { if(isFinite(v)){ if(v<lo) lo=v; if(v>hi) hi=v; } };
+  for(let i=0;i<=300;i++) push(F(xMin + (xMax-xMin)*i/300));
+  push(fa); push(fb); push(fc); push(fa + m*(xMin-a)); push(fa + m*(xMax-a));
+  const pad = (hi-lo)*0.13 || 1;
+  const yMin = lo - pad, yMax = hi + pad;
+
+  const X = x => PX0 + (x-xMin)/(xMax-xMin)*(PX1-PX0);
+  const Y = y => PY1 - (y-yMin)/(yMax-yMin)*(PY1-PY0);
+
+  /* 网格 / 轴 */
+  const gGrid = document.getElementById('gGrid'), gAxes = document.getElementById('gAxes'),
+        gTicks = document.getElementById('gTicks');
+  gGrid.innerHTML=''; gAxes.innerHTML=''; gTicks.innerHTML='';
+  const xt = niceTicks(xMin, xMax, 6), yt = niceTicks(yMin, yMax, 5);
+  xt.forEach(v => gGrid.appendChild(el('line', {x1:X(v),y1:PY0,x2:X(v),y2:PY1,stroke:'#ece7de','stroke-width':1})));
+  yt.forEach(v => gGrid.appendChild(el('line', {x1:PX0,y1:Y(v),x2:PX1,y2:Y(v),stroke:'#ece7de','stroke-width':1})));
+  if(yMin < 0 && yMax > 0) gAxes.appendChild(el('line', {x1:PX0,y1:Y(0),x2:PX1,y2:Y(0),stroke:'#c8c0b4','stroke-width':1.3}));
+  if(xMin < 0 && xMax > 0) gAxes.appendChild(el('line', {x1:X(0),y1:PY0,x2:X(0),y2:PY1,stroke:'#c8c0b4','stroke-width':1.3}));
+  xt.forEach(v => { const t = el('text', {x:X(v), y:PY1+14, 'font-size':10.5, fill:'#8a908e','text-anchor':'middle'});
+    t.textContent = nf(v, Math.abs(v) < 10 && Math.abs(v%1) > 1e-9 ? 1 : 0); gTicks.appendChild(t); });
+  yt.forEach(v => { const t = el('text', {x:PX0-6, y:Y(v)+3.5, 'font-size':10.5, fill:'#8a908e','text-anchor':'end'});
+    t.textContent = nf(v, Math.abs(v) < 10 && Math.abs(v%1) > 1e-9 ? 1 : 0); gTicks.appendChild(t); });
+
+  /* 曲线 */
+  let dp = '';
+  for(let i=0;i<=460;i++){
+    const x = xMin + (xMax-xMin)*i/460;
+    const y = F(x);
+    if(!isFinite(y)) continue;
+    dp += (dp ? ' L ' : 'M ') + X(x).toFixed(2) + ' ' + Y(y).toFixed(2);
+  }
+  document.getElementById('pCurve').setAttribute('d', dp);
+
+  /* 弦（端点为 A、B，粗线）与其延长线（细虚线） */
+  document.getElementById('pChord').setAttribute('d',
+    `M ${X(a)} ${Y(fa)} L ${X(b)} ${Y(fb)}`);
+  document.getElementById('pChordExt').setAttribute('d',
+    `M ${X(xMin)} ${Y(fa + m*(xMin-a))} L ${X(xMax)} ${Y(fa + m*(xMax-a))}`);
+
+  /* c 处切线 */
+  document.getElementById('pTangent').setAttribute('d',
+    `M ${X(xMin)} ${Y(fc + dc*(xMin-cv))} L ${X(xMax)} ${Y(fc + dc*(xMax-cv))}`);
+
+  /* 端点竖线 */
+  const lA = document.getElementById('lA'), lB = document.getElementById('lB');
+  lA.setAttribute('x1', X(a)); lA.setAttribute('x2', X(a));
+  lA.setAttribute('y1', Y(fa)); lA.setAttribute('y2', PY1);
+  lB.setAttribute('x1', X(b)); lB.setAttribute('x2', X(b));
+  lB.setAttribute('y1', Y(fb)); lB.setAttribute('y2', PY1);
+
+  const cA = document.getElementById('cA'), cB = document.getElementById('cB'), cM = document.getElementById('cM');
+  cA.setAttribute('cx', X(a)); cA.setAttribute('cy', Y(fa));
+  cB.setAttribute('cx', X(b)); cB.setAttribute('cy', Y(fb));
+  cM.setAttribute('cx', X(cv)); cM.setAttribute('cy', Y(fc));
+  cM.setAttribute('stroke', isPar ? '#4e6a5b' : '#b5705f');
+
+  /* 定理保证的中值点（空心圆） */
+  const gR = document.getElementById('gRoots'); gR.innerHTML='';
+  roots.forEach((r, i) => {
+    gR.appendChild(el('circle', {cx:X(r), cy:Y(F(r)), r:6, fill:'none', stroke:'#93899c',
+      'stroke-width':2, 'stroke-dasharray':'3 2'}));
+    const t = el('text', {x:X(r), y:Y(F(r)) - 11, 'font-size':11, fill:'#93899c',
+      'text-anchor':'middle', 'font-weight':500});
+    t.textContent = 'c' + (roots.length > 1 ? (i+1) : '') + '≈' + nf(r,3);
+    gR.appendChild(t);
+  });
+
+  /* 标签 */
+  const gL = document.getElementById('gLabels'); gL.innerHTML='';
+  const mk = (x, y, s, fill, anchor, dx=0, dy=0, bold) => {
+    const t = el('text', {x:x+dx, y:y+dy, 'font-size':11.5, fill:fill, 'text-anchor':anchor||'start',
+      'font-weight': bold ? 600 : 500});
+    t.textContent = s; gL.appendChild(t);
+  };
+  mk(X(a), PY1-4, 'a='+nf(a,3), '#8a908e', 'middle', 0, 14);
+  mk(X(b), PY1-4, 'b='+nf(b,3), '#8a908e', 'middle', 0, 14);
+  /* 端点字母：切点靠近端点时会与“切点”标注挤在一起，此时省略（底部的 a=/b= 仍标明端点） */
+  if(Math.abs(X(cv) - X(a)) > 42) mk(X(a), Y(fa), 'A', '#6b8899', 'end', -9, -7, true);
+  if(Math.abs(X(cv) - X(b)) > 42) mk(X(b), Y(fb), 'B', '#6b8899', 'start', 10, -7, true);
+  mk(X(cv), Y(fc), '切点 c（斜率 ' + nf(dc,3) + '）', '#b5705f', 'middle', 0, 17, true);
+
+  /* KaTeX */
+  tex(document.getElementById('mTex'),
+    `m=\\dfrac{f(b)-f(a)}{b-a}=${nf(m,6)},\\qquad f'(c)=3c^{2}-3=${nf(dc,6)}` +
+    (isPar ? '\\;\\Rightarrow\\;f\'(c)=m\\;\\checkmark' : ''),
+    `m = (f(b)-f(a))/(b-a) = ${nf(m,6)} ； f'(c) = 3c²-3 = ${nf(dc,6)}`);
+
+  /* 数字面板 */
+  document.getElementById('vc').textContent = nf(cv,6);
+  document.getElementById('rm').textContent = nf(m,6);
+  document.getElementById('rc').textContent = nf(cv,6);
+  document.getElementById('rdc').textContent = nf(dc,6);
+  document.getElementById('rroots').textContent = roots.length ? roots.map(r=>nf(r,5)).join(' , ') : '无';
+  const bd = document.getElementById('rbadge');
+  bd.className = 'badge' + (isPar ? '' : ' no');
+  bd.textContent = isPar ? '✓ 切线平行于弦' : '未平行（靠近中值点会自动吸附）';
+
+  document.getElementById('concl').innerHTML =
+    `弦斜率 m = <b>${nf(m,6)}</b>；在 c = <b>${nf(cv,6)}</b> 处 f′(c) = <b>${nf(dc,6)}</b>，` +
+    `与弦相差 <b>${nf(diff,6)}</b>。数值求根得 ` +
+    (roots.length ? roots.map(r=>`c = <b>${nf(r,6)}</b>`).join('、') : '无') +
+    `，这些点上 f′(c) = m，即<strong>切线平行于弦</strong>` +
+    (mode==='rol'
+      ? '（罗尔模式：f(a)=f(b)，弦水平，切线也水平，f′(c)=0）。'
+      : '（拉格朗日：曲线在 [a,b] 上连续、在 (a,b) 内可导，故至少存在一个这样的中值点）。');
+
+  document.getElementById('sub').textContent = M.sub;
+}
+
+/* ---------- 交互 ---------- */
+const sc = document.getElementById('sc');
+sc.addEventListener('input', render);
+function setMode(md){
+  mode = md;
+  const M = MODES[md];
+  sc.min = M.a; sc.max = M.b; sc.step = 0.001;
+  const g = x => DF(x) - (F(M.b)-F(M.a))/(M.b-M.a);
+  const rs = findRoots(g, M.a, M.b);
+  sc.value = (rs.length ? rs[rs.length-1] : (M.a+M.b)/2).toFixed(3);
+  document.getElementById('bLag').classList.toggle('on', md==='lag');
+  document.getElementById('bRol').classList.toggle('on', md==='rol');
+  render();
+}
+document.getElementById('bLag').addEventListener('click', () => setMode('lag'));
+document.getElementById('bRol').addEventListener('click', () => setMode('rol'));
+document.getElementById('bSnap').addEventListener('click', () => {
+  const M = MODES[mode], m = (F(M.b)-F(M.a))/(M.b-M.a);
+  const rs = findRoots(x => DF(x)-m, M.a, M.b);
+  const cur = +sc.value;
+  let best = cur, bd = Infinity;
+  rs.forEach(r => { const d = Math.abs(r-cur); if(d < bd){ bd = d; best = r; } });
+  sc.value = best.toFixed(3);
+  render();
+});
+render();
+</script>
+</body>
+</html>

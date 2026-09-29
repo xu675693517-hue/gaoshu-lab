@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>换元积分法 · x=sin t 让根式变简单</title>
+<link rel="stylesheet" href="../assets/katex/katex.min.css">
+<style>
+:root{--bg:#f7f4ef;--surface:#ffffff;--ink:#2a2f2e;--ink2:#535a59;--muted:#8a908e;--line:#e5dfd6;--p:#6e8b7b;--p-deep:#4e6a5b;--p-soft:#e8efeb;--ok:#5c8a6a;--warn:#bf8a3c;--bad:#b5705f;--info:#6b8899}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;overflow-x:hidden;background:var(--bg);color:var(--ink);font-family:"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;font-size:13.5px;line-height:1.45}
+.wrap{max-width:860px;margin:0 auto;padding:7px 14px 8px}
+h1{font-size:15.5px;margin:0 0 3px;font-weight:600;letter-spacing:.2px}
+.sub{font-size:12.2px;color:var(--ink2);margin:0 0 6px}
+.bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:5px 10px;margin-bottom:6px}
+.bar .lb{font-size:12px;color:var(--muted);white-space:nowrap}
+select{font:inherit;font-size:12.4px;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:2px 6px}
+input[type=range]{-webkit-appearance:none;appearance:none;height:20px;background:transparent;flex:1;min-width:130px;margin:0}
+input[type=range]::-webkit-slider-runnable-track{height:5px;background:var(--line);border-radius:3px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;margin-top:-5px;border-radius:50%;background:var(--p-deep);border:2px solid var(--surface);box-shadow:0 1px 2px rgba(0,0,0,.18)}
+input[type=range]::-moz-range-track{height:5px;background:var(--line);border-radius:3px}
+input[type=range]::-moz-range-thumb{width:14px;height:14px;border:2px solid var(--surface);border-radius:50%;background:var(--p-deep)}
+.val{font-variant-numeric:tabular-nums;font-weight:600;color:var(--p-deep);min-width:3.2em;display:inline-block;font-size:12.6px}
+canvas{display:block;width:100%;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+.stats{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.st{flex:1;min-width:126px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:4px 8px}
+.st .k{font-size:10.8px;color:var(--muted);line-height:1.3}
+.st .v{font-size:14.5px;font-variant-numeric:tabular-nums;font-weight:600;color:var(--ink)}
+.st .tex{font-size:11.5px;line-height:1.15;overflow:hidden}
+.concl{margin-top:5px;background:var(--p-soft);border:1px solid var(--line);border-left:3px solid var(--p-deep);border-radius:8px;padding:5px 9px;font-size:12.2px}
+.concl b{color:var(--p-deep)}
+.ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}.info{color:var(--info)}
+.texline{font-size:12.2px}
+@media (max-width:560px){.st{min-width:45%}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>换元积分法 · x = sin t 让根式变简单</h1>
+  <p class="sub">直接算 <span class="tex" data-tex="\int_0^1\sqrt{1-x^2}\,dx"></span> 很难，令 <span class="tex" data-tex="x=\sin t"></span>，则 <span class="tex" data-tex="dx=\varphi'(t)\,dt=\cos t\,dt"></span>，被积式变成 <span class="tex" data-tex="\sqrt{1-x^2}\,dx=\sqrt{1-\sin^2t}\,\cos t\,dt=\cos^2t\,dt"></span>。拖动滑块，看 <b>x 轴</b>与 <b>t 轴</b>上的面积如何一一对应。</p>
+
+  <div class="bar">
+    <span class="lb">换元参数 t =</span><span class="val" id="tv">—</span>
+    <input type="range" id="tsl" min="0" max="1" step="0.0005" value="1">
+    <span class="texline">对应 x = sin t = <b id="xv" style="color:var(--p-deep)">—</b></span>
+  </div>
+
+  <canvas id="main" style="height:202px"></canvas>
+
+  <div class="stats">
+    <div class="st"><div class="k">左端 · x 轴上的面积</div><div class="v" id="vX">—</div>
+      <div class="tex" id="tx1" data-tex="\int_{0}^{x}\sqrt{1-u^2}\,du"></div></div>
+    <div class="st"><div class="k">右端 · t 轴上的面积</div><div class="v" id="vT">—</div>
+      <div class="tex" id="tx2" data-tex="\int_{0}^{t}\cos^2u\,du"></div></div>
+    <div class="st"><div class="k">两端之差 |左 − 右|</div><div class="v ok" id="vD">—</div>
+      <div class="k">数值积分各自独立计算</div></div>
+    <div class="st"><div class="k">全域（t = π/2）对比 π/4</div><div class="v" id="vQ">—</div>
+      <div class="tex" data-tex="\int_0^1\sqrt{1-x^2}\,dx=\dfrac{\pi}{4}"></div></div>
+  </div>
+
+  <div class="concl"><b>一句话本质：</b>换元不是"凑答案"，而是换一根坐标轴——<span class="tex" data-tex="x=\sin t"></span> 把积分搬到 t 轴上，微元也一起搬（<span class="tex" data-tex="dx=\varphi'(t)\,dt"></span>），所以 <b>两端的面积数值必然相等</b>（上面两个数由两套独立积分算出，差仅由数值求积引起）。</div>
+</div>
+
+<script src="../assets/katex/katex.min.js"></script>
+<script>
+(function(){
+"use strict";
+var C={ink:'#2a2f2e',ink2:'#535a59',muted:'#8a908e',line:'#e5dfd6',p:'#6e8b7b',pDeep:'#4e6a5b',pSoft:'#e8efeb',ok:'#5c8a6a',warn:'#bf8a3c',bad:'#b5705f',info:'#6b8899'};
+var $=function(s){return document.querySelector(s);};
+
+/* ---------- KaTeX（带兜底，绝不白屏） ---------- */
+function kt(el){
+  if(!el) return;
+  var s=el.getAttribute('data-tex'); if(s===null) return;
+  try{
+    if(window.katex && typeof katex.renderToString==='function'){
+      el.innerHTML=katex.renderToString(s,{displayMode:el.hasAttribute('data-display'),throwOnError:false,strict:false});
+      return;
+    }
+  }catch(e){}
+  el.textContent=s.replace(/\\[a-zA-Z]+/g,' ').replace(/[{}]/g,'').replace(/\s+/g,' ').trim();
+}
+function renderTex(root){var n=(root||document).querySelectorAll('.tex');for(var i=0;i<n.length;i++) kt(n[i]);}
+function setTex(el,s){if(!el)return;el.setAttribute('data-tex',s);kt(el);}
+
+/* ---------- 数值工具 ---------- */
+var SUP={'-':'\u207B','0':'\u2070','1':'\u00B9','2':'\u00B2','3':'\u00B3','4':'\u2074','5':'\u2075','6':'\u2076','7':'\u2077','8':'\u2078','9':'\u2079'};
+function sup(n){return String(n).split('').map(function(c){return SUP[c]||c;}).join('');}
+function fmtErr(v){
+  if(!isFinite(v)) return '—';
+  if(v===0) return '0';
+  var e=Math.floor(Math.log10(Math.abs(v))),m=v/Math.pow(10,e);
+  if(e>=-1&&e<=1) return v.toFixed(4);
+  return m.toFixed(2)+'\u00D710'+sup(e);
+}
+function simpson(f,a,b,n){
+  if(n%2) n++;
+  var h=(b-a)/n,s=f(a)+f(b),i;
+  for(i=1;i<n;i++) s+=(i%2?4:2)*f(a+i*h);
+  return s*h/3;
+}
+function fit(cv){
+  var dpr=Math.max(1,window.devicePixelRatio||1);
+  var w=cv.clientWidth||600,h=cv.clientHeight||200;
+  cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);
+  var ctx=cv.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);
+  return {ctx:ctx,w:w,h:h};
+}
+function rrect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();}
+
+/* ---------- 两个数学对象 ---------- */
+var fx=function(x){return Math.sqrt(Math.max(0,1-x*x));};          /* y=√(1-x²) */
+var ft=function(t){return Math.cos(t)*Math.cos(t);};               /* y=cos²t   */
+var XDOM=1, TDOM=Math.PI/2;
+
+/* ---------- 画一个"轴 + 曲线 + 阴影面积"面板 ---------- */
+function panel(ctx,px,py,pw,ph,o){
+  var padL=30,padR=64,padT=20,padB=20;
+  var xMax=o.xMax,yMax=o.yMax;
+  var X=function(v){return px+padL+(v/xMax)*(pw-padL-padR);};
+  var Y=function(v){return py+ph-padB-Math.min(v,yMax)/yMax*(ph-padT-padB);};
+  var y0=Y(0);
+  /* 标题 */
+  ctx.font='11.5px "Segoe UI","Microsoft YaHei",sans-serif';
+  ctx.fillStyle=C.ink2;ctx.textAlign='left';ctx.textBaseline='alphabetic';
+  ctx.fillText(o.title,px+padL-16,py+12);
+  /* 轴 */
+  ctx.strokeStyle=C.line;ctx.lineWidth=1;ctx.beginPath();
+  ctx.moveTo(X(0),y0);ctx.lineTo(px+pw-padR+16,y0);ctx.stroke();
+  /* 面积（阴影）*/
+  var N=200,i,v;
+  ctx.beginPath();ctx.moveTo(X(0),y0);
+  for(i=0;i<=N;i++){v=o.cut*i/N;ctx.lineTo(X(v),Y(o.f(v)));}
+  ctx.lineTo(X(o.cut),y0);ctx.closePath();
+  ctx.fillStyle=o.soft;ctx.fill();
+  /* 曲线 */
+  ctx.beginPath();
+  for(i=0;i<=N;i++){v=xMax*i/N;ctx.lineTo(X(v),Y(o.f(v)));}
+  ctx.strokeStyle=o.color;ctx.lineWidth=1.8;ctx.stroke();
+  /* 轴上的高亮区间 [0,cut] */
+  ctx.strokeStyle=C.pDeep;ctx.lineWidth=4;ctx.lineCap='round';
+  ctx.beginPath();ctx.moveTo(X(0),y0);ctx.lineTo(X(o.cut),y0);ctx.stroke();
+  ctx.lineWidth=1;ctx.lineCap='butt';
+  /* 端点竖虚线 */
+  ctx.setLineDash([3,3]);ctx.strokeStyle=o.color;ctx.lineWidth=1.2;
+  ctx.beginPath();ctx.moveTo(X(o.cut),y0);ctx.lineTo(X(o.cut),Y(o.f(o.cut)));ctx.stroke();
+  ctx.setLineDash([]);
+  /* 端点圆点 */
+  ctx.beginPath();ctx.arc(X(o.cut),Y(o.f(o.cut)),3.4,0,Math.PI*2);
+  ctx.fillStyle=o.color;ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=1.4;ctx.stroke();
+  /* 刻度 */
+  ctx.font='10.5px "Segoe UI","Microsoft YaHei",sans-serif';
+  ctx.fillStyle=C.muted;ctx.textAlign='center';ctx.textBaseline='top';
+  for(i=0;i<o.ticks.length;i++){
+    var tk=o.ticks[i];
+    ctx.strokeStyle=C.line;ctx.beginPath();
+    ctx.moveTo(X(tk.v),y0);ctx.lineTo(X(tk.v),y0+4);ctx.stroke();
+    ctx.fillText(tk.t,X(tk.v),y0+6);
+  }
+  /* 当前端点数值（放右上角，绝不压住曲线或标题） */
+  ctx.textAlign='right';ctx.font='600 11.5px "Segoe UI","Microsoft YaHei",sans-serif';
+  ctx.fillStyle=o.color;
+  ctx.fillText(o.endLabel,px+pw-padR+10,py+12);
+  ctx.textAlign='left';
+}
+
+/* ---------- 主渲染 ---------- */
+function render(){
+  var rho=parseFloat($('#tsl').value);
+  var t=rho*TDOM, x=Math.sin(t);
+
+  $('#tv').textContent=t.toFixed(4)+'  ('+(t*180/Math.PI).toFixed(1)+'\u00B0)';
+  $('#xv').textContent=x.toFixed(6);
+
+  /* 数值验证：两侧各自独立做数值积分 */
+  var nX=20000, nT=6000;                       /* x 域被积函数端点导数无穷，取更大 n */
+  var IX=simpson(fx,0,x,nX);
+  var IT=simpson(ft,0,t,nT);
+  var d=Math.abs(IX-IT);
+  $('#vX').textContent=IX.toFixed(8);
+  $('#vT').textContent=IT.toFixed(8);
+  $('#vD').textContent=fmtErr(d);
+  $('#vD').className='v '+(d<1e-6?'ok':'bad');
+  if(t>0.999*TDOM){
+    $('#vQ').textContent='0.78539816  (π/4)';
+  }else{
+    $('#vQ').textContent='全域时二者都 = π/4';
+  }
+  setTex($('#tx1'),'\\int_{0}^{'+x.toFixed(4)+'}\\sqrt{1-u^{2}}\\,du');
+  setTex($('#tx2'),'\\int_{0}^{'+t.toFixed(4)+'}\\cos^{2}u\\,du');
+
+  /* 画布 */
+  var g=fit($('#main')),ctx=g.ctx,w=g.w,h=g.h;
+  var gap=20, ph=Math.floor((h-gap)/2);
+  ctx.font='11.5px "Segoe UI","Microsoft YaHei",sans-serif';
+  panel(ctx,4,0,w-8,ph,{
+    xMax:XDOM,yMax:1.06,cut:x,f:fx,soft:C.pSoft,color:C.p,
+    title:'x 轴：y = \u221A(1\u2212x\u00B2)（阴影 = 左端积分）',
+    ticks:[{v:0,t:'0'},{v:0.5,t:'0.5'},{v:1,t:'1'}],
+    endLabel:'当前 x = '+x.toFixed(4)
+  });
+  panel(ctx,4,ph+gap,w-8,ph,{
+    xMax:TDOM,yMax:1.06,cut:t,f:ft,soft:'#eef2ee',color:C.info,
+    title:'t 轴：y = cos\u00B2t（阴影 = 右端积分）',
+    ticks:[{v:0,t:'0'},{v:Math.PI/4,t:'\u03C0/4'},{v:Math.PI/2,t:'\u03C0/2'}],
+    endLabel:'当前 t = '+t.toFixed(4)
+  });
+  /* 中间提示 */
+  ctx.fillStyle=C.pDeep;ctx.font='11.5px "Segoe UI","Microsoft YaHei",sans-serif';
+  ctx.textAlign='center';
+  ctx.fillText('x = sin t   \u21C4   dx = cos t dt        ——两块阴影的面积始终相等',w/2,ph+13);
+  ctx.textAlign='left';
+}
+
+$('#tsl').addEventListener('input',render);
+window.addEventListener('resize',function(){render();});
+renderTex(document);
+render();
+})();
+</script>
+</body>
+</html>

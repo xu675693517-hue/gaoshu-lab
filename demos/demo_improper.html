@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>反常积分 · 拖上限看积分值趋近极限</title>
+<link rel="stylesheet" href="../assets/katex/katex.min.css">
+<style>
+:root{--bg:#f7f4ef;--surface:#ffffff;--ink:#2a2f2e;--ink2:#535a59;--muted:#8a908e;--line:#e5dfd6;--p:#6e8b7b;--p-deep:#4e6a5b;--p-soft:#e8efeb;--ok:#5c8a6a;--warn:#bf8a3c;--bad:#b5705f;--info:#6b8899}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;overflow-x:hidden;background:var(--bg);color:var(--ink);font-family:"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;font-size:13.5px;line-height:1.45}
+.wrap{max-width:860px;margin:0 auto;padding:6px 14px 6px}
+h1{font-size:15.5px;line-height:1.3;margin:0 0 2px;font-weight:600;letter-spacing:.2px}
+.sub{font-size:12.2px;line-height:1.4;color:var(--ink2);margin:0 0 4px}
+.bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:4px 10px;margin-bottom:5px}
+.bar .lb{font-size:12px;color:var(--muted);white-space:nowrap}
+select{font:inherit;font-size:12.4px;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:2px 6px}
+input[type=range]{-webkit-appearance:none;appearance:none;height:20px;background:transparent;flex:1;min-width:130px;margin:0}
+input[type=range]::-webkit-slider-runnable-track{height:5px;background:var(--line);border-radius:3px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;margin-top:-5px;border-radius:50%;background:var(--p-deep);border:2px solid var(--surface);box-shadow:0 1px 2px rgba(0,0,0,.18)}
+input[type=range]::-moz-range-track{height:5px;background:var(--line);border-radius:3px}
+input[type=range]::-moz-range-thumb{width:14px;height:14px;border:2px solid var(--surface);border-radius:50%;background:var(--p-deep)}
+.val{font-variant-numeric:tabular-nums;font-weight:600;color:var(--p-deep);min-width:3.2em;display:inline-block;font-size:12.6px}
+canvas{display:block;width:100%;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+.stats{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.st{flex:1;min-width:126px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:4px 8px}
+.st .k{font-size:10.8px;color:var(--muted);line-height:1.3}
+.st .v{font-size:14px;font-variant-numeric:tabular-nums;font-weight:600;color:var(--ink)}
+.st .tex{font-size:11.5px;line-height:1.15;overflow:hidden}
+.concl{margin-top:5px;background:var(--p-soft);border:1px solid var(--line);border-left:3px solid var(--p-deep);border-radius:8px;padding:5px 9px;font-size:12.2px}
+.concl b{color:var(--p-deep)}
+.concl.warnc{background:#f7f1e6;border-left-color:var(--warn)}
+.concl.warnc b{color:var(--warn)}
+.ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}.info{color:var(--info)}
+@media (max-width:560px){.st{min-width:45%}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>反常积分 · 拖端点看积分值趋近极限（还是发散）</h1>
+  <p class="sub" id="setup">—</p>
+
+  <div class="bar">
+    <span class="lb">选择情形</span>
+    <select id="mode">
+      <option value="inv2">∫₁^b 1/x² dx（无穷区间，收敛到 1）</option>
+      <option value="inv1">∫₁^b 1/x dx（无穷区间，发散）</option>
+      <option value="sq">∫ₐ¹ 1/√x dx（瑕点在 0，收敛到 2）</option>
+    </select>
+    <span class="lb" id="endlab">移动端点 b =</span><span class="val" id="pv">—</span>
+    <input type="range" id="psl" min="0" max="1" step="0.001" value="0.55">
+  </div>
+
+  <canvas id="main" style="height:188px"></canvas>
+
+  <div class="stats">
+    <div class="st"><div class="k">当前积分值（有限区间先算出来）</div><div class="v" id="vNow">—</div>
+      <div class="tex" id="tNow"></div></div>
+    <div class="st"><div class="k">极限 lim（若存在）</div><div class="v" id="vLim">—</div>
+      <div class="tex" id="tLim"></div></div>
+    <div class="st"><div class="k">与极限的差</div><div class="v" id="vGap">—</div>
+      <div class="k" id="kGap">—</div></div>
+    <div class="st"><div class="k">结论</div><div class="v" id="vCon">—</div>
+      <div class="k" id="kCon">—</div></div>
+  </div>
+
+  <div class="concl" id="concl"><b>一句话本质：</b><span id="ctxt">—</span></div>
+</div>
+
+<script src="../assets/katex/katex.min.js"></script>
+<script>
+(function(){
+"use strict";
+var C={ink:'#2a2f2e',ink2:'#535a59',muted:'#8a908e',line:'#e5dfd6',p:'#6e8b7b',pDeep:'#4e6a5b',pSoft:'#e8efeb',ok:'#5c8a6a',warn:'#bf8a3c',bad:'#b5705f',info:'#6b8899'};
+var $=function(s){return document.querySelector(s);};
+
+function kt(el){
+  if(!el) return;
+  var s=el.getAttribute('data-tex'); if(s===null) return;
+  try{
+    if(window.katex && typeof katex.renderToString==='function'){
+      el.innerHTML=katex.renderToString(s,{displayMode:el.hasAttribute('data-display'),throwOnError:false,strict:false});
+      return;
+    }
+  }catch(e){}
+  el.textContent=s.replace(/\\[a-zA-Z]+/g,' ').replace(/[{}]/g,'').replace(/\s+/g,' ').trim();
+}
+function renderTex(root){var n=(root||document).querySelectorAll('.tex');for(var i=0;i<n.length;i++) kt(n[i]);}
+function setTex(el,s){if(!el)return;el.setAttribute('data-tex',s);kt(el);}
+var SUP={'-':'\u207B','0':'\u2070','1':'\u00B9','2':'\u00B2','3':'\u00B3','4':'\u2074','5':'\u2075','6':'\u2076','7':'\u2077','8':'\u2078','9':'\u2079'};
+function sup(n){return String(n).split('').map(function(c){return SUP[c]||c;}).join('');}
+function fmtErr(v){
+  if(!isFinite(v)) return '—';
+  if(v===0) return '0';
+  var e=Math.floor(Math.log10(Math.abs(v))),m=v/Math.pow(10,e);
+  if(e>=-1&&e<=1) return v.toFixed(4);
+  return m.toFixed(2)+'\u00D710'+sup(e);
+}
+function fmtNum(v){
+  if(v===null||v===undefined) return '—';
+  if(!isFinite(v)) return '\u221E';
+  var a=Math.abs(v);
+  if(v===0) return '0';
+  if(a<0.001||a>=10000) return v.toExponential(3);
+  if(a<1) return v.toFixed(4);
+  if(a<100) return v.toFixed(3);
+  return v.toFixed(1);
+}
+function fmtPoint(v){
+  var a=Math.abs(v);
+  if(a>=1000) return v.toFixed(0);
+  if(a>=100) return v.toFixed(1);
+  if(a>=1) return v.toFixed(2);
+  if(a>=0.01) return v.toFixed(3);
+  return v.toFixed(a<1e-3?5:3);
+}
+function fit(cv){
+  var dpr=Math.max(1,window.devicePixelRatio||1);
+  var w=cv.clientWidth||600,h=cv.clientHeight||200;
+  cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);
+  var ctx=cv.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);
+  return {ctx:ctx,w:w,h:h};
+}
+
+/* ================= 三种情形 ================= */
+/* 数学（均已核对）：
+   ∫₁^b 1/x² dx = 1 − 1/b  → 1 (b→∞)      尾部面积 = 1/b
+   ∫₁^b 1/x  dx = ln b     → +∞ (发散)
+   ∫ₐ¹ 1/√x dx = 2 − 2√a   → 2 (a→0⁺)     尾部面积 = 2√a
+*/
+var CASES={
+  inv2:{
+    f:function(x){return 1/(x*x);},
+    xLo:0.55,yMax:1.12,
+    moving:'b',
+    mapRho:function(r){return Math.pow(1000,r);},          /* b ∈ [1,1000] */
+    rhoOf:function(b){return Math.log(b)/Math.log(1000);},
+    v:function(p){return 1-1/p;},
+    limit:1,
+    gap:function(p){return 1/p;},
+    region:[function(p){return 1;},function(p){return p;}],
+    tail:[function(p){return p;},function(p){return null;}],
+    xHi:function(p){return Math.min(18,Math.max(4,p*1.18));},
+    setup:'无穷区间上的反常积分，定义是<b>先算有限区间再取极限</b>：'
+        +'<span class="tex" data-tex="\\int_1^{+\\infty}\\dfrac{dx}{x^{2}}=\\lim\\limits_{b\\to+\\infty}\\int_1^{b}\\dfrac{dx}{x^{2}}"></span>。'
+        +'拖动 b，看阴影面积怎么"卡"在 1 上。',
+    nowTex:function(p){return '\\int_{1}^{'+fmtPoint(p)+'}\\dfrac{dx}{x^{2}}='+fmtNum(1-1/p);},
+    limTex:'\\lim\\limits_{b\\to\\infty}\\int_1^{b}\\dfrac{dx}{x^2}=1',
+    gapNote:'差 = 尾部面积 = 1/b',
+    conv:true,
+    concl:'<span class="tex" data-tex="\\int_1^{+\\infty}\\dfrac{dx}{x^{2}}=1"></span> 收敛——因为尾部面积是 1/b，b 翻倍它就减半，'
+        +'所以"跑不完"的尾巴加起来也只有有限的一块；<b>收敛靠的是"面积衰减得够快"</b>（p = 2 &gt; 1）。'
+  },
+  inv1:{
+    f:function(x){return 1/x;},
+    xLo:0.55,yMax:1.12,
+    moving:'b',
+    mapRho:function(r){return Math.pow(1000,r);},
+    rhoOf:function(b){return Math.log(b)/Math.log(1000);},
+    v:function(p){return Math.log(p);},
+    limit:null,
+    gap:function(){return null;},
+    region:[function(p){return 1;},function(p){return p;}],
+    tail:[function(p){return p;},function(p){return null;}],
+    xHi:function(p){return Math.min(18,Math.max(4,p*1.18));},
+    setup:'同样先算有限区间：<span class="tex" data-tex="\\int_1^{b}\\dfrac{dx}{x}=\\ln b"></span>。'
+        +'被积函数也是往 0 掉的，但<b>掉得不够快</b>——拖动 b，看 ln b 只会一直变大，永远不落地。',
+    nowTex:function(p){return '\\int_{1}^{'+fmtPoint(p)+'}\\dfrac{dx}{x}=\\ln '+fmtPoint(p)+'='+fmtNum(Math.log(p));},
+    limTex:'\\lim\\limits_{b\\to\\infty}\\ln b=+\\infty',
+    gapNote:'ln b 无界，任何有限数都会被超过',
+    conv:false,
+    concl:'发散！<span class="tex" data-tex="\\int_1^{+\\infty}\\dfrac{dx}{x}=+\\infty"></span>——'
+        +'<b>看清楚：函数值趋于 0，并不代表积分收敛。</b>ln b 每把 b 乘 10，就固定加上 ln10 ≈ 2.303，'
+        +'加多少块都不够；这正说明"1/x^p 只有 p &gt; 1 才收敛"。'
+  },
+  sq:{
+    f:function(x){return 1/Math.sqrt(x);},
+    xLo:0,yMax:6.2,
+    moving:'a',
+    mapRho:function(r){return Math.pow(10,-4*r);},          /* a ∈ [1e-4, 1] */
+    rhoOf:function(a){return -Math.log(a)/(4*Math.log(10));},
+    v:function(p){return 2-2*Math.sqrt(p);},
+    limit:2,
+    gap:function(p){return 2*Math.sqrt(p);},
+    region:[function(p){return p;},function(){return 1;}],
+    tail:[function(){return 0;},function(p){return p;}],
+    xHi:function(){return 1;},
+    setup:'这次没有无穷，但被积函数在 x = 0 处<b>爆掉</b>（瑕点）：'
+        +'<span class="tex" data-tex="\\int_0^{1}\\dfrac{dx}{\\sqrt{x}}=\\lim\\limits_{a\\to0^{+}}\\int_a^{1}\\dfrac{dx}{\\sqrt{x}}"></span>。'
+        +'拖动 a → 0⁺，看左边那一小条面积是否还留得下。',
+    nowTex:function(p){return '\\int_{'+fmtPoint(p)+'}^{1}\\dfrac{dx}{\\sqrt{x}}='+fmtNum(2-2*Math.sqrt(p));},
+    limTex:'\\lim\\limits_{a\\to0^{+}}\\int_a^{1}\\dfrac{dx}{\\sqrt x}=2',
+    gapNote:'差 = 尾部面积 = 2√a',
+    conv:true,
+    concl:'收敛！<span class="tex" data-tex="\\int_0^{1}\\dfrac{dx}{\\sqrt{x}}=2"></span>——'
+        +'函数在 x = 0 处无限高，但那条竖向"尖峰"的面积只有 2√a：a 缩成 1/100，它就缩成 1/10。'
+        +'<b>所以"被积函数无界"不等于发散</b>，判据永远是<b>极限存不存在</b>，'
+        +'而不是函数会不会爆、会不会趋于 0。'
+  }
+};
+var cur='inv2';
+
+/* ================= 绘图 ================= */
+function draw(ctx,w,h,CS,p){
+  var padL=34,padR=16,padT=22,padB=22;
+  var xLo=CS.xLo,xHi=CS.xHi(p),yMax=CS.yMax;
+  var X=function(v){return padL+(v-xLo)/(xHi-xLo)*(w-padL-padR);};
+  var Y=function(v){return h-padB-Math.min(v,yMax)/yMax*(h-padT-padB);};
+  var y0=Y(0),i,v,N=280;
+
+  /* 背景网格（横线） */
+  ctx.strokeStyle='#f0ebe3';ctx.lineWidth=1;
+  for(i=1;i<=3;i++){
+    var yy=Y(yMax*i/4);
+    ctx.beginPath();ctx.moveTo(padL,yy);ctx.lineTo(w-padR,yy);ctx.stroke();
+  }
+  /* 轴 */
+  ctx.strokeStyle=C.line;ctx.lineWidth=1;ctx.beginPath();
+  ctx.moveTo(padL-8,y0);ctx.lineTo(w-padR,y0);ctx.stroke();
+
+  var reg=CS.region, tail=CS.tail;
+  var r1=reg[0](p), r2=reg[1](p);          /* 主区域 [r1,r2] */
+  var t1=tail[0](p), t2=tail[1](p);        /* 尾部；t2===null 表示右侧无穷尾 */
+
+  /* 尾部区域（很浅，带虚线边界），提示"这一块随端点收缩" */
+  ctx.save();ctx.beginPath();ctx.rect(padL-8,padT-12,w-padL-padR+8,h-padT-padB+12);ctx.clip();
+  var q1,q2;
+  if(t2===null){ q1=r2; q2=xHi; } else { q1=t1; q2=t2; }
+  ctx.beginPath();ctx.moveTo(X(q1),y0);
+  for(i=0;i<=N;i++){v=q1+(q2-q1)*i/N;ctx.lineTo(X(v),Y(CS.f(v)));}
+  ctx.lineTo(X(q2),y0);ctx.closePath();
+  ctx.fillStyle='#f3ede2';ctx.fill();
+  ctx.setLineDash([4,3]);ctx.strokeStyle=C.warn;ctx.lineWidth=1.2;ctx.stroke();
+  ctx.setLineDash([]);
+
+  /* 主区域 [1,b] 或 [a,1] */
+  ctx.beginPath();ctx.moveTo(X(r1),y0);
+  for(i=0;i<=N;i++){v=r1+(r2-r1)*i/N;ctx.lineTo(X(v),Y(CS.f(v)));}
+  ctx.lineTo(X(r2),y0);ctx.closePath();
+  ctx.fillStyle=C.pSoft;ctx.fill();
+  ctx.strokeStyle=C.p;ctx.lineWidth=1.2;ctx.stroke();
+
+  /* 曲线 */
+  ctx.beginPath();
+  for(i=0;i<=N;i++){v=xLo+(xHi-xLo)*i/N;ctx.lineTo(X(v),Y(CS.f(v)));}
+  ctx.strokeStyle=C.p;ctx.lineWidth=1.9;ctx.stroke();
+  ctx.restore();
+
+  /* 移动端点的竖虚线 */
+  var pm=(CS.moving==='b')?r2:r1;
+  ctx.setLineDash([3,3]);ctx.strokeStyle=C.pDeep;ctx.lineWidth=1.3;
+  ctx.beginPath();ctx.moveTo(X(pm),y0);ctx.lineTo(X(pm),Y(Math.min(CS.f(pm),yMax)));ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.beginPath();ctx.arc(X(pm),y0,3.2,0,Math.PI*2);ctx.fillStyle=C.pDeep;ctx.fill();
+  ctx.strokeStyle='#fff';ctx.lineWidth=1.3;ctx.stroke();
+
+  /* 无穷远处箭头 / 瑕点渐近线 */
+  if(CS.moving==='b'){
+    ctx.strokeStyle=C.warn;ctx.lineWidth=1.2;
+    ctx.beginPath();ctx.moveTo(w-padR-14,y0-4);ctx.lineTo(w-padR,y0-4);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(w-padR,y0-4);ctx.lineTo(w-padR-5,y0-7.5);ctx.lineTo(w-padR-5,y0-0.5);ctx.closePath();
+    ctx.fillStyle=C.warn;ctx.fill();
+    ctx.font='10.5px "Segoe UI","Microsoft YaHei",sans-serif';ctx.fillStyle=C.muted;ctx.textAlign='right';
+    ctx.fillText('x \u2192 +\u221E',w-padR,y0+6);
+  }else{
+    ctx.setLineDash([4,3]);ctx.strokeStyle=C.bad;ctx.lineWidth=1.3;
+    ctx.beginPath();ctx.moveTo(X(0),y0-2);ctx.lineTo(X(0),padT-12);ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.font='10.5px "Segoe UI","Microsoft YaHei",sans-serif';ctx.textAlign='left';
+    ctx.fillStyle=C.bad;ctx.fillText('x=0 瑕点',X(0)+4,padT-2);
+  }
+
+  /* 文字标注 */
+  ctx.font='11.5px "Segoe UI","Microsoft YaHei",sans-serif';ctx.textAlign='left';
+  ctx.fillStyle=C.pDeep;
+  ctx.fillText('\u222B（已算出的值）= '+fmtNum(CS.v(p)),padL,padT-8);
+  var gv=CS.gap(p);
+  var tl='尾部这一块（还没算进去）= '+((gv===null)?'\u221E\uFF08\u4E00\u76F4\u5728\u957F\uFF09':fmtNum(gv));
+  ctx.fillStyle=C.warn;
+  ctx.textAlign='right';
+  ctx.fillText(tl,w-padR-4,padT-8);
+  ctx.textAlign='left';
+
+  /* 端点刻度 */
+  ctx.fillStyle=C.muted;ctx.font='10.5px "Segoe UI","Microsoft YaHei",sans-serif';
+  ctx.textAlign='center';ctx.textBaseline='top';
+  ctx.strokeStyle=C.line;ctx.beginPath();ctx.moveTo(X(pm),y0);ctx.lineTo(X(pm),y0+4);ctx.stroke();
+  var showAtLeft=(CS.moving==='b')?(X(pm)>w-padR-46):(X(pm)<padL+40);
+  ctx.textAlign=showAtLeft?'right':'center';
+  ctx.fillText(CS.moving+' = '+fmtPoint(pm),X(pm)+(showAtLeft?-4:0),y0+6);
+  ctx.textAlign='left';ctx.fillText('1',X(1),y0+6);
+  ctx.textBaseline='alphabetic';
+}
+
+/* ================= 主渲染 ================= */
+function render(){
+  var CS=CASES[cur],rho=parseFloat($('#psl').value),p=CS.mapRho(rho);
+  if(cur==='sq'){ $('#endlab').textContent='移动端点 a ='; }
+  else{ $('#endlab').textContent='移动端点 b ='; }
+  $('#pv').textContent=fmtPoint(p);
+
+  var val=CS.v(p),lim=CS.limit,gap=CS.gap(p);
+  $('#vNow').textContent=fmtNum(val);
+  setTex($('#tNow'),CS.nowTex(p));
+  if(lim===null){
+    $('#vLim').textContent='+∞（不存在）';
+    $('#vLim').className='v bad';
+    $('#vGap').textContent='—';
+    $('#kGap').textContent='极限不存在，差无意义';
+    $('#vCon').textContent='发散';
+    $('#vCon').className='v bad';
+    $('#kCon').textContent='ln b \u2192 +\u221E，积分不收敛';
+    $('#concl').className='concl warnc';
+  }else{
+    $('#vLim').textContent=fmtNum(lim);
+    $('#vLim').className='v ok';
+    $('#vGap').textContent=fmtErr(gap);
+    $('#kGap').textContent=CS.gapNote;
+    $('#vCon').textContent='收敛';
+    $('#vCon').className='v ok';
+    $('#kCon').textContent='因为与极限的差 \u2192 0';
+    $('#concl').className='concl';
+  }
+  setTex($('#tLim'),CS.limTex);
+  $('#ctxt').innerHTML=CS.concl;
+  renderTex($('#ctxt'));
+
+  var g=fit($('#main'));
+  draw(g.ctx,g.w,g.h,CS,p);
+}
+
+$('#psl').addEventListener('input',render);
+$('#mode').addEventListener('change',function(){
+  cur=this.value;
+  $('#setup').innerHTML=CASES[cur].setup;
+  renderTex($('#setup'));
+  render();
+});
+window.addEventListener('resize',render);
+window.addEventListener('load',render);
+
+$('#setup').innerHTML=CASES[cur].setup;
+renderTex(document);
+render();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>数列极限的 ε-N 定义 · 交互演示</title>
+<link rel="stylesheet" href="../assets/katex/katex.min.css">
+<style>
+:root{
+  --page:#f7f4ef; --surface:#ffffff; --ink:#2a2f2e; --muted:#8a908e; --line:#e5dfd6;
+  --sage:#6e8b7b; --sage-deep:#4e6a5b; --blue:#6b8899; --sand:#b39a6e; --rose:#b5705f; --mauve:#93899c;
+  --sage-soft:#e7ede8; --sand-soft:#f1ebdf; --plot:#fffdf9;
+}
+*{box-sizing:border-box}
+html{width:100%}
+body{
+  margin:0;padding:8px 10px 12px;width:100%;overflow-x:hidden;
+  background:var(--page);color:var(--ink);
+  font-family:"Segoe UI","Microsoft YaHei",sans-serif;font-size:14px;line-height:1.5;
+  display:flex;justify-content:center;
+}
+.card{
+  width:100%;max-width:860px;background:var(--surface);border:1px solid var(--line);
+  border-radius:14px;padding:8px 16px 12px;box-shadow:0 1px 3px rgba(47,53,55,.07);
+}
+.head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:4px}
+h1{margin:0;font-size:16px;font-weight:600;letter-spacing:.2px;white-space:nowrap}
+h1 em{font-style:normal;color:var(--sage-deep)}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tab{
+  font-family:inherit;font-size:12.5px;color:var(--muted);cursor:pointer;
+  background:#f1eee8;border:1px solid var(--line);border-radius:999px;padding:3px 11px;
+  transition:all .15s;line-height:1.5;white-space:nowrap;
+}
+.tab:hover{border-color:var(--sage);color:var(--ink)}
+.tab.on{background:var(--sage-deep);border-color:var(--sage-deep);color:#fff}
+.defrow{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:13px;color:#3d4446;margin-bottom:4px}
+.defrow .def{color:var(--ink)}
+.defrow .seqtex{color:var(--sage-deep)}
+.ctrl{margin-bottom:2px}
+.sliderow{display:flex;align-items:center;gap:9px}
+.elab{font-size:13px;color:var(--muted);white-space:nowrap}
+.eval{font-size:15px;font-weight:600;color:var(--sage-deep);font-variant-numeric:tabular-nums;min-width:56px}
+.ehint{font-size:11.5px;color:var(--muted);white-space:nowrap}
+input[type=range]{
+  -webkit-appearance:none;appearance:none;flex:1 1 auto;min-width:120px;height:22px;
+  background:transparent;cursor:pointer;accent-color:var(--sage-deep);
+}
+input[type=range]::-webkit-slider-runnable-track{height:5px;border-radius:3px;background:#e3ddd3;border:1px solid var(--line)}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;width:17px;height:17px;border-radius:50%;
+  background:var(--sage-deep);border:2px solid #fff;margin-top:-7px;box-shadow:0 1px 3px rgba(47,53,55,.3);
+}
+input[type=range]::-moz-range-track{height:5px;border-radius:3px;background:#e3ddd3}
+input[type=range]::-moz-range-thumb{width:15px;height:15px;border:2px solid #fff;border-radius:50%;background:var(--sage-deep)}
+.ticks{display:flex;justify-content:space-between;font-size:10.5px;color:var(--muted);padding:0 2px;margin-top:-3px}
+.plots{display:flex;flex-direction:column;gap:4px;margin:3px 0 0}
+canvas{display:block;width:100%;border-radius:8px}
+#cvM{border:1px solid var(--line);background:var(--plot)}
+#cvZ{border:1px solid var(--line);background:var(--plot)}
+.readout{
+  display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px;
+  font-size:12px;line-height:1.42;color:#3f4647;
+  background:#f5f2ec;border:1px solid var(--line);border-radius:9px;padding:5px 9px;
+}
+.rp{background:#fff;border:1px solid var(--line);border-radius:7px;padding:1px 7px;white-space:nowrap}
+.rp b{color:var(--sage-deep);font-variant-numeric:tabular-nums}
+.rp.hi{background:var(--sage-soft);border-color:var(--sage);color:#243a31;font-weight:600}
+.rp.vf{background:#fff;border-style:dashed;color:#4a5152;white-space:normal}
+.ra{color:var(--muted);font-weight:600}
+.conclusion{
+  margin-top:6px;border-left:4px solid var(--sage-deep);background:var(--sage-soft);
+  border-radius:0 9px 9px 0;padding:6px 11px;font-size:12px;line-height:1.5;color:#2b3733;
+}
+.conclusion b{color:var(--sage-deep)}
+.katex{font-size:1.02em}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="head">
+    <h1>数列极限的 <em>ε-N 定义</em></h1>
+    <div class="tabs" id="tabs">
+      <button class="tab on" type="button" data-i="0">aₙ = (n−1)/n&#160;→&#160;1</button>
+      <button class="tab" type="button" data-i="1">aₙ = 1/n&#160;→&#160;0</button>
+    </div>
+  </div>
+
+  <div class="defrow">
+    <span class="tex def" data-tex="\forall\,\varepsilon&gt;0,\ \exists N\in\mathbb{N},\ \forall n&gt;N:\ |a_n-L|&lt;\varepsilon">∀ε&gt;0，∃N∈ℕ：当 n&gt;N 时，恒有 |aₙ−L| &lt; ε</span>
+    <span class="tex seqtex" id="seqTex" data-tex="a_n=\dfrac{n-1}{n}\ \longrightarrow\ L=1">aₙ = (n−1)/n → L = 1</span>
+  </div>
+
+  <div class="ctrl">
+    <div class="sliderow">
+      <span class="elab">ε =</span><span class="eval" id="evalTxt">0.1</span>
+      <input id="eps" type="range" min="0" max="26" step="1" value="19" aria-label="ε 取值">
+      <span class="ehint">拖动滑块改变 ε</span>
+    </div>
+    <div class="ticks"><span>0.001（带最薄 · N 最大）</span><span>对数刻度</span><span>0.5（带最厚 · N 最小）</span></div>
+  </div>
+
+  <div class="plots" id="plotBox">
+    <canvas id="cvM" height="140"></canvas>
+    <canvas id="cvZ" height="74"></canvas>
+  </div>
+
+  <div class="readout" id="readout"></div>
+  <div class="conclusion" id="conclusion"></div>
+</div>
+
+<script src="../assets/katex/katex.min.js"></script>
+<script>
+(function(){
+'use strict';
+
+/* ---------- 配色（可被父页面覆盖） ---------- */
+var C={ink:'#2a2f2e',muted:'#8a908e',line:'#e5dfd6',sage:'#6e8b7b',sageDeep:'#4e6a5b',
+       blue:'#6b8899',sand:'#b39a6e',mauve:'#93899c',rose:'#b5705f',
+       gray:'#c8c1b6',grid:'#ece7de',plot:'#fffdf9'};
+
+/* ---------- 两个数列：|a_n - L| 恒等于 1/n ---------- */
+var SEQ=[
+  {name:'aₙ = (n−1)/n', tex:'a_n=\\dfrac{n-1}{n}\\ \\longrightarrow\\ L=1', L:1,
+   f:function(n){return 1-1/n;}, dev:function(n){return 1/n;}, capTop:true},
+  {name:'aₙ = 1/n',     tex:'a_n=\\dfrac{1}{n}\\ \\longrightarrow\\ L=0',       L:0,
+   f:function(n){return 1/n;},   dev:function(n){return 1/n;}, capTop:false}
+];
+
+/* ε 取一组"漂亮值"，滑块按对数手感分布 */
+var EPSS=['0.001','0.0015','0.002','0.0025','0.003','0.004','0.005','0.006','0.008','0.01',
+          '0.012','0.015','0.02','0.025','0.03','0.04','0.05','0.06','0.08','0.1',
+          '0.12','0.15','0.2','0.25','0.3','0.4','0.5'];
+var MAXN=4000;
+
+/* ---------- 工具 ---------- */
+function fmtNum(x,d){
+  if(!isFinite(x)) return '∞';
+  var s=x.toFixed(d);
+  if(s.indexOf('.')>=0){ s=s.replace(/0+$/,''); s=s.replace(/\.$/,''); }
+  return s;
+}
+function el(id){ return document.getElementById(id); }
+
+/* 扫出符合定义的最小 N：第一个满足 1/n<ε 的项的下标减 1 */
+function scanN(s){
+  var e=parseFloat(s);
+  for(var n=1;n<=MAXN;n++){ if(1/n<e) return n-1; }
+  return MAXN;
+}
+
+/* ---------- KaTeX 兜底渲染 ---------- */
+var HAS_KATEX=(typeof katex!=='undefined' && katex && typeof katex.renderToString==='function');
+function renderTex(scope){
+  var list=(scope||document).querySelectorAll('.tex');
+  if(!HAS_KATEX) return;
+  for(var i=0;i<list.length;i++){
+    var t=list[i].getAttribute('data-tex'); if(!t) continue;
+    try{ list[i].innerHTML=katex.renderToString(t,{throwOnError:true}); }
+    catch(err){ /* 保留 HTML 兜底文本 */ }
+  }
+}
+
+/* ---------- 状态 ---------- */
+var cur=0, idx=(function(){ var k=EPSS.indexOf('0.1'); return k<0?0:k; })();
+var cvM=el('cvM'), cvZ=el('cvZ');
+var G={};
+
+function ctxOf(cv){
+  var c=cv.getContext('2d');
+  return c;
+}
+function fit(cv,w,h){
+  var dpr=window.devicePixelRatio||1;
+  cv.style.width=w+'px'; cv.style.height=h+'px';
+  cv.width=Math.round(w*dpr); cv.height=Math.round(h*dpr);
+  var c=cv.getContext('2d');
+  c.setTransform(dpr,0,0,dpr,0,0);
+  cv.__w=w; cv.__h=h;
+}
+
+/* ---------- 坐标刻度 ---------- */
+function intTicks(nx){
+  var step = nx<=12?2 : nx<=26?5 : nx<=60?10 : 20, t=[1], k;
+  for(k=step;k<=nx;k+=step) t.push(k);
+  var last=t[t.length-1];
+  if(last!==nx && (nx-last)>=Math.max(2,step*0.5)) t.push(nx);
+  return t;
+}
+var LOGT=[1,2,5,10,20,50,100,200,500,1000,2000,5000,10000];
+
+/* ---------- 计算几何/参数 ---------- */
+function compute(){
+  var eps=parseFloat(EPSS[idx]), S=SEQ[cur];
+  var n0=0,n;
+  for(n=1;n<=MAXN;n++){ if(S.dev(n)<eps){ n0=n; break; } }
+  if(!n0) n0=MAXN+1;
+  var logMode=(n0>48), tmax, nx=0, xmap, xticks, lmax=0;
+  if(!logMode){
+    nx=Math.max(14,n0+5); tmax=nx;
+    xmap=function(k){ return (k-1)/(nx-1); };
+    xticks=intTicks(nx);
+  }else{
+    lmax=Math.log(n0)/Math.LN10*1.15;
+    tmax=Math.ceil(Math.pow(10,lmax));
+    xmap=function(k){ return Math.log(k)/Math.LN10/lmax; };
+    xticks=LOGT.filter(function(t){ return t<=tmax; });
+  }
+  var L=S.L;
+  var b0=Math.min(0,L-1.4*eps), b1=Math.max(1,L+1.4*eps), pad=0.035*(b1-b0);
+  G={eps:eps,es:EPSS[idx],S:S,L:L,n0:n0,N:n0-1,logMode:logMode,tmax:tmax,nx:nx,xmap:xmap,xticks:xticks,
+     yLo:b0-pad,yHi:b1+pad,zLo:L-1.45*eps,zHi:L+1.45*eps};
+}
+
+/* ---------- 画点（分组：不满足=灰，满足=主色） ---------- */
+function dotPath(c,xs,ys,r){
+  c.beginPath();
+  for(var i=0;i<xs.length;i++){ c.moveTo(xs[i]+r,ys[i]); c.arc(xs[i],ys[i],r,0,6.2831853072); }
+  c.fill();
+}
+
+/* ---------- 主图 ---------- */
+function drawMain(){
+  var c=ctxOf(cvM), pw=cvM.__w, ph=cvM.__h;
+  // t 从 12 加到 30：把「±ε 带 / n = N+1 / aₙ」这些标注**移出绘图区**放到顶部留白，
+  // 原来它们画在图里，与点列、虚线重叠（实机截图里挤成一团）。
+  var m={l:46,r:52,t:30,b:24}, W=pw-m.l-m.r, H=ph-m.t-m.b;
+  var eps=G.eps,L=G.L,yLo=G.yLo,yHi=G.yHi,xmap=G.xmap,n0=G.n0;
+  var X=function(k){ return m.l+xmap(k)*W; };
+  var Y=function(v){ return m.t+(yHi-v)/(yHi-yLo)*H; };
+  c.clearRect(0,0,pw,ph);
+
+  /* 绘图区 */
+  c.save();
+  c.fillStyle=C.plot; c.fillRect(m.l,m.t,W,H);
+
+  /* 网格 + y 轴刻度 */
+  c.font='10.5px "Segoe UI","Microsoft YaHei",sans-serif';
+  var yt=[0,0.25,0.5,0.75,1];
+  c.strokeStyle=C.grid; c.lineWidth=1;
+  for(var i=0;i<yt.length;i++){
+    var v=yt[i]; if(v<yLo-1e-9||v>yHi+1e-9) continue;
+    var yy=Math.round(Y(v))+0.5;
+    c.beginPath(); c.moveTo(m.l,yy); c.lineTo(m.l+W,yy); c.stroke();
+    c.fillStyle=C.muted; c.textAlign='right'; c.textBaseline='middle';
+    c.fillText(fmtNum(v,2),m.l-6,Y(v));
+  }
+  /* x 轴刻度 */
+  c.strokeStyle=C.grid;
+  for(i=0;i<G.xticks.length;i++){
+    var t=G.xticks[i], xx=Math.round(X(t))+0.5;
+    c.beginPath(); c.moveTo(xx,m.t); c.lineTo(xx,m.t+H); c.stroke();
+  }
+
+  /* ε 带 */
+  var yTop=Y(L+eps), yBot=Y(L-eps);
+  c.fillStyle='rgba(130,149,139,0.20)';
+  c.fillRect(m.l,yTop,W,yBot-yTop);
+  c.strokeStyle='rgba(79,107,95,0.85)'; c.lineWidth=1; c.setLineDash([4,3]);
+  c.beginPath(); c.moveTo(m.l,Math.round(yTop)+0.5); c.lineTo(m.l+W,Math.round(yTop)+0.5);
+  c.moveTo(m.l,Math.round(yBot)+0.5); c.lineTo(m.l+W,Math.round(yBot)+0.5); c.stroke();
+  c.setLineDash([]);
+  /* ±ε 带说明放顶部留白（图内会与点列、虚线打架） */
+  c.fillStyle=C.sageDeep; c.textAlign='left'; c.textBaseline='alphabetic';
+  c.fillText('±ε 带（宽 2ε = '+fmtNum(2*eps,4)+'）', m.l, m.t-6);
+  /* 极限水平线 L */
+  c.strokeStyle=C.blue; c.lineWidth=1.5;
+  c.beginPath(); c.moveTo(m.l,Y(L)); c.lineTo(m.l+W,Y(L)); c.stroke();
+  /* L / L±ε 三个值统一放到**图外右侧**（与放大图同一读图逻辑）：
+     图内放会压住点列 —— 数列收敛到 L，右上角正好密布点。 */
+  c.textAlign='left'; c.textBaseline='middle';
+  c.fillStyle=C.sageDeep;
+  c.fillText('L+ε = '+fmtNum(L+eps,4), m.l+W+5, Y(L+eps));
+  c.fillText('L−ε = '+fmtNum(L-eps,4), m.l+W+5, Y(L-eps));
+  c.fillStyle=C.blue;
+  c.fillText('L = '+fmtNum(L,2), m.l+W+5, Y(L));
+
+  /* N+1 位置竖虚线 */
+  var xv=Math.round(X(n0))+0.5;
+  c.strokeStyle=C.sageDeep; c.lineWidth=1.2; c.setLineDash([5,3]);
+  c.beginPath(); c.moveTo(xv,m.t); c.lineTo(xv,m.t+H+4); c.stroke();
+  c.setLineDash([]);
+  var labTxt='n = N+1 = '+n0;
+  c.font='10.5px "Segoe UI","Microsoft YaHei",sans-serif';
+  var tw=c.measureText(labTxt).width;
+  c.fillStyle=C.sageDeep; c.textBaseline='alphabetic';
+  c.textAlign=(xv+tw/2 > m.l+W-70) ? 'right' : 'left';
+  c.fillText(labTxt, xv + (c.textAlign==='left'?5:-5), m.t-6);
+
+  /* 点列 */
+  var gx=[],gy=[],sx=[],sy=[],N=n0-1,lim=G.tmax,r=G.logMode?1.8:2.9;
+  for(var n=1;n<=lim;n++){
+    var x=X(n), y=Y(SEQ[cur].f(n));
+    if(n<=N){ gx.push(x); gy.push(y); } else { sx.push(x); sy.push(y); }
+  }
+  c.fillStyle=C.gray; dotPath(c,gx,gy,r);
+  c.fillStyle=C.sage; dotPath(c,sx,sy,r);
+  c.strokeStyle=C.sageDeep; c.lineWidth=0.9;
+  for(i=0;i<sx.length;i++){ c.beginPath(); c.arc(sx[i],sy[i],r,0,6.2831853072); c.stroke(); }
+
+  /* 轴框 + 刻度标签 */
+  c.restore();
+  c.strokeStyle=C.line; c.lineWidth=1; c.setLineDash([]);
+  c.strokeRect(m.l+0.5,m.t+0.5,W,H);
+  c.font='10.5px "Segoe UI","Microsoft YaHei",sans-serif';
+  c.fillStyle=C.muted; c.textAlign='center'; c.textBaseline='top';
+  for(i=0;i<G.xticks.length;i++){
+    var tk=G.xticks[i];
+    if(X(tk)>m.l+W-12) continue;              /* 最右侧刻度留给坐标轴名 n */
+    c.fillText(String(tk),X(tk),m.t+H+5);
+  }
+  c.textAlign='left';
+  c.fillText('n',m.l+W+14,m.t+H+5);
+  c.textAlign='left'; c.textBaseline='alphabetic';
+  c.fillStyle=C.muted; c.fillText('数列项 aₙ',m.l-42,m.t-6);
+}
+
+/* ---------- 放大图 ---------- */
+function drawZoom(){
+  var c=ctxOf(cvZ), pw=cvZ.__w, ph=cvZ.__h;
+  var m={l:46,r:88,t:10,b:12}, W=pw-m.l-m.r, H=ph-m.t-m.b;
+  var eps=G.eps,L=G.L,zLo=G.zLo,zHi=G.zHi,xmap=G.xmap,n0=G.n0,N=n0-1;
+  var X=function(k){ return m.l+xmap(k)*W; };
+  var Y=function(v){ return m.t+(zHi-v)/(zHi-zLo)*H; };
+  c.clearRect(0,0,pw,ph);
+  c.save();
+  c.fillStyle=C.plot; c.fillRect(m.l,m.t,W,H);
+
+  /* 主图同款竖网格 */
+  c.strokeStyle=C.grid; c.lineWidth=1;
+  for(var i=0;i<G.xticks.length;i++){
+    var xx=Math.round(X(G.xticks[i]))+0.5;
+    c.beginPath(); c.moveTo(xx,m.t); c.lineTo(xx,m.t+H); c.stroke();
+  }
+  /* ε 带 */
+  var yTop=Y(L+eps), yBot=Y(L-eps);
+  c.fillStyle='rgba(130,149,139,0.20)'; c.fillRect(m.l,yTop,W,yBot-yTop);
+  c.strokeStyle='rgba(79,107,95,0.85)'; c.lineWidth=1; c.setLineDash([4,3]);
+  c.beginPath(); c.moveTo(m.l,Math.round(yTop)+0.5); c.lineTo(m.l+W,Math.round(yTop)+0.5);
+  c.moveTo(m.l,Math.round(yBot)+0.5); c.lineTo(m.l+W,Math.round(yBot)+0.5); c.stroke();
+  c.setLineDash([]);
+  c.strokeStyle=C.blue; c.lineWidth=1.5;
+  c.beginPath(); c.moveTo(m.l,Y(L)); c.lineTo(m.l+W,Y(L)); c.stroke();
+
+  /* 点（超出窗口的自动被裁掉） */
+  c.save();
+  c.beginPath(); c.rect(m.l,m.t,W,H); c.clip();
+  var gx=[],gy=[],sx=[],sy=[];
+  for(var n=1;n<=G.tmax;n++){
+    var v=SEQ[cur].f(n);
+    if(v<zLo-0.02||v>zHi+0.02) continue;
+    var x=X(n), y=Y(v);
+    if(n<=N){ gx.push(x); gy.push(y); } else { sx.push(x); sy.push(y); }
+  }
+  var r=G.logMode?2.0:3.0;
+  c.fillStyle=C.gray; dotPath(c,gx,gy,r);
+  c.fillStyle=C.sage; dotPath(c,sx,sy,r);
+  c.strokeStyle=C.sageDeep; c.lineWidth=1;
+  for(i=0;i<sx.length;i++){ c.beginPath(); c.arc(sx[i],sy[i],r,0,6.2831853072); c.stroke(); }
+  c.restore();
+
+  /* N+1 竖虚线 */
+  var xv=Math.round(X(n0))+0.5;
+  c.strokeStyle=C.sageDeep; c.lineWidth=1.2; c.setLineDash([5,3]);
+  c.beginPath(); c.moveTo(xv,m.t); c.lineTo(xv,m.t+H); c.stroke();
+  c.setLineDash([]);
+
+  c.restore();
+  c.strokeStyle=C.line; c.lineWidth=1; c.strokeRect(m.l+0.5,m.t+0.5,W,H);
+
+  /* 右侧标注 */
+  c.font='10.5px "Segoe UI","Microsoft YaHei",sans-serif';
+  c.textAlign='left'; c.textBaseline='middle';
+  var dec=Math.max(4,Math.ceil(-Math.log(eps)/Math.LN10)+3);
+  c.fillStyle=C.sageDeep;
+  c.fillText('L+ε = '+fmtNum(L+eps,dec),m.l+W+5,Y(L+eps));
+  c.fillText('L−ε = '+fmtNum(L-eps,dec),m.l+W+5,Y(L-eps));
+  c.fillStyle=C.blue; c.fillText('L = '+fmtNum(L,2),m.l+W+5,Y(L));
+  /* 放大图说明（含色标）：放在数据空白的一侧，并垫浅底避免压线 */
+  c.textAlign='left'; c.textBaseline='top';
+  var capY=SEQ[cur].capTop ? m.t+2 : m.t+H-14;
+  var cap='放大镜：横轴同主图，纵轴只显示 L ± 1.45ε';
+  var t2='满足 |aₙ−L| < ε', t3='不满足（n ≤ N）';
+  var xc=m.l+2, kx=xc+c.measureText(cap).width+16, kx2=kx+7+c.measureText(t2).width+16;
+  var capW=(kx2+7+c.measureText(t3).width)-xc+9;
+  c.fillStyle='rgba(255,253,249,0.90)'; c.fillRect(xc-4,capY-3,capW,15);
+  c.fillStyle=C.muted; c.fillText(cap,xc,capY);
+  c.fillStyle=C.sage; c.beginPath(); c.arc(kx,capY+6,3.8,0,6.2832); c.fill();
+  c.strokeStyle=C.sageDeep; c.lineWidth=1; c.stroke();
+  c.fillStyle=C.muted; c.fillText(t2,kx+7,capY);
+  c.fillStyle=C.gray; c.beginPath(); c.arc(kx2,capY+6,3.8,0,6.2832); c.fill();
+  c.fillStyle=C.muted; c.fillText(t3,kx2+7,capY);
+}
+
+/* ---------- 文字联动 ---------- */
+function updateText(){
+  var eps=G.eps,s=G.es,L=G.L,N=G.N,n0=G.n0,invEps=1/eps;
+  el('evalTxt').textContent=s;
+  var dec=Math.max(4,Math.ceil(-Math.log(eps)/Math.LN10)+3);
+  var dN=1/Math.max(N,1), dN1=1/n0;
+  var eq=(Math.abs(dN-eps)<1e-12);
+  var parts=[];
+  parts.push('<span class="rp">ε = <b>'+s+'</b></span>');
+  parts.push('<span class="ra">⇒</span>');
+  parts.push('<span class="rp">需 |aₙ − '+fmtNum(L,2)+'| = 1/n &lt; ε ⟺ n &gt; 1/ε = '+fmtNum(invEps,3)+'</span>');
+  parts.push('<span class="ra">⇒</span>');
+  parts.push('<span class="rp hi">最小 N = '+N+'，即从第 '+(N+1)+' 项起全部落进带内</span>');
+  parts.push('<span class="rp vf">核对：n = '+N+' 时 1/n = '+fmtNum(dN,dec)+(eq?' = ε，不满足严格小于 ✗':' ≥ ε ✗')+
+             '；n = '+n0+' 时 1/n = '+fmtNum(dN1,dec)+' &lt; ε ✓</span>');
+  el('readout').innerHTML=parts.join(' ');
+
+  /* 相邻 ε 对比 */
+  var cmp=[];
+  if(idx>0){ cmp.push('ε = '+EPSS[idx-1]+' 时 N = '+scanN(EPSS[idx-1])); }
+  if(idx<EPSS.length-1){ cmp.push('ε = '+EPSS[idx+1]+' 时 N = '+scanN(EPSS[idx+1])); }
+  var cmpTxt=cmp.length? '　<span style="color:#4e6a5b">相邻对比 → '+cmp.join('；')+'。</span>' : '';
+  el('conclusion').innerHTML=
+    '<b>一句话本质：</b>ε 是<b>先给定的</b>任意小目标，N 是它<b>逼出来的</b>存在保证 —— ε 越小，N 越大；'+
+    '本例 ε = '+s+' 时最小 N = '+N+'，从第 '+(N+1)+' 项起所有 aₙ 都落进 '+fmtNum(L,2)+'±'+s+' 的 ε 带内。'+cmpTxt;
+}
+
+/* ---------- 全量刷新 ---------- */
+function redraw(){
+  compute();
+  drawMain();
+  drawZoom();
+  updateText();
+}
+function layout(){
+  var w=el('plotBox').clientWidth||640;
+  if(w<240) w=240;
+  fit(cvM,w,140); fit(cvZ,w,74);
+  redraw();
+}
+
+/* ---------- 事件 ---------- */
+var slider=el('eps');
+slider.addEventListener('input',function(){
+  idx=parseInt(slider.value,10)||0;
+  redraw();                 /* 实时：不等 change */
+});
+el('tabs').addEventListener('click',function(e){
+  var b=e.target.closest?e.target.closest('.tab'):null;
+  if(!b) return;
+  var i=parseInt(b.getAttribute('data-i'),10);
+  if(i===cur) return;
+  cur=i;
+  var ts=this.querySelectorAll('.tab');
+  for(var k=0;k<ts.length;k++) ts[k].className='tab'+(k===i?' on':'');
+  el('seqTex').setAttribute('data-tex',SEQ[i].tex);
+  el('seqTex').textContent=SEQ[i].name+' → L = '+fmtNum(SEQ[i].L,2);
+  renderTex(el('seqTex').parentNode);
+  redraw();
+});
+var rt=null;
+function onResize(){ if(rt) clearTimeout(rt); rt=setTimeout(layout,120); }
+window.addEventListener('resize',onResize);
+if(window.ResizeObserver){ try{ new ResizeObserver(onResize).observe(el('plotBox')); }catch(e){} }
+
+/* ---------- 启动 ---------- */
+slider.value=String(idx);
+renderTex(document);
+layout();
+})();
+</script>
+</body>
+</html>

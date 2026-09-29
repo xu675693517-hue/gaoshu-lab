@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>函数极限的 ε-δ 定义 · 交互演示</title>
+<link rel="stylesheet" href="../assets/katex/katex.min.css">
+<style>
+:root{
+  --page:#f7f4ef; --surface:#ffffff; --ink:#2a2f2e; --muted:#8a908e; --line:#e5dfd6;
+  --sage:#6e8b7b; --sage-deep:#4e6a5b; --blue:#6b8899; --sand:#b39a6e; --rose:#b5705f; --mauve:#93899c;
+  --blue-soft:#e6ebf0; --sand-soft:#f1ebdf; --plot:#fffdf9;
+}
+*{box-sizing:border-box}
+html{width:100%}
+body{
+  margin:0;padding:8px 10px 12px;width:100%;overflow-x:hidden;
+  background:var(--page);color:var(--ink);
+  font-family:"Segoe UI","Microsoft YaHei",sans-serif;font-size:14px;line-height:1.5;
+  display:flex;justify-content:center;
+}
+.card{
+  width:100%;max-width:860px;background:var(--surface);border:1px solid var(--line);
+  border-radius:14px;padding:8px 16px 12px;box-shadow:0 1px 3px rgba(47,53,55,.07);
+}
+.head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:4px}
+h1{margin:0;font-size:16px;font-weight:600;letter-spacing:.2px;white-space:nowrap}
+h1 em{font-style:normal;color:var(--blue)}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tab{
+  font-family:inherit;font-size:12.5px;color:var(--muted);cursor:pointer;
+  background:#f1eee8;border:1px solid var(--line);border-radius:999px;padding:3px 11px;
+  transition:all .15s;line-height:1.5;white-space:nowrap;
+}
+.tab:hover{border-color:var(--blue);color:var(--ink)}
+.tab.on{background:var(--blue);border-color:var(--blue);color:#fff}
+.defrow{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:13px;color:#3d4446;margin-bottom:4px}
+.defrow .def{color:var(--ink)}
+.defrow .seqtex{color:var(--blue)}
+.ctrl{margin-bottom:2px}
+.sliderow{display:flex;align-items:center;gap:9px}
+.elab{font-size:13px;color:var(--muted);white-space:nowrap}
+.eval{font-size:15px;font-weight:600;color:var(--blue);font-variant-numeric:tabular-nums;min-width:46px}
+.ehint{font-size:11.5px;color:var(--muted);white-space:nowrap}
+input[type=range]{
+  -webkit-appearance:none;appearance:none;flex:1 1 auto;min-width:120px;height:22px;
+  background:transparent;cursor:pointer;accent-color:var(--blue);
+}
+input[type=range]::-webkit-slider-runnable-track{height:5px;border-radius:3px;background:#e3ddd3;border:1px solid var(--line)}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;width:17px;height:17px;border-radius:50%;
+  background:var(--blue);border:2px solid #fff;margin-top:-7px;box-shadow:0 1px 3px rgba(47,53,55,.3);
+}
+input[type=range]::-moz-range-track{height:5px;border-radius:3px;background:#e3ddd3}
+input[type=range]::-moz-range-thumb{width:15px;height:15px;border:2px solid #fff;border-radius:50%;background:var(--blue)}
+.ticks{display:flex;justify-content:space-between;font-size:10.5px;color:var(--muted);padding:0 2px;margin-top:-3px}
+.plotbox{margin:3px 0 2px}
+canvas{display:block;width:100%;border-radius:8px}
+#cv{border:1px solid var(--line);background:var(--plot)}
+.readout{
+  display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px;
+  font-size:12px;line-height:1.42;color:#3f4647;
+  background:#f5f2ec;border:1px solid var(--line);border-radius:9px;padding:5px 9px;
+}
+.rp{background:#fff;border:1px solid var(--line);border-radius:7px;padding:1px 7px;white-space:nowrap}
+.rp b{color:var(--blue);font-variant-numeric:tabular-nums}
+.rp.hi{background:var(--blue-soft);border-color:var(--blue);color:#27333d;font-weight:600}
+.rp.vf{background:#fff;border-style:dashed;color:#4a5152;white-space:normal}
+.ra{color:var(--muted);font-weight:600}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:11.5px;color:var(--muted);margin:3px 2px 0}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:3px;border:1px solid var(--line);vertical-align:-1px;margin-right:4px}
+.conclusion{
+  margin-top:6px;border-left:4px solid var(--blue);background:var(--blue-soft);
+  border-radius:0 9px 9px 0;padding:6px 11px;font-size:12px;line-height:1.5;color:#27333d;
+}
+.conclusion b{color:#4a6478}
+.katex{font-size:1.02em}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="head">
+    <h1>函数极限的 <em>ε-δ 定义</em></h1>
+    <div class="tabs" id="tabs">
+      <button class="tab on" type="button" data-i="0">f(x) = 2x+1，x → 1（L = 3）</button>
+      <button class="tab" type="button" data-i="1">f(x) = x²，x → 2（L = 4）</button>
+    </div>
+  </div>
+
+  <div class="defrow">
+    <span class="tex def" data-tex="\forall\,\varepsilon&gt;0,\ \exists\,\delta&gt;0:\ 0&lt;|x-x_0|&lt;\delta\ \Longrightarrow\ |f(x)-L|&lt;\varepsilon">∀ε&gt;0，∃δ&gt;0：当 0&lt;|x−x₀|&lt;δ 时，恒有 |f(x)−L| &lt; ε</span>
+    <span class="tex seqtex" id="seqTex" data-tex="f(x)=2x+1,\ x_0=1,\ L=3">f(x)=2x+1，x₀=1，L=3</span>
+  </div>
+
+  <div class="ctrl">
+    <div class="sliderow">
+      <span class="elab">ε =</span><span class="eval" id="evalTxt">0.20</span>
+      <input id="eps" type="range" min="0" max="19" step="1" value="3" aria-label="ε 取值">
+      <span class="ehint">拖动滑块改变 ε，δ 自动跟着变</span>
+    </div>
+    <div class="ticks"><span>0.05（最严）</span><span>ε 越大 → 要求的 δ 越大（越好办）</span><span>1.00（最松）</span></div>
+  </div>
+
+  <div class="plotbox" id="plotBox">
+    <canvas id="cv" height="206"></canvas>
+  </div>
+  <div class="legend">
+    <span><i style="background:rgba(179,154,110,.35);border-color:#b39a6e"></i>水平 ε 带：|f(x) − L| &lt; ε</span>
+    <span><i style="background:rgba(123,143,163,.35);border-color:#6b8899"></i>竖直 δ 带：0 &lt; |x − x₀| &lt; δ</span>
+    <span><i style="background:rgba(130,149,139,.45);border-color:#4e6a5b"></i>交集（要证的结论区）</span>
+  </div>
+
+  <div class="readout" id="readout"></div>
+  <div class="conclusion" id="conclusion"></div>
+</div>
+
+<script src="../assets/katex/katex.min.js"></script>
+<script>
+(function(){
+'use strict';
+
+var C={ink:'#2a2f2e',muted:'#8a908e',line:'#e5dfd6',sage:'#6e8b7b',sageDeep:'#4e6a5b',
+       blue:'#6b8899',sand:'#b39a6e',mauve:'#93899c',plot:'#fffdf9',grid:'#ece7de'};
+
+/* ---------- 两个例子：δ 的取法都可由 |f(x)−L| 的估计直接读出 ---------- */
+var FN=[
+  { name:'f(x) = 2x+1，x → 1（L = 3）',
+    tex:'f(x)=2x+1,\\ x_0=1,\\ L=3', plotLabel:'f(x) = 2x+1',
+    x0:1, L:3, f:function(x){return 2*x+1;},
+    /* |f(x)-3| = 2|x-1| < ε  ⟺  |x-1| < ε/2  ⇒  δ = ε/2（且这是最大的 δ） */
+    delta:function(e){ return e/2; },
+    strict:true, boundTx:'|f(x)−3| = 2|x−1|', deltaTex:'\\delta=\\dfrac{\\varepsilon}{2}',
+    xw:function(d){ return Math.max(3.2*d,0.10); },
+    aux:null },
+  { name:'f(x) = x²，x → 2（L = 4）',
+    tex:'f(x)=x^2,\\ x_0=2,\\ L=4', plotLabel:'f(x) = x²',
+    x0:2, L:4, f:function(x){return x*x;},
+    /* |x²-4| = |x-2||x+2| ≤ 5|x-2| < ε（|x-2| ≤ 1 时成立）⇒ 可取 δ = min(1, ε/5) = ε/5 */
+    delta:function(e){ return Math.min(1,e/5); },
+    strict:false, boundTx:'|x²−4| = |x−2||x+2| ≤ 5|x−2|', deltaTex:'\\delta=\\dfrac{\\varepsilon}{5}',
+    /* 辅助线 y = L ± 5(x−x0)：证明里用到的线性上界 */
+    aux:{slope:5,color:'#93899c'},
+    xw:function(d){ return Math.max(3.0*d,0.045); } }
+];
+var EPS=[]; for(var i=1;i<=20;i++) EPS.push(i*0.05);   /* 0.05 … 1.00 */
+var defIdx=3;                                          /* ε = 0.20 */
+
+function el(id){ return document.getElementById(id); }
+function fmtNum(x,d){
+  if(!isFinite(x)) return '∞';
+  var s=x.toFixed(d);
+  if(s.indexOf('.')>=0){ s=s.replace(/0+$/,''); s=s.replace(/\.$/,''); }
+  return s;
+}
+var HAS_KATEX=(typeof katex!=='undefined' && katex && typeof katex.renderToString==='function');
+function renderTex(scope){
+  var list=(scope||document).querySelectorAll('.tex');
+  if(!HAS_KATEX) return;
+  for(var i=0;i<list.length;i++){
+    var t=list[i].getAttribute('data-tex'); if(!t) continue;
+    try{ list[i].innerHTML=katex.renderToString(t,{throwOnError:true}); }
+    catch(err){ /* 保留 HTML 兜底文本 */ }
+  }
+}
+
+/* ---------- 画布 ---------- */
+var cv=el('cv'), CW=0, CH=206;
+function fit(){
+  var w=el('plotBox').clientWidth||640; if(w<240) w=240;
+  CW=w;
+  var dpr=window.devicePixelRatio||1;
+  cv.style.width=w+'px'; cv.style.height=CH+'px';
+  cv.width=Math.round(w*dpr); cv.height=Math.round(CH*dpr);
+  cv.getContext('2d').setTransform(dpr,0,0,dpr,0,0);
+}
+function txtBox(c,t,x,y,align,color){
+  c.textAlign=align||'left'; c.textBaseline='middle';
+  var w=c.measureText(t).width, ox = align==='center'? -w/2 : align==='right'? -w : 0;
+  c.fillStyle='rgba(255,253,249,0.86)';
+  c.fillRect(x+ox-3,y-7,w+6,14);
+  c.fillStyle=color; c.fillText(t,x,y);
+}
+function arrowV(c,x,y1,y2,color){
+  c.strokeStyle=color; c.fillStyle=color; c.lineWidth=1.1;
+  c.beginPath(); c.moveTo(x,y1); c.lineTo(x,y2); c.stroke();
+  var s=3.6, d=(y2>y1?1:-1);
+  c.beginPath(); c.moveTo(x,y2); c.lineTo(x-s,y2-d*s*1.5); c.lineTo(x+s,y2-d*s*1.5); c.closePath(); c.fill();
+  c.beginPath(); c.moveTo(x,y1); c.lineTo(x-s,y1+d*s*1.5); c.lineTo(x+s,y1+d*s*1.5); c.closePath(); c.fill();
+}
+function arrowH(c,y,x1,x2,color){
+  c.strokeStyle=color; c.fillStyle=color; c.lineWidth=1.1;
+  c.beginPath(); c.moveTo(x1,y); c.lineTo(x2,y); c.stroke();
+  var s=3.6, d=(x2>x1?1:-1);
+  c.beginPath(); c.moveTo(x2,y); c.lineTo(x2-d*s*1.5,y-s); c.lineTo(x2-d*s*1.5,y+s); c.closePath(); c.fill();
+  c.beginPath(); c.moveTo(x1,y); c.lineTo(x1+d*s*1.5,y-s); c.lineTo(x1+d*s*1.5,y+s); c.closePath(); c.fill();
+}
+
+function draw(){
+  var F=FN[cur], e=EPS[idx], L=F.L, x0=F.x0;
+  var delta=F.delta(e);
+  var xw=F.xw(delta), yw=3.0*e;
+  var xa=x0-xw, xb=x0+xw, ya=L-yw, yb=L+yw;
+  var c=cv.getContext('2d'), pw=CW, ph=CH;
+  c.clearRect(0,0,pw,ph);
+  var m={l:52,r:52,t:30,b:26}, W=pw-m.l-m.r, H=ph-m.t-m.b;
+  var X=function(v){ return m.l+(v-xa)/(xb-xa)*W; };
+  var Y=function(v){ return m.t+(yb-v)/(yb-ya)*H; };
+
+  /* 背景 */
+  c.fillStyle=C.plot; c.fillRect(m.l,m.t,W,H);
+
+  /* ① 水平 ε 带（横贯全宽） */
+  c.fillStyle='rgba(179,154,110,0.20)';
+  c.fillRect(m.l,Y(L+e),W,Y(L-e)-Y(L+e));
+  /* ② 竖直 δ 带（纵贯全高） */
+  c.fillStyle='rgba(123,143,163,0.24)';
+  c.fillRect(X(x0-delta),m.t,X(x0+delta)-X(x0-delta),H);
+  /* ③ 交集高亮 */
+  var bx=X(x0-delta), by=Y(L+e), bw=X(x0+delta)-X(x0-delta), bh=Y(L-e)-Y(L+e);
+  c.fillStyle='rgba(130,149,139,0.19)'; c.fillRect(bx,by,bw,bh);
+
+  /* 网格 */
+  c.strokeStyle=C.grid; c.lineWidth=1;
+  var gy=[L-2*e,L-e,L,L+e,L+2*e], i;
+  for(i=0;i<gy.length;i++){
+    var yy=Math.round(Y(gy[i]))+0.5;
+    c.beginPath(); c.moveTo(m.l,yy); c.lineTo(m.l+W,yy); c.stroke();
+  }
+
+  /* 辅助线：y = L ± 5(x−x0)（仅 x² 例） */
+  if(F.aux){
+    c.save();
+    c.beginPath(); c.rect(m.l,m.t,W,H); c.clip();
+    c.strokeStyle=F.aux.color; c.lineWidth=1.3; c.setLineDash([6,4]);
+    for(var sg=-1;sg<=1;sg+=2){
+      c.beginPath();
+      c.moveTo(X(xa),Y(L+F.aux.slope*(xa-x0)*sg));
+      c.lineTo(X(xb),Y(L+F.aux.slope*(xb-x0)*sg));
+      c.stroke();
+    }
+    c.setLineDash([]); c.restore();
+  }
+
+  /* 曲线 */
+  c.save();
+  c.beginPath(); c.rect(m.l,m.t,W,H); c.clip();
+  c.strokeStyle=C.ink; c.lineWidth=2; c.lineJoin='round';
+  c.beginPath();
+  var first=true, N=220;
+  for(i=0;i<=N;i++){
+    var x=xa+(xb-xa)*i/N, y=F.f(x);
+    if(y<ya-(yb-ya)||y>yb+(yb-ya)){ first=true; continue; }
+    if(first){ c.moveTo(X(x),Y(y)); first=false; } else { c.lineTo(X(x),Y(y)); }
+  }
+  c.stroke();
+  c.restore();
+
+  /* 虚线：x=x₀、y=L、边界 */
+  c.setLineDash([5,4]);
+  c.strokeStyle=C.muted; c.lineWidth=1.1;
+  c.beginPath(); c.moveTo(Math.round(X(x0))+0.5,m.t); c.lineTo(Math.round(X(x0))+0.5,m.t+H); c.stroke();
+  c.beginPath(); c.moveTo(m.l,Math.round(Y(L))+0.5); c.lineTo(m.l+W,Math.round(Y(L))+0.5); c.stroke();
+  c.strokeStyle=C.sand; c.lineWidth=1.3;
+  c.beginPath(); c.moveTo(m.l,Math.round(Y(L+e))+0.5); c.lineTo(m.l+W,Math.round(Y(L+e))+0.5);
+  c.moveTo(m.l,Math.round(Y(L-e))+0.5); c.lineTo(m.l+W,Math.round(Y(L-e))+0.5); c.stroke();
+  c.strokeStyle=C.blue; c.lineWidth=1.3;
+  c.beginPath(); c.moveTo(Math.round(X(x0-delta))+0.5,m.t); c.lineTo(Math.round(X(x0-delta))+0.5,m.t+H);
+  c.moveTo(Math.round(X(x0+delta))+0.5,m.t); c.lineTo(Math.round(X(x0+delta))+0.5,m.t+H); c.stroke();
+  c.setLineDash([]);
+
+  /* 交集边框 */
+  c.strokeStyle=C.sageDeep; c.lineWidth=1.6;
+  c.strokeRect(Math.round(bx)+0.5,Math.round(by)+0.5,Math.round(bw),Math.round(bh));
+
+  /* (x₀, L) 挖空点 */
+  c.beginPath(); c.arc(X(x0),Y(L),4.6,0,6.2832);
+  c.fillStyle='#fff'; c.fill(); c.strokeStyle=C.sageDeep; c.lineWidth=2; c.stroke();
+
+  /* 边框与刻度 */
+  c.strokeStyle=C.line; c.lineWidth=1; c.strokeRect(m.l+0.5,m.t+0.5,W,H);
+  c.font='10.5px "Segoe UI","Microsoft YaHei",sans-serif';
+  var dec=Math.max(3,Math.ceil(-Math.log(e)/Math.LN10)+2);
+  c.fillStyle=C.muted; c.textAlign='right'; c.textBaseline='middle';
+  c.fillText(fmtNum(L+e,dec),m.l-6,Y(L+e));
+  c.fillText(fmtNum(L,2),m.l-6,Y(L));
+  c.fillText(fmtNum(L-e,dec),m.l-6,Y(L-e));
+  c.textAlign='center'; c.textBaseline='top';
+  c.fillText(fmtNum(x0,2),X(x0),m.t+H+5);
+  var lx1=fmtNum(x0-delta,dec), lx2=fmtNum(x0+delta,dec);
+  var w1=c.measureText(lx1).width, w2=c.measureText(lx2).width;
+  c.fillText(lx1,X(x0-delta)-Math.min(w1/2, bwx(X(x0-delta),m.l)),m.t+H+5);
+  c.fillText(lx2,X(x0+delta)+Math.min(w2/2, bwz(X(x0+delta),m.l+W)),m.t+H+5);
+  c.fillStyle=C.blue; c.textAlign='center';
+  c.fillText('x₀−δ',X(x0-delta),m.t+H+19);
+  c.fillText('x₀',X(x0),m.t+H+19);
+  c.fillText('x₀+δ',X(x0+delta),m.t+H+19);
+
+  /* 2δ / 2ε 标注 */
+  var yA=m.t+H-9;
+  arrowH(c,yA,X(x0-delta)+3,X(x0+delta)-3,C.blue);
+  txtBox(c,'2δ = '+fmtNum(2*delta,dec),(X(x0-delta)+X(x0+delta))/2,yA-12,'center',C.blue);
+  var xA=m.l+13;
+  arrowV(c,xA,Y(L+e)+3,Y(L-e)-3,C.sand);
+  txtBox(c,'2ε = '+fmtNum(2*e,dec),xA+9,Y(L)+ (Y(L)-Y(L+e))*0.62,'left',C.sand);
+
+  /* 交集说明 */
+  var lx=Math.min(Math.max(bx+bw/2,m.l+98),m.l+W-98);
+  txtBox(c,'交集：x 落在这里 ⇒ |f(x)−L| < ε 必然成立',lx,by-11,'center',C.sageDeep);
+
+  /* 曲线名 */
+  c.fillStyle=C.ink; c.textAlign='left'; c.textBaseline='top'; c.font='11.5px "Segoe UI","Microsoft YaHei",sans-serif';
+  /* 函数名标注移到顶部留白：原在图内左上角，会压住曲线起点 */
+  c.fillText(F.plotLabel+' 的图像', m.l-46, m.t-6);
+  function bwx(x,lo){ return Math.max(0,x-lo); }
+  function bwz(x,hi){ return Math.max(0,hi-x); }
+}
+
+/* ---------- 文字联动 ---------- */
+var cur=0, idx=defIdx;
+function updateText(){
+  var F=FN[cur], e=EPS[idx], delta=F.delta(e), L=F.L, x0=F.x0;
+  var dec=Math.max(3,Math.ceil(-Math.log(e)/Math.LN10)+2);
+  el('evalTxt').textContent=e.toFixed(2);
+
+  var fxs=fmtNum(x0,2);
+  var p=[];
+  p.push('<span class="rp">ε = <b>'+e.toFixed(2)+'</b></span>');
+  p.push('<span class="ra">⇒</span>');
+  if(cur===0){
+    p.push('<span class="rp">'+F.boundTx+' &lt; ε ⟺ |x−'+fxs+'| &lt; ε/2</span>');
+    p.push('<span class="ra">⇒</span>');
+    p.push('<span class="rp hi">取 δ = ε/2 = '+fmtNum(delta,dec)+'</span>');
+    p.push('<span class="ra">⇒</span>');
+    p.push('<span class="rp hi">当 0 &lt; |x−'+fxs+'| &lt; '+fmtNum(delta,dec)+' 时，|f(x)−'+fmtNum(L,2)+'| &lt; '+e.toFixed(2)+'</span>');
+    var worst=2*delta;
+    p.push('<span class="rp vf">核对：x = '+fmtNum(x0+delta,dec)+' 时 |f−'+fmtNum(L,2)+'| = '+fmtNum(worst,dec)+
+           ' = ε（正好取等，所以 δ 不能再大）；x = '+fmtNum(x0+delta*0.9,dec)+' 时 = '+fmtNum(2*delta*0.9,dec)+' &lt; ε ✓</span>');
+  }else{
+    p.push('<span class="rp">'+F.boundTx+' &lt; ε（当 |x−2| ≤ 1）</span>');
+    p.push('<span class="ra">⇒</span>');
+    p.push('<span class="rp hi">取 δ = min(1, ε/5) = '+fmtNum(delta,dec)+'</span>');
+    p.push('<span class="ra">⇒</span>');
+    p.push('<span class="rp hi">当 0 &lt; |x−'+fxs+'| &lt; '+fmtNum(delta,dec)+' 时，|f(x)−'+fmtNum(L,2)+'| &lt; '+e.toFixed(2)+'</span>');
+    var at=4*delta+delta*delta;                 /* |(2+δ)² − 4| = 4δ + δ² */
+    var dmax=-2+Math.sqrt(4+e);                 /* 真正最大的 δ */
+    p.push('<span class="rp vf">核对：x = '+fmtNum(x0+delta,dec)+' 时 |f−4| = 4δ+δ² = '+fmtNum(at,dec)+' &lt; ε ✓；'+
+           '真正能取的最大 δ = −2+√(4+ε) = '+fmtNum(dmax,Math.max(4,dec))+'，所以 δ = ε/5 '+fmtNum(delta,dec)+' 是「偏保守但更好算」的取法</span>');
+  }
+  el('readout').innerHTML=p.join(' ');
+
+  var concl;
+  if(cur===0){
+    concl='<b>一句话本质：</b>ε 先给（多小都行），δ 是<b>被 ε 逼出来的</b>「x 的容许半径」。这里 |f(x)−3| = 2|x−1|，'+
+          '所以 δ 只要取 ε 的一半（δ = '+fmtNum(delta,dec)+'）就能保证 |f(x)−3| &lt; '+e.toFixed(2)+
+          '；ε 减半，δ 也减半。';
+  }else{
+    concl='<b>一句话本质：</b>ε 先给，δ 后找。x² 在 x→2 附近变化率约 4~5 倍，于是 δ 只能取到 ε 的 1/5 左右'+
+          '（δ = '+fmtNum(delta,dec)+'，真正的上限 ' +fmtNum(-2+Math.sqrt(4+e),Math.max(4,dec))+ '）——<b>δ 比 ε 小多少，正反映了函数在该点「变化有多陡」</b>。';
+  }
+  el('conclusion').innerHTML=concl;
+}
+
+function redraw(){ draw(); updateText(); }
+function layout(){ fit(); redraw(); }
+
+/* ---------- 事件 ---------- */
+var slider=el('eps');
+slider.addEventListener('input',function(){
+  idx=parseInt(slider.value,10)||0;
+  redraw();                        /* 实时响应，不等 change */
+});
+el('tabs').addEventListener('click',function(ev){
+  var t=ev.target, b=null;
+  while(t && t!==this){ if(t.className && String(t.className).indexOf('tab')>=0){ b=t; break; } t=t.parentNode; }
+  if(!b) return;
+  var i=parseInt(b.getAttribute('data-i'),10);
+  if(i===cur) return;
+  cur=i;
+  var ts=this.querySelectorAll('.tab');
+  for(var k=0;k<ts.length;k++) ts[k].className='tab'+(k===i?' on':'');
+  el('seqTex').setAttribute('data-tex',FN[i].tex);
+  el('seqTex').textContent=FN[i].name;
+  renderTex(el('seqTex').parentNode);
+  redraw();
+});
+var rt=null;
+function onResize(){ if(rt) clearTimeout(rt); rt=setTimeout(layout,120); }
+window.addEventListener('resize',onResize);
+if(window.ResizeObserver){ try{ new ResizeObserver(onResize).observe(el('plotBox')); }catch(x){} }
+
+slider.value=String(idx);
+renderTex(document);
+layout();
+})();
+</script>
+</body>
+</html>

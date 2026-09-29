@@ -1,0 +1,1572 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><!--VIDBASE-INJECTED--><script>/* 视频文件留在原站（Netlify），这里只声明基址；跨域 <video> 播放不需要 CORS，所以不用改播放器 */window.__VIDBASE__='https://ouc-gaoshu-lab.netlify.app/';</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>高数 · 目标学习台 (中国海洋大学 高等数学 I-1)</title>
+<link rel="stylesheet" href="assets/katex/katex.min.css">
+<script src="assets/katex/katex.min.js"></script>
+<style>
+/* ===================== 设计系统 v2 =====================
+   一套主色 + 三个语义色 + 暖灰系。色相只在表达含义时出现。 */
+:root{
+  /* 底与面 */
+  --bg:#f7f4ef; --bg2:#efeae3; --surface:#ffffff; --surface2:#fbf9f6; --surface3:#f4f1ec;
+  /* 墨 */
+  --ink:#2a2f2e; --ink2:#535a59; --muted:#8a908e;
+  /* 线 */
+  --line:#e5dfd6; --line2:#d5ccc0;
+  /* 主色：松绿 */
+  --p:#6e8b7b; --p-deep:#4e6a5b; --p-soft:#e8efeb; --p-ink:#3a5445;
+  /* 语义：正确 / 警示 / 错误 / 信息 */
+  --ok:#5c8a6a; --ok-soft:#e6f0e9; --ok-ink:#3c6647;
+  --warn:#bf8a3c; --warn-soft:#f8efdd; --warn-ink:#7d5a22;
+  --bad:#b5705f; --bad-soft:#f7e8e3; --bad-ink:#7d4a3c;
+  --info:#6b8899; --info-soft:#e8eef2; --info-ink:#3f5a68;
+  /* 影 */
+  --sh1:0 1px 2px rgba(42,47,46,.04);
+  --sh2:0 1px 2px rgba(42,47,46,.04), 0 10px 28px -14px rgba(42,47,46,.16);
+  --r:14px; --r-sm:10px; --r-lg:18px;
+  --t:160ms cubic-bezier(.4,0,.2,1);
+}
+body.dark{
+  --bg:#22211e; --bg2:#1c1b19; --surface:#2b2a26; --surface2:#302f2b; --surface3:#35332e;
+  --ink:#eae6df; --ink2:#c3bfb7; --muted:#9a968e;
+  --line:#3b3934; --line2:#4a4741;
+  --p:#8aa899; --p-deep:#a7c2b3; --p-soft:#2c3831; --p-ink:#c6dccf;
+  --ok:#8fb79b; --ok-soft:#28332c; --ok-ink:#bcd9c5;
+  --warn:#d8ab63; --warn-soft:#383022; --warn-ink:#e8cfa0;
+  --bad:#cf9384; --bad-soft:#3a2b27; --bad-ink:#e8c0b5;
+  --info:#93aebd; --info-soft:#26313a; --info-ink:#c3d6e0;
+  --sh1:0 1px 2px rgba(0,0,0,.24);
+  --sh2:0 1px 2px rgba(0,0,0,.3), 0 10px 28px -14px rgba(0,0,0,.5);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Segoe UI","PingFang SC","Microsoft YaHei",ui-sans-serif,system-ui,sans-serif;
+  font-size:15px;line-height:1.78;letter-spacing:.012em;-webkit-font-smoothing:antialiased;
+  transition:background var(--t),color var(--t)}
+a{color:var(--p-deep);text-decoration:none;border-bottom:1px solid transparent;transition:var(--t)}
+a:hover{border-bottom-color:currentColor}
+::selection{background:var(--p-soft)}
+:focus-visible{outline:2px solid var(--p);outline-offset:2px;border-radius:6px}
+
+.wrap{display:flex;min-height:100vh}
+
+/* ---------- 侧栏 ---------- */
+.side{width:268px;flex:0 0 268px;background:var(--bg2);border-right:1px solid var(--line);
+  padding:20px 16px 40px;position:sticky;top:0;height:100vh;overflow-y:auto;
+  scrollbar-width:thin}
+.side::-webkit-scrollbar{width:8px}
+.side::-webkit-scrollbar-thumb{background:var(--line2);border-radius:99px}
+.brand{display:flex;align-items:center;gap:10px;margin:0 0 6px}
+.brand .mark{width:36px;height:36px;border-radius:11px;flex:0 0 36px;
+  background:linear-gradient(145deg,var(--p),var(--p-deep));color:#fff;
+  display:grid;place-items:center;font-size:19px;font-weight:600;
+  box-shadow:0 6px 14px -8px rgba(78,106,91,.9)}
+.brand b{font-size:15.5px;letter-spacing:-.01em;display:block;line-height:1.3}
+.brand small{display:block;color:var(--muted);font-size:11.5px;line-height:1.45;font-weight:400}
+.sect{margin:20px 0 8px;font-size:11px;letter-spacing:.16em;color:var(--muted);font-weight:600}
+.goal{display:flex;align-items:center;gap:10px;width:100%;text-align:left;
+  background:var(--surface);border:1px solid transparent;border-radius:var(--r-sm);
+  padding:10px 12px;margin-bottom:6px;cursor:pointer;color:var(--ink);
+  font-size:14px;font-family:inherit;line-height:1.45;transition:var(--t);position:relative}
+.goal:hover{background:var(--surface3);transform:translateX(2px)}
+.goal.on{background:var(--p-soft);color:var(--p-ink);font-weight:600;
+  box-shadow:var(--sh1)}
+.goal.on::before{content:"";position:absolute;left:0;top:9px;bottom:9px;width:3px;
+  border-radius:99px;background:var(--p)}
+.goal .ico{font-size:17px;line-height:1;flex:0 0 20px;text-align:center;filter:saturate(.85)}
+.goal small{display:block;color:var(--muted);font-size:11.5px;font-weight:400;margin-top:1px}
+.goal.on small{color:var(--p-ink);opacity:.75}
+.bar{height:6px;border-radius:99px;background:var(--line);overflow:hidden;margin:8px 0 6px}
+.bar>i{display:block;height:100%;border-radius:99px;
+  background:linear-gradient(90deg,var(--p),var(--info));transition:width .4s cubic-bezier(.4,0,.2,1)}
+.kv{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);line-height:1.9}
+.kv b{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
+.btn{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-sm);
+  padding:7px 12px;cursor:pointer;font-family:inherit;font-size:13px;color:var(--ink2);
+  line-height:1.5;transition:var(--t)}
+.btn:hover{border-color:var(--line2);background:var(--surface2);color:var(--ink)}
+.btn:active{transform:translateY(1px)}
+.btn.pri{background:var(--p);border-color:var(--p);color:#fff;font-weight:500}
+.btn.pri:hover{background:var(--p-deep);border-color:var(--p-deep);color:#fff}
+.btn.ghost{background:transparent;border-color:transparent;color:var(--muted)}
+.btn.ghost:hover{background:var(--surface3);color:var(--ink)}
+.btn.sm{padding:4px 10px;font-size:12px;border-radius:8px}
+
+/* ---------- 主区 ---------- */
+.main{flex:1;min-width:0;padding:32px 40px 96px;max-width:1100px}
+.main>h1:first-child{margin-top:4px}
+h1{font-size:26px;line-height:1.35;margin:6px 0 6px;letter-spacing:-.015em;font-weight:650}
+h2{font-size:18px;line-height:1.45;margin:34px 0 12px;letter-spacing:-.008em;
+  padding-bottom:8px;border-bottom:1px solid var(--line);font-weight:600}
+h3{font-size:15.5px;margin:22px 0 8px;color:var(--ink2);font-weight:600}
+.lead{color:var(--ink2);margin:0 0 4px;font-size:14.5px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
+  padding:16px 18px;margin:12px 0;box-shadow:var(--sh1);transition:var(--t)}
+.card:hover{box-shadow:var(--sh2)}
+.chip{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;line-height:1.6;
+  padding:2px 9px;border-radius:99px;background:var(--surface3);color:var(--ink2);
+  font-weight:500;white-space:nowrap}
+.chip.b{background:var(--info-soft);color:var(--info-ink)}
+.chip.m{background:var(--p-soft);color:var(--p-ink)}
+.chip.r{background:var(--warn-soft);color:var(--warn-ink)}
+.chip.g{background:var(--ok-soft);color:var(--ok-ink)}
+.chip.d{background:var(--bad-soft);color:var(--bad-ink)}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th,td{text-align:left;padding:11px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+th.num,td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+td.num{font-weight:600;color:var(--ink)}
+th{font-size:11.5px;color:var(--muted);font-weight:600;letter-spacing:.06em;
+  background:transparent;position:sticky;top:0}
+tbody tr{transition:background var(--t)}
+tbody tr:hover td{background:var(--surface2)}
+tbody tr:last-child td{border-bottom:0}
+td b{font-weight:600}
+
+/* 题目 */
+.qwrap{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
+  padding:18px 20px;margin:12px 0;box-shadow:var(--sh1);transition:var(--t)}
+.qwrap:hover{box-shadow:var(--sh2)}
+.qstem{font-size:15.5px;line-height:2.05;margin:10px 0 4px;color:var(--ink)}
+.opts{display:flex;flex-direction:column;gap:8px;margin:12px 0 4px}
+.opt{border:1px solid var(--line);border-radius:var(--r-sm);padding:9px 12px;cursor:pointer;
+  background:var(--surface2);font-size:14.5px;display:flex;gap:10px;align-items:flex-start;
+  line-height:1.9;transition:var(--t)}
+.opt:hover{border-color:var(--line2);background:var(--surface);transform:translateX(2px)}
+.opt>b{color:var(--muted);font-weight:600;flex:0 0 16px}
+.opt.sel{border-color:var(--info);background:var(--info-soft)}
+.opt.right{border-color:var(--ok);background:var(--ok-soft)}
+.opt.right>b{color:var(--ok-ink)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.opt.wrong>b{color:var(--bad-ink)}
+.tin{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:var(--r-sm);
+  background:var(--surface2);font-family:inherit;font-size:14.5px;color:var(--ink);transition:var(--t)}
+.tin:focus{outline:none;border-color:var(--p);background:var(--surface);
+  box-shadow:0 0 0 3px var(--p-soft)}
+.ans{margin-top:14px;padding:13px 16px;border-left:3px solid var(--ok);
+  background:var(--ok-soft);border-radius:0 var(--r-sm) var(--r-sm) 0;color:var(--ok-ink)}
+.ans.mid{border-left:3px solid var(--warn,#bf8a3c);background:var(--warn-soft,#f7f1e6)}
+.ans.bad{border-color:var(--bad);background:var(--bad-soft);color:var(--bad-ink)}
+.ans b{color:inherit}
+.src{font-size:11.5px;color:var(--muted);margin-top:10px;line-height:1.7}
+.katex{font-size:1.04em}
+
+/* 知识树 */
+.treegrp{border:1px solid var(--line);border-radius:var(--r);margin:10px 0;overflow:hidden;
+  background:var(--surface);box-shadow:var(--sh1)}
+.treegrp>summary{padding:13px 16px;cursor:pointer;font-weight:600;font-size:14.5px;
+  list-style:none;transition:var(--t)}
+.treegrp>summary:hover{background:var(--surface2)}
+.treegrp>summary::-webkit-details-marker{display:none}
+.treegrp>summary::after{content:"›";float:right;color:var(--muted);transition:var(--t);
+  font-size:18px;line-height:1}
+.treegrp[open]>summary::after{transform:rotate(90deg)}
+.treegrp[open]>summary{border-bottom:1px solid var(--line);background:var(--surface2)}
+.trow{display:flex;align-items:center;gap:10px;padding:11px 16px;
+  border-bottom:1px solid var(--line);font-size:14px;transition:var(--t);
+  flex-wrap:wrap}                      /* 允许换行：窄屏下 pill/按钮掉到第二行，不挤名字 */
+.trow > span:not(.dot):not(.pill){min-width:0;flex:1 1 140px}   /* 名字列优先占满，不再被压成竖排 */
+.trow .pill{white-space:nowrap}
+.trow:last-child{border-bottom:0}
+.trow:hover{background:var(--surface2)}
+.dot{width:8px;height:8px;border-radius:99px;background:var(--line2);flex:0 0 8px}
+.dot.l0{background:var(--line2)} .dot.l1{background:var(--warn)}
+.dot.l2{background:var(--info)} .dot.l3{background:var(--p)}
+.pill{font-size:11.5px;color:var(--muted);margin-left:auto;white-space:nowrap;
+  font-variant-numeric:tabular-nums}
+.freq{display:inline-block;height:5px;border-radius:99px;
+  background:linear-gradient(90deg,var(--p),var(--info));vertical-align:middle;min-width:3px}
+.empty{color:var(--muted);font-size:13.5px;padding:18px 0;text-align:center}
+.timer{font-variant-numeric:tabular-nums}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
+/* 首页目标卡 */
+.gcard{display:flex;align-items:center;gap:13px;cursor:pointer;padding:15px 17px;margin:12px 0}
+.gcard:hover{border-color:var(--line2);transform:translateY(-2px)}
+.gcard .gi{font-size:22px;line-height:1;flex:0 0 30px;text-align:center;filter:saturate(.85)}
+.gcard b{font-size:15px;font-weight:600}
+.gcard small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
+
+/* 视图切换的柔和入场 */
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+#view>*{animation:fadeUp .28s cubic-bezier(.4,0,.2,1) both}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+@media(max-width:640px){
+  /* 手机端"按知识点学"的行：名字必须占满一行，否则会出现"一列一个字"的竖排 */
+  .trow{gap:8px;padding:12px 13px}
+  .trow > span:not(.dot):not(.pill){flex:1 1 100%;order:1;font-size:15px;line-height:1.5}
+  .trow .pill{order:2;font-size:12px}
+  .trow .chip{order:2}
+  .trow .btn{order:3;flex:1 1 auto;min-height:34px}
+  .trow .dot{order:0}
+  .trow input[type=checkbox]{order:0;width:18px!important;height:18px!important}
+}
+@media(max-width:900px){
+  .wrap{flex-direction:column}
+  /* 侧栏压成"顶部一行入口条"：手机上原来它占满整屏，内容要滑很久才看见。
+     入口横滑、次要信息（进度/数据）收起，正文立刻可见。 */
+  .side{width:100%;flex:none;height:auto;position:sticky;top:0;z-index:20;
+        padding:9px 12px 7px;border-right:0;border-bottom:1px solid var(--line);box-shadow:var(--sh1);
+        background:var(--bg2)}
+  .brand{margin-bottom:5px}
+  .brand .mark{width:30px;height:30px;flex:0 0 30px;font-size:16px;border-radius:9px}
+  .brand b{font-size:14px} .brand small{font-size:10.5px}
+  #goals{display:flex;gap:6px;overflow-x:auto;padding:2px 0 3px;scrollbar-width:none;
+         position:relative;mask-image:linear-gradient(90deg,#000 88%,transparent)}
+  #goals .goal{min-width:104px}
+  #goals::-webkit-scrollbar{display:none}
+  #goals .goal{flex:0 0 auto;margin:0;padding:7px 11px;font-size:13px;border:1px solid var(--line)}
+  #goals .goal small{display:none}
+  #goals .goal .ico{font-size:15px}
+  .side .sect, .side .bar, .side .kv{display:none}          /* 进度/数据先收起，正文优先 */
+  .side > div:last-child{margin-top:6px!important}
+  .side > div:last-child .btn{padding:4px 9px;font-size:12px}
+  .main{padding:16px 14px 76px;max-width:none}
+  h1{font-size:21px;margin-top:2px}
+  h2{font-size:16.5px;margin-top:24px}
+  .two{grid-template-columns:1fr}
+  .card{padding:13px 14px}
+  table{font-size:12.5px}
+  th,td{padding:9px 6px}
+  .yr{display:none}                                          /* 年份列在窄屏缩掉，免得挤压换行 */
+  td:last-child,th:last-child{white-space:nowrap}
+  table td:has(.dot){white-space:nowrap}
+  .qstem{font-size:15px;line-height:1.95}
+  .chip{font-size:11px;padding:2px 7px}
+  .btn{padding:6px 10px}
+}
+.rel{background:var(--surface2);border:1px solid var(--line);border-radius:10px;padding:9px 11px;margin-bottom:7px}
+.relstem{font-size:13.5px;line-height:1.75;margin-top:5px}
+.btn.xs{padding:3px 9px;font-size:12px}
+
+/* 键盘可达性：焦点要看得见（纯键盘用户才知道现在选到哪） */
+.goal:focus-visible,.gcard:focus-visible,.btn:focus-visible,.trow:focus-visible{
+  outline:2px solid var(--sage,#6e8b7b);outline-offset:2px;border-radius:10px}
+.gcard{cursor:pointer}
+
+/* 手机上长公式会超出屏宽（实测超出 111px）——单独给公式横向滚动，
+   不要用 overflow:hidden 裁掉（学生就没法看全了） */
+.katex-display{overflow-x:auto;overflow-y:hidden;padding:2px 0}
+#view .katex{font-size:1.02em}
+@media(max-width:640px){
+  .katex-display{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .card{padding:13px 13px}          /* 手机上卡片内边距收一点，正文更宽 */
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <aside class="side">
+    <div class="brand">
+      <div class="mark">∫</div>
+      <div><b>高数 · 目标学习台</b><small>海大 · 高等数学 I-1（上册）</small></div>
+    </div>
+    <div class="sect">我 想 干 什 么</div>
+    <div id="goals"></div>
+    <div class="sect">进 度</div>
+    <div class="bar"><i id="pbar" style="width:0%"></i></div>
+    <div class="kv"><span id="pnum">0 / 0 知识点</span><span id="ppct">0%</span></div>
+    <div class="kv" style="margin-top:6px"><span>已做 <b id="qdone">0</b> 题</span><span>错题 <b id="qwrong">0</b></span></div>
+    <div class="sect">数 据</div>
+    <div class="kv" style="display:block;line-height:1.9" id="stat"></div>
+    <div style="margin-top:14px;display:flex;gap:7px;flex-wrap:wrap">
+      <button class="btn sm" onclick="toggleDark()">夜雾</button>
+      <button class="btn sm" onclick="exportRec()">导出记录</button>
+      <button class="btn sm" onclick="resetAll()">清空进度</button>
+    </div>
+  </aside>
+  <main class="main" id="view"></main>
+</div>
+<script src="data/topic_sources.js"></script>
+<script src="data/textbook.js"></script>
+<script src="data/videos.js"></script>
+<script src="data/payload.js"></script>
+<script>/* 数据见 data/payload.js（线上拆包，便于单独缓存）*/</script>
+<script>
+/* ===== 状态 ===== */
+const D = window.__DATA__;
+const T = {}; D.topics.forEach(t => T[t.id] = t);
+const LS_KEY = 'gaoshu_target_lab_v1';
+const BOOK = '上册';   // 本学期范围（海大 高数 I-1）
+/* 知识点 → 交互演示（真实可拖动的图，不是静态插图） */
+/* 一个知识点可挂多个演示：[文件名, 一句话说明]。9 个新演示由子代理产出，
+   数学与渲染我已独立复核（重算了全部数值 + 逐格截图看渲染）。 */
+const DEMOS = {
+  K02: [['demo_seq_limit_en.html', '拖 ε 看最小 N：数列从第几项起全部落进 ε 带'],
+        ['demo_monotone_bounded.html', '拖初值看数列：单调 + 有界 ⇒ 收敛到不动点']],
+  K03: [['demo_func_limit_ed.html', '拖 ε 看 δ：函数极限的 ε-δ 夹逼']],
+  K04: [['demo_equiv_inf.html', '拖 x 看比值：sin x/x、tan x/x 怎么趋近 1']],
+  K06: [['demo_equiv_inf.html', '拖 x 看比值：等价无穷小替换到底怎么来的']],
+  K07: [['demo_continuity.html', '切四种间断点：连续的三条件到底差哪一条']],
+  K09: [['demo_derivative_def.html', '拖 h 看割线变切线：差商趋近导数']],
+  K12: [['demo_derivative_def.html', '拖 h 看割线变切线（微分的直观来源）']],
+  K13: [['demo_mvt.html', '拖切点看切线平行于弦：中值定理的几何意义']],
+  K14: [['demo_lhopital.html', '拖 x 看 f/g 与 f′/g′ 同时趋近同一极限']],
+  K15: [['demo_taylor.html', '拖阶数看多项式逼近：泰勒展开为什么能逼近']],
+  K16: [['demo_extrema.html', '拖点看 f′ 的符号：增减性与极值判定']],
+  K17: [['demo_concavity.html', '拖点看切线与曲线：凹凸性与拐点']],
+  K19: [['demo_substitution.html', '拖分界看 x 与 t 两根轴上的区间怎么对应']],
+  K20: [['demo_parts.html', '看 u、dv、uv、∫v du 四项怎么对上：分部积分']],
+  K22: [['demo_riemann.html', '拖 n 看阶梯逼近面积：定积分的定义']],
+  K23: [['demo_ftc.html', '拖上限看面积累积：F(x)=∫f 与 F′=f 的关系']],
+  K24: [['demo_parts.html', '换元与分部的对应关系（同一套思想）']],
+  K25: [['demo_riemann.html', '拖 n 看面积逼近'], ['demo_volume_area.html', '拖上下限实时算面积与旋转体体积']],
+  K26: [['demo_improper.html', '拖上限看积分值趋近极限还是发散']],
+};   // 本学期范围（海大 高数 I-1）；下册题不入本学期目标范围
+const QS = () => D.questions.filter(q => q.book === BOOK);
+let S = load();
+function load(){ try{ return JSON.parse(localStorage.getItem(LS_KEY)) || base(); }catch(e){ return base(); } }
+function base(){ return {mastery:{}, wrong:{}, done:{}, records:[], dark:false, midCut:'K12', goal:null}; }
+function save(){ localStorage.setItem(LS_KEY, JSON.stringify(S)); renderSide(); }
+function toggleDark(){ S.dark=!S.dark; document.body.classList.toggle('dark',S.dark); save(); }
+function resetAll(){ if(confirm('清空本机所有学习进度？（题库不受影响）')){ S=base(); save(); render(); } }
+
+/* 掌握度：0 未学 / 1 学过 / 2 会做 / 3 熟练（按正确率自动升档） */
+function mlevel(id){ const m=S.mastery[id]; if(!m) return 0;
+  const n=(m.right||0)+(m.wrong||0); if(!n) return 1;
+  const acc=m.right/n; if(n>=3&&acc>=0.85) return 3; if(acc>=0.6) return 2; return 1; }
+function markAnswer(q, ok){
+  const t=q.topic; S.mastery[t]=S.mastery[t]||{right:0,wrong:0};
+  ok?(S.mastery[t].right++, S.done[q.id]=1):(S.mastery[t].wrong++, delete S.done[q.id]);
+  const w=S.wrong[q.id]||{c:0,streak:0};
+  if(!ok){ w.c++; w.streak=0; S.wrong[q.id]=w; }
+  else if(w.c){ w.streak=(w.streak||0)+1; if(w.streak>=2) delete S.wrong[q.id]; else S.wrong[q.id]=w; }
+  S.records.push({id:q.id,t,ok,ts:Date.now()}); if(S.records.length>800) S.records.shift();
+  save();
+}
+/* ===== 公式渲染（离线 KaTeX） ===== */
+function esc(s){ return String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+function tex(s){ try{ return katex.renderToString(s,{throwOnError:false,displayMode:false}); }
+  catch(e){ return esc(s); } }
+function rich(s){   // $...$ 与 $$...$$ → KaTeX；markdown 粗体 → <b>；其余按纯文本
+  if(s==null) return '';
+  /* ⚠️⚠️ 只还原"后面不是字母"的字面 \n（负向前瞻）。
+     原来写的是无脑 replace(/\\n/g,'\n') —— 但 LaTeX 里 **\neq（≠）\nabla \notin \nmid
+     全都以 \n 开头** ✗ → 会被切成「真换行 + eq」→ 页面显示成
+     "F'(x)  换行  eq 0" 这种残片，学生看到的就是"代码"（用户实测反馈的元凶）。
+     正确判据：\n 后跟空格/数字/中文/标点 才是被双重转义的换行。 */
+  s = String(s).replace(/\\n(?![A-Za-z])/g, '\n');
+  /* 视觉模型转录讲义时，把 LaTeX 命令写成了**双反斜杠**（`\\lim`、`\\{x_n\\}`）——
+     实测 topic_sources 里这种有 3 万多处 ✗。KaTeX 把 `\\` 当**换行**，于是公式会
+     在中间断行、花括号还会漏出来 ✗。只收敛"后面跟字母"的那些；
+     矩阵/cases 里的换行是 `\\` 后面跟空白或 `&`，必须原样保留。 */
+  s = s.replace(/\\+(?=[A-Za-z])/g, '\\');
+  // 模型常把美元符转义成 \$（还有 \( \) \[ \] 这些定界符）→ 先还原，否则整段公式原样印出来
+  s = String(s).replace(/\\\$/g,'$').replace(/\\\(/g,'$').replace(/\\\)/g,'$')
+                  .replace(/\\\[/g,'$$').replace(/\\\]/g,'$$');
+  // ② **双反斜杠的 LaTeX 命令**（\\dfrac / \\text / \\to）——渲染不出、原样印成代码。
+  //    只折叠"反斜杠+反斜杠+字母"（\begin{cases} 里真正的换行符是 \\ 后跟空白/&，不受影响）
+  s = s.replace(/\\\\+([A-Za-z])/g, '\\$1');
+  let out='', i=0; const re=/\$\$([^$]+)\$\$|\$([^$]+)\$/g; let m;
+  while((m=re.exec(s))){
+    out+=mdBold(esc(s.slice(i,m.index)));
+    const body=m[1]!=null?m[1]:m[2];
+    out += m[1]!=null ? '<div style="text-align:center;margin:8px 0">'+tex(body)+'</div>' : tex(body);
+    i=m.index+m[0].length;
+  }
+  return out+mdBold(esc(s.slice(i)));
+}
+/* markdown 粗体 → <b>（模型写 **通项** 这类，原样印出来就是"代码感"的元凶之一） */
+function mdBold(h){
+  return String(h).replace(/\*\*([^*\n]{1,60})\*\*/g, '<b>$1</b>');
+}
+
+
+
+/* ===================== 视频片段播放器 =====================
+   用户想法："视频码能不能换成视频切分呢，视频就在网页里" ——
+   不真切片（会再复制 6.6GB），而是喂原视频 + 精确定位到 [t0,t1]，
+   到 t1 自动暂停：观感就是切好的片段，零额外磁盘。
+   目录自适应：file:// 用绝对 file URL；本地服务模式用相对路径（见 启动学习台.bat）。 */
+const VID = window.__VIDEOS__ || {sections: [], dir: ''};
+/* 视频基址。默认相对路径（本地 / Netlify 同源都适用）。
+   ★ 站点换域名时（如网页迁 GitHub Pages、视频留在 Netlify），构建时注入
+     `window.__VIDBASE__ = 'https://<原站>/'` —— 这样**不必重传 2 GB 视频**，
+     而且播放器不用改一行。<video> 跨域播放不需要 CORS ✓。 */
+function vidBase(){
+  if(window.__VIDBASE__) return window.__VIDBASE__;
+  const d = (VID.dir || '').replace(/\\/g,'/');
+  return location.protocol === 'file:' ? ('file:///' + d + '/') : ('../' + d + '/');
+}
+/* 切片地址：clip 存的是相对路径（videos/x.mp4）→ 换域名时要补上原站前缀 */
+function clipURL(s){
+  if(!s || !s.clip) return s ? (vidBase() + encodeURIComponent(s.video)) : '';
+  return (window.__VIDBASE__ || '') + s.clip;
+}
+function fmtT(s){ if(s==null) return ''; const h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=Math.floor(s%60);
+  return (h?h+':':'')+String(m).padStart(2,'0')+':'+String(x).padStart(2,'0'); }
+function playSection(cid, sec){
+  const s = VID.sections.find(x=>x.cid===cid && String(x.sec)===String(sec));
+  if(!s) return;
+  const v = document.getElementById('vplayer');
+  const box = document.getElementById('vbox');
+  box.style.display='block';
+  document.getElementById('vtitle').textContent = `第 ${s.lec} 讲 · ${s.title}`;
+  document.getElementById('vrange').textContent = `${fmtT(s.t0)} – ${fmtT(s.t1)}（${Math.round((s.t1-s.t0)/60)} 分钟）`;
+  box.scrollIntoView({behavior:'smooth', block:'nearest'});
+  // 先把播放器藏起来，探测完再决定显示什么 —— 线上版没有切片文件，
+  // 直接赋值 src 只会得到一个坏播放器（用户会以为页面坏了）。
+  v.style.display='none';
+  let note = document.getElementById('vnonote');
+  if(!note){
+    note = document.createElement('div');
+    note.id = 'vnonote';
+    note.style.cssText = 'font-size:13px;line-height:1.9;color:var(--muted);padding:12px 14px;' +
+      'background:var(--surface2);border:1px solid var(--line);border-radius:10px';
+    box.appendChild(note);
+  }
+  note.style.display='none';
+  /* ★ 不再用 fetch(HEAD) 做"在不在"探测：网页一旦迁到别的域名，视频就是**跨域**的，
+     fetch 会被 CORS 拦 ✗ —— 明明能播却判成"不可用"（视频全被判死，最惨的一类假故障）。
+     改成直接把 src 交给 <video>，由它自己的 onerror 决定降级：跨域 <video> 播放不需要 CORS ✓。 */
+  const src = clipURL(s);
+  note.style.display='none';
+  v.style.display='block';
+  v.onerror = function(){
+    v.style.display='none';
+    note.innerHTML = '这一段（第 ' + s.lec + ' 讲）的视频暂时取不到 —— 可能是网络或视频源还没就绪。'
+      + '<br>其余内容（<b>知识卡 / 讲义原文 / 教材对照 / 交互演示 / 真题</b>）不受影响；'
+      + '急看视频可用<b>本地版</b>学习台。';
+    note.style.display='block';
+  };
+  if(s.clip){ v.src = src; v._t0 = 0; v._t1 = (s.t1 - s.t0); }
+  else { v.src = src; v._t0 = s.t0; v._t1 = s.t1; }
+  v.play().catch(()=>{});
+}
+function initPlayer(){
+  const v = document.getElementById('vplayer');
+  if(!v || v._bound) return;
+  v._bound = true;
+  v.addEventListener('timeupdate', ()=>{
+    if(v._t1 && v.currentTime >= v._t1){ v.pause(); }
+  });
+  v.addEventListener('loadedmetadata', ()=>{ if(v._t0) v.currentTime = v._t0; });
+}
+/* 某个知识点挂着的所有视频节（带封面 + 播放按钮） */
+/* 线上版没有那 6.3 GB 视频切片（Netlify/GitHub 传不上去），
+   所以点播放时先探一下文件在不在：不在就把播放器换成一句说明，
+   而不是让用户对着一个坏掉的 <video> 发呆。本地版探测必然成功 → 行为不变。 */
+let VPROBE = {};
+function videoOK(url, cb){
+  if(!url){ cb(false); return; }
+  if(url in VPROBE){ cb(VPROBE[url]); return; }
+  fetch(url, {method:'HEAD'}).then(r=>{ VPROBE[url] = r.ok; cb(r.ok); })
+    .catch(()=>{ VPROBE[url] = false; cb(false); });
+}
+
+function VIDEOBLOCK(id){
+  const t = T[id]; if(!t || !t.lectures || !t.lectures.length) return '';
+  const rows = t.lectures.map(l=>{
+    const s = VID.sections.find(x=>x.cid===l.cid && String(x.sec)===String(l.sec));
+    if(!s) return '';
+    return `<div style="display:flex;gap:12px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line)">
+      <div class="poster" style="width:112px;height:63px;border-radius:8px;border:1px solid var(--line);
+        flex:0 0 112px;overflow:hidden;background:var(--surface3);position:relative">
+        <span style="position:absolute;inset:0;display:grid;place-items:center;
+          font-size:11.5px;color:var(--muted)">第 ${s.lec} 讲</span>
+        <img src="${s.poster}" alt="" loading="lazy" onerror="this.style.display='none'"
+          style="position:relative;width:100%;height:100%;object-fit:cover">
+      </div>
+      <div style="min-width:0">
+        <div style="font-size:14px">第 ${s.lec} 讲 · ${s.title}</div>
+        <div style="font-size:12px;color:var(--muted)">${fmtT(s.t0)} – ${fmtT(s.t1)} · ${Math.round((s.t1-s.t0)/60)} 分钟${s.clip?' · 已切片':''}　${(s.summary||'').slice(0,34)}</div>
+      </div>
+      <button class="btn sm pri" style="margin-left:auto" onclick="playSection('${s.cid}','${s.sec}')">▶ 播放这一段</button>
+      <div id="vna${s.cid}_${String(s.sec).replace(/[^0-9a-zA-Z]/g,'')}" style="display:none;font-size:12px;
+        color:var(--muted);margin-left:auto">线上版不含视频切片（6.3 GB），请用本地版观看</div>
+    </div>`;}).join('');
+  return `<div class="card"><span class="chip b">视频讲解</span>
+    <span style="font-size:13px;color:var(--muted)">点一下就在页面里播那一段（到本节结束自动停）</span>
+    <div id="vbox" style="display:none;margin:12px 0 6px">
+      <div style="font-size:13px;margin-bottom:6px"><b id="vtitle"></b>
+        <span id="vrange" style="color:var(--muted);margin-left:8px"></span></div>
+      <video id="vplayer" controls preload="metadata" playsinline
+        style="width:100%;max-height:440px;border-radius:12px;background:#000;border:1px solid var(--line)"></video>
+    </div>
+    <div style="margin-top:8px">${rows || '<div class="empty">这一节没挂到视频片段</div>'}</div>
+  </div>`;
+}
+
+/* ---- 讲义正文的轻量渲染（标题/列表/表格/公式），够用且不引依赖 ---- */
+function mdBlock(text){
+  const out = []; let tbl = [];
+  const flushTbl = () => {
+    if(!tbl.length) return;
+    const rows = tbl.filter(r=>!/^\s*\|?[\s:\-|]+\|?\s*$/.test(r)).map(r=>r.replace(/^\s*\|/,'').replace(/\|\s*$/,'').split('|'));
+    if(rows.length){
+      out.push('<div style="overflow-x:auto"><table style="margin:8px 0">' +
+        rows.map((c,i)=>'<tr>'+c.map(x=>`<${i?'td':'th'}>${rich(x.trim())}</${i?'td':'th'}>`).join('')+'</tr>').join('') +
+        '</table></div>');
+    }
+    tbl = [];
+  };
+  for(const raw of String(text||'').split('\n')){
+    const l = raw.replace(/\s+$/,'');
+    if(/^\s*\|.*\|\s*$/.test(l)){ tbl.push(l); continue; }
+    flushTbl();
+    if(!l.trim()){ continue; }
+    if(/^#{1,6}\s/.test(l)){ out.push(`<div style="font-weight:600;margin:14px 0 4px;color:var(--ink)">${rich(l.replace(/^#+\s*/,''))}</div>`); continue; }
+    if(/^\s*[-*•]\s+/.test(l)){ out.push(`<div style="padding-left:14px;position:relative"><span style="position:absolute;left:2px;color:var(--muted)">•</span>${rich(l.replace(/^\s*[-*•]\s+/,''))}</div>`); continue; }
+    if(/^\s*\d+[.、)]\s+/.test(l)){ out.push(`<div style="padding-left:6px">${rich(l)}</div>`); continue; }
+    out.push(`<div style="margin:6px 0">${rich(l)}</div>`);
+  }
+  flushTbl();
+  return out.join('');
+}
+/* ---- 知识卡（模型从讲义原文合成）---- */
+function CARDBLOCK(id){
+  const c = (D.cards||{})[id];
+  if(!c) return '';
+  const sec = (title, arr, render) => (arr&&arr.length) ? `<div style="margin:12px 0">
+      <div style="font-weight:600;font-size:13.5px;color:var(--p-ink);margin-bottom:6px">${title}</div>
+      ${arr.map(render).join('')}</div>` : '';
+  return `<div class="card"><span class="chip g">知识卡</span>
+    <span style="font-size:13px;color:var(--muted)">由老师讲义原文整理</span>
+    ${c.essence?`<div style="margin:10px 0;padding:11px 14px;background:var(--p-soft);border-radius:10px;color:var(--p-ink)"><b>一句话本质：</b>${rich(c.essence)}</div>`:''}
+    ${sec('定义', c.definitions, d=>`<div style="margin:6px 0"><b>${rich(d.name||'')}</b>　${rich(d.statement||'')}</div>`)}
+    ${sec('定理', c.theorems, d=>`<div style="margin:6px 0"><b>${rich(d.name||'')}</b>　${rich(d.statement||'')}${d.conditions?`<div style="font-size:12.5px;color:var(--muted)">成立条件：${rich(d.conditions)}</div>`:''}</div>`)}
+    ${sec('核心公式', c.formulas, f=>`<div style="margin:7px 0;padding:9px 12px;background:var(--surface2);border-radius:10px">
+        <div>${rich(f.latex||'')}</div><div style="font-size:12.5px;color:var(--muted)">${rich(f.name||'')}${f.note?' ｜ '+rich(f.note):''}</div></div>`)}
+    ${sec('例题', c.examples, e=>`<div style="margin:9px 0;padding:11px 13px;border-left:3px solid var(--info);background:var(--surface2);border-radius:0 10px 10px 0">
+        <div>${rich(e.stem||'')}</div>
+        ${(e.steps||[]).length?`<ol style="margin:6px 0 0 18px;padding:0">${e.steps.map(s=>`<li>${rich(s)}</li>`).join('')}</ol>`:''}
+        ${e.answer?`<div style="margin-top:6px;color:var(--ok-ink)"><b>答案：</b>${rich(e.answer)}</div>`:''}</div>`)}
+    ${sec('易错', c.pitfalls, x=>`<div style="margin:5px 0;padding-left:14px;position:relative"><span style="position:absolute;left:0;color:var(--bad)">!</span>${rich(x)}</div>`)}
+    ${sec('老师的话', c.quotes, x=>`<div style="margin:6px 0;padding:9px 12px;background:var(--warn-soft);border-radius:10px;color:var(--warn-ink)">${rich(x)}</div>`)}
+  </div>`;
+}
+/* ---- 教材对应章节（工科数学分析 上）----
+   映射是**人工核对**过的（见 build_textbook_map.py 的 TOPIC_FIX），不走自动分类：
+   实测自动分类在这份扫描教材上会串。价值：教材=标准表述 / 讲义=老师怎么讲 /
+   真题=考试怎么考，一个知识点页里三种视角对照。 */
+function TEXTBOOK(id){
+  const tb = (window.__TEXTBOOK__||{})[id] || [];
+  if(!tb.length) return '';
+  return `<div class="card">
+    <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:4px;flex-wrap:wrap">
+      <span class="chip b">📖 教材对应</span>
+      <span style="font-size:13px;color:var(--muted)">工科数学分析 上（哈工大版）· 点开看教材原文</span>
+    </div>
+    ${tb.map(s=>`<details class="treegrp"><summary><b>${esc(s.label)}</b>　${esc(s.name)}
+      <span style="color:var(--muted);font-size:12px;font-weight:400">教材 p${s.pages[0]}–${s.pages[1]}</span></summary>
+      <div style="padding:6px 16px 14px">${mdBlock(s.md||'')}</div></details>`).join('')}
+  </div>`;
+}
+
+/* ---- 讲义原文（可折叠）---- */
+function SOURCEBLOCK(id){
+  const s = (window.__SOURCES__||{})[id];
+  if(!s || !s.pages || !s.pages.length) return '';
+  return `<details class="treegrp"><summary>老师讲义原文 · ${s.pages.length} 页
+    <span style="color:var(--muted);font-size:12px;font-weight:400">（点开对照）</span></summary>
+    <div style="padding:6px 16px 14px">
+    ${s.pages.map(p=>`<div style="margin:12px 0;padding-top:10px;border-top:1px solid var(--line)">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:4px">${esc(p.file)} · ${esc(p.page)}${p.title?' · '+esc(p.title):''}</div>
+        ${mdBlock(p.md)}</div>`).join('')}</div></details>`;
+}
+
+/* 复核状态徽章：official/dual/proof 都是"可信"，conflict 才标红，pending 是琥珀 */
+function VCHIP(q){
+  const b = (q.verified||{}).by || (q.answer?'official':'pending');
+  /* 可信度分级很重要：官方答案 > 双路一致 > 老师原解 > 仲裁定案 > 存疑。
+     仲裁是"第三方裁判"，比存疑强、但不能当成官方答案。 */
+  /* resolved = 人工/独立验算定案（比双路投票更硬：实测 13 道冲突里 9 道是"两路都错"）*/
+  const map = {official:['g','官方答案'], dual:['g','双路一致 ✓'], proof:['b','双路已证'],
+               resolved:['g','独立验算'], teacher:['m','老师讲的'], arbitrated:['b','仲裁定案'],
+               near:['r','两路表述不同'], conflict:['d','⚠ 两路不一致'], pending:['r','待复核']};
+  const [cls,txt] = map[b] || map.pending;
+  return `<span class="chip ${cls}" title="答案来源">${txt}</span>`;
+}
+/* 首页六大入口：以"我想干什么"为纲 —— 这是整个应用的设计核心 */
+const GOALS = [
+  {k:'mid',    ico:'🎯', name:'期中复习', hint:'前半程 + 真题频次'},
+  {k:'final',  ico:'🎯', name:'期末复习', hint:'全册'},
+  {k:'topics', ico:'📚', name:'按知识点学', hint:'只学我要的那块'},
+  {k:'types',  ico:'🧩', name:'按题型练', hint:'选择/填空/计算/证明'},
+  {k:'wrong',  ico:'❌', name:'错题本', hint:'连对 2 次移出'},
+  {k:'exam',   ico:'📝', name:'真题模拟', hint:'按年份整卷'},
+];
+
+/* 举一反三：三层，全部**优先用真实材料**（用户要求：宋浩/老师例题能用就用，真题最重要）
+   ① 同类真题 —— 考试就考这些
+   ② 宋浩 · 老师例题 —— 含老师讲过的多种解法
+   ③ AI 生成变式 —— 仅作补充，明确标注 */
+function VARIANTS(q){
+  const r = (D.related||{})[q.id] || {};
+  /* ⚠️ 必须把"学生刚做的这道题自己"剔除掉。
+     找茬智能体实测：做完一道题，下面的「③ AI 生成变式」里印的就是**同一道题**
+     （因为变式是从原题生成的，related 表里把自己也放进去了）—— 学生看到会以为
+     "举一反三"是骗人的 ✗。三层一起过滤，按 id 精确比。 */
+  const _me = String(q.id||'');
+  const _drop = arr => (arr||[]).filter(x => String((x&&x.id)||'') !== _me);
+  const exams = _drop(r.exam), lec = _drop(r.lecture), ai = _drop(r.ai);
+  if(!exams.length && !lec.length && !ai.length) return '';
+  const blk = (title, hint, color, body) => body ? `
+    <div style="margin-top:10px">
+      <div style="font-size:13px;font-weight:600;color:${color};margin-bottom:5px">${title}
+        <span style="font-weight:400;color:var(--muted);font-size:12px">${hint}</span></div>
+      ${body}</div>` : '';
+
+  const examBody = exams.map(x=>`
+    <div class="rel">
+      <div style="display:flex;gap:6px;align-items:baseline">
+        <span class="chip b">${esc((x.source||{}).year||'')}${(x.source||{}).term?(' · '+esc(x.source.term)):''}</span>
+        ${x.pts?`<span class="chip m">${x.pts} 分</span>`:''}
+        <button class="btn xs" onclick="goQ('${x.id}')">看这道题</button>
+      </div>
+      <div class="relstem">${rich(x.stem)}</div>
+    </div>`).join('');
+
+  const lecBody = lec.map(x=>`
+    <div class="rel">
+      <div style="display:flex;gap:6px;align-items:baseline;flex-wrap:wrap">
+        <span class="chip m">${esc(String((x.source&&x.source.file)||(x.source||'')).slice(0,22)||'例题')}</span>
+        ${(x.methods||[]).length>1?`<span class="chip g">含 ${x.methods.length} 种解法</span>`:''}
+        <button class="btn xs" onclick="goQ('${x.id}')">看这道题</button>
+      </div>
+      <div class="relstem">${rich(x.stem)}</div>
+    </div>`).join('');
+
+  const aiBody = ai.map(v=>`
+    <div class="rel"><div class="relstem">${rich(v.stem||v.q||v)}</div></div>`).join('');
+
+  return `<div style="margin-top:12px;padding-top:10px;border-top:1px dashed var(--line)">
+    <b style="font-size:13.5px">举一反三</b>
+    ${blk('① 同类真题', '与其同一考点、不同年份（考试就考这些）', 'var(--ok-ink)', examBody)}
+    ${blk('② 宋浩 · 老师例题', '真实例题，含老师讲的解法', 'var(--warn-ink)', lecBody)}
+    ${blk('③ AI 生成变式', '前两层不够时补充，非真题', 'var(--muted)', aiBody)}
+  </div>`;
+}
+function renderSide(){
+  document.getElementById('goals').innerHTML = GOALS.map(g=>
+    `<button class="goal ${S.goal===g.k?'on':''}" onclick="go('${g.k}')">
+       <span class="ico">${g.ico}</span><span>${g.name}<br>
+       <small style="color:var(--muted);font-size:11.5px">${g.hint}</small></span></button>`).join('');
+  const ids=D.topics.map(t=>t.id), lv=ids.map(mlevel);
+  const done=lv.filter(x=>x>=2).length;
+  const pct=ids.length?Math.round(done/ids.length*100):0;
+  document.getElementById('pbar').style.width=pct+'%';
+  document.getElementById('pnum').textContent=`${done} / ${ids.length} 知识点`;
+  document.getElementById('ppct').textContent=pct+'%';
+  document.getElementById('qdone').textContent=Object.keys(S.done).length;
+  document.getElementById('qwrong').textContent=Object.keys(S.wrong).length;
+  const yrs=new Set(D.questions.map(q=>q.source.year).filter(Boolean));
+  document.getElementById('stat').innerHTML=
+    `题目 <b>${D.questions.length}</b> 道 ｜ 知识点 <b>${D.topics.length}</b> 个<br>
+     真题年份 <b>${yrs.size}</b> 个 ｜ 已挂视频节 <b>${D.topics.filter(t=>t.lectures.length).length}</b> 点`;
+}
+/* ===== 视图 ===== */
+
+/* ---- 分享：复制当前页链接（用户要把站发给同学用）---- */
+function copyLink(btn){
+  const url = location.href;
+  const done = () => toast('链接已复制，发给同学就能直接打开这一页');
+  try{
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(url).then(done, () => fallback());
+    } else fallback();
+  }catch(e){ fallback(); }
+  function fallback(){                       // 老浏览器/非 https 时的兜底
+    const ta = document.createElement('textarea');
+    ta.value = url; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select();
+    try{ document.execCommand('copy'); done(); }catch(e){ prompt('手动复制这个链接：', url); }
+    ta.remove();
+  }
+}
+let _toastT = null;
+function toast(msg){
+  let el = document.getElementById('_toast');
+  if(!el){
+    el = document.createElement('div'); el.id='_toast';
+    el.style.cssText = 'position:fixed;left:50%;bottom:28px;transform:translateX(-50%);' +
+      'background:#22211e;color:#fff;padding:10px 16px;border-radius:10px;font-size:13.5px;' +
+      'z-index:99;box-shadow:0 6px 20px rgba(0,0,0,.25);opacity:0;transition:opacity .2s';
+    document.body.appendChild(el);
+  }
+  el.textContent = msg; el.style.opacity = '1';
+  clearTimeout(_toastT); _toastT = setTimeout(()=>{ el.style.opacity='0'; }, 2200);
+}
+
+function go(k){
+  S.goal=k; save();
+  // 用户友好：① 把当前页写进 URL（可复制分享、浏览器返回键可用）
+  //           ② 切页回到顶部（否则点进新页会停在中间，像"没反应"）
+  try{ if(location.hash !== '#'+k) history.pushState(null,'','#'+k); }catch(e){}
+  window.scrollTo(0,0);
+  render();
+}
+/* 手打/分享的常见写法也认（#topics、#期中、#错题 …）→ 都能直达 */
+const HASH_ALIAS = {知识点:'topics', 章节:'topics', 题型:'types', 错题:'wrong', 错题本:'wrong',
+  期中:'mid', 期末:'final', 模拟:'exam', 首页:'', home:'', topic:'topics', drill:'types'};
+function midTopics(){       // 期中范围：按册次顺序切到设定分界（默认到第二章末）
+  const cut=D.topics.findIndex(t=>t.id===S.midCut);
+  return D.topics.slice(0, cut<0?D.topics.length:cut+1).filter(t=>!t.chapter.startsWith('下册'));
+}
+function scopeTopics(){
+  if(S.goal==='mid') return midTopics();
+  return D.topics.filter(t=>!t.chapter.startsWith('下册'));
+}
+function statsFor(ids){
+  return ids.map(id=>{
+    const qs=QS().filter(q=>q.topic===id);
+    const pts=qs.reduce((a,q)=>a+(typeof q.points==='number'?q.points:0),0);
+    const yrs=[...new Set(qs.map(q=>q.source.year).filter(Boolean))];
+    return {id, name:(T[id]||{}).name||id, n:qs.length, pts, yrs, lv:mlevel(id)};
+  }).filter(x=>x.n>0).sort((a,b)=>b.n-a.n||b.pts-a.pts);
+}
+const LV=['未学','学过','会做','熟练'];
+/* ⚠️ 键名要有唯一真源：侧栏 GOALS 用的是 topics/types，
+   而分支里曾写 'topic'/'drill' —— 两处不一致，导致**「按知识点学」和「按题型练」
+   点进去落到兜底分支**（看起来像点不动）。现在统一在这里做一次归一，
+   两种写法都认，以后改名只需改这一处。 */
+const GOAL_CANON = {topics:'topic', types:'drill'};
+function render(){
+  const v=document.getElementById('view');
+  const g = GOAL_CANON[S.goal] || S.goal;
+  if(!g){ v.innerHTML=homeHTML(); return; }
+  if(g==='topic') return v.innerHTML=topicHTML(), void 0;
+  if(g==='drill') return v.innerHTML=drillHTML(), void 0;
+  if(g==='wrong') return v.innerHTML=wrongHTML(), void 0;
+  if(g==='exam')  return v.innerHTML=examHTML(), void 0;
+  v.innerHTML=reviewHTML(g);
+}
+function homeHTML(){
+  return `<h1>我想干什么？</h1>
+  <p class="lead">选一个目标，我直接给你那个目标该学的东西 —— 不用翻整本书。</p>
+  ${S.hideGuide ? `<div style="text-align:right;margin:-6px 0 8px">
+      <button class="btn sm ghost" onclick="S.hideGuide=0;save();render()">显示使用说明</button></div>`
+    : `<div class="card" style="background:var(--ok-soft,#eef4ef);border-color:#d8e4da">
+    <div style="display:flex;gap:9px;align-items:flex-start">
+      <span style="font-size:18px">👋</span>
+      <div style="min-width:0">
+        <div style="font-weight:600;margin-bottom:5px">第一次用？三步就够了</div>
+        <div style="font-size:13.5px;line-height:2;color:var(--ink2)">
+          <b>1</b> 上面挑一个目标 —— 比如考试近了就点「期中复习」，它按<b>真题出现次数</b>排好先后；<br>
+          <b>2</b> 想自己选就点「📚 按知识点学」—— 可按<b>教材章节顺序</b>走，也能勾选<b>自己挑几个</b>连着学；<br>
+          <b>3</b> 每个知识点里都有：<b>视频片段 · 知识卡 · 讲义原文 · 教材对应 · 交互演示 · 真题</b>（含解析）。<br>
+          <span style="color:var(--muted)">做错的题会自动进「错题本」，连对 2 次自动移出；顶部「🔗 分享这一页」可把当前页发给同学。</span>
+        </div>
+        <div style="margin-top:9px">
+          <button class="btn sm" onclick="S.hideGuide=1;save();render()">知道了，不再显示</button>
+        </div>
+      </div></div></div>`}
+  ${(S.last && T[S.last]) ? `<div class="card" style="display:flex;gap:10px;align-items:center">
+    <span style="font-size:13.5px;color:var(--muted)">上次学到</span>
+    <b>${T[S.last].name}</b>
+    <span style="flex:1"></span>
+    <button class="btn pri" onclick="learn('${S.last}')">继续学这一块</button>
+    <button class="btn" onclick="drillTopic('${S.last}')">练它的题</button>
+  </div>` : ''}
+  <div class="two">
+    ${GOALS.map(g=>`<div class="card gcard" role="button" tabindex="0"
+      onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();go('${g.k}')}"
+      onclick="go('${g.k}')">
+      <span class="gi">${g.ico}</span>
+      <span><b>${g.name}</b><br><small>${g.hint}</small></span></div>`).join('')}
+  </div>
+  <h2>数据底座</h2>
+  <div class="card">
+    <p style="margin:0 0 8px">题库来自 <b>中国海洋大学历年真题</b>（2012–2024，上册 I-1），每题都标了来源：哪一年、哪一卷、第几题、几分。
+    考点重要性不靠感觉，靠真题出现频次统计。</p>
+    <div class="kv"><span>题目</span><b>${QS().length} 道</b></div>
+    <div class="kv"><span>有官方答案</span><b>${QS().filter(q=>q.answer).length} 道</b></div>
+    <div class="kv"><span>知识点</span><b>${D.topics.length} 个 / ${D.chapters.length} 章</b></div>
+    <div class="kv"><span>视频节对齐</span><b>${D.topics.reduce((a,t)=>a+t.lectures.length,0)} 节（可跳时间码）</b></div>
+  </div>`;
+}
+/* 目标复习页：考点频次表 + 必刷题 */
+function reviewHTML(goal){
+  const ids=scopeTopics().map(t=>t.id), st=statsFor(ids);
+  const isMid=goal==='mid';
+  const cutName=(T[S.midCut]||{}).name||'';
+  const must=st.slice(0,8).map(s=>{
+    const qs=QS().filter(q=>q.topic===s.id).sort((a,b)=>(b.points||0)-(a.points||0));
+    return qs[0];
+  }).filter(Boolean);
+  return `<h1>${isMid?'期中复习':'期末复习'}</h1>
+  <p class="lead">${isMid
+    ? `范围：<b>前半程</b>（到「${cutName}」为止，共 ${ids.length} 个知识点）。下面按<b>真题出现频次</b>排序——频次高的先学。`
+    : `范围：<b>全册</b>（${ids.length} 个知识点），按真题频次排序。`}</p>
+  ${isMid?`<div class="card"><span class="chip m">范围可调</span>
+    <span style="font-size:13.5px">期中分界：</span>
+    <select class="tin" style="width:auto;display:inline-block" onchange="S.midCut=this.value;save();render()">
+      ${D.topics.filter(t=>!t.chapter.startsWith('下册')).map(t=>
+        `<option value="${t.id}" ${t.id===S.midCut?'selected':''}>到 ${t.name} 为止</option>`).join('')}
+    </select>
+    <div style="color:var(--muted);font-size:12.5px;margin-top:6px">
+      依据：海大历年期中卷的切法（下册期中止于重积分一线），上册对应前半册。</div></div>`:''}
+  ${(()=>{
+    // 学生视角的必要提示：光排序不够，得直说"先干哪三个"。
+    // 估算用时按每个知识点 ≈40 分钟（含看讲解+做几道题），只是量级参考。
+    const top = st.slice(0,3), restN = Math.max(0, st.length-3);
+    if(!top.length) return '';
+    const mins = n => n>=60 ? (n/60).toFixed(n%60?1:0)+' 小时' : n+' 分钟';
+    return `<div class="card" style="border-left:4px solid var(--ok,#5c8a6a);background:var(--ok-soft,#e6f0e9)">
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <b style="font-size:15px">🎯 先啃这三个</b>
+      <span style="font-size:12.5px;color:var(--muted)">真题出现次数最高 —— 先把这几块的分拿到手</span>
+    </div>
+    <div style="margin-top:9px;display:flex;flex-direction:column;gap:7px">
+      ${top.map((s,i)=>`<div style="display:flex;gap:9px;align-items:center;flex-wrap:wrap">
+        <span style="display:inline-block;width:19px;height:19px;line-height:19px;text-align:center;border-radius:99px;background:var(--ok,#5c8a6a);color:#fff;font-size:12px;flex:0 0 19px">${i+1}</span>
+        <b style="font-size:13.5px">${s.name}</b>
+        <span style="font-size:12px;color:var(--muted)">${s.n} 题${s.pts>0?' · '+s.pts+' 分':''} · 约 40 分钟</span>
+        <span style="flex:1"></span>
+        <button class="btn sm" onclick="learn('${s.id}')">开始学</button>
+        <button class="btn sm pri" onclick="drillTopic('${s.id}')">直接练</button>
+      </div>`).join('')}
+    </div>
+    <div style="margin-top:9px;font-size:12.5px;color:var(--muted)">
+      这三个点约 2 小时；剩下 ${restN} 个点再花约 ${mins(restN*40)}。想自己挑就点侧栏「📚 按知识点学」。
+    </div></div>`;
+  })()}
+  <h2>考点频次（真题实证）</h2>
+  <div class="card" style="padding:6px 10px">
+  <table><thead><tr><th>知识点</th><th class="num">题数</th><th class="num">总分</th><th class="yr">年份</th><th>掌握</th><th></th></tr></thead><tbody>
+  ${st.map(s=>`<tr><td><b>${s.name}</b><br><span style="color:var(--muted);font-size:12px">${(T[s.id]||{}).chapter||''}</span></td>
+    <td class="num"><span class="freq" style="width:${Math.min(56,s.n*6)}px"></span> ${s.n}</td><td class="num">${s.pts>0?s.pts:'—'}</td>
+    <td class="yr" style="font-size:12px;color:var(--muted)">${s.yrs.filter(y=>y&&y!=='未知').sort().join(' · ')||'—'}</td>
+    <td><span class="dot l${s.lv}"></span> ${LV[s.lv]}</td>
+    <td style="white-space:nowrap"><button class="btn sm" onclick="learn('${s.id}')">学</button>
+      <button class="btn sm pri" onclick="drillTopic('${s.id}')">练</button></td></tr>`).join('')
+    || '<tr><td colspan="6" class="empty">该范围内暂无真题命中</td></tr>'}
+  </tbody></table></div>
+  <h2>必刷题（按分值挑出的高频点首题）</h2>
+  ${must.map(q=>qHTML(q,true)).join('')||'<div class="empty">暂无</div>'}`;
+}
+/* ================= 按知识点学：**顺序可选 + 自由勾选** =================
+   用户要求（原话）："学习模块可以新增一个按照章节顺序区分，可以自主选择，
+   不一定要按照考点频次，这应该是要给我们自己选的" ——
+   · 📖 教材章节顺序（默认）：跟教材走，标出对应 §小节 与页码
+   · 🔥 真题频次：按真题题数排序（原来的样子）
+   · 每行可勾选 → 只学自己挑的那几个（不被频次绑架），勾完一键连着学
+   勾选状态存 localStorage，刷新不丢。 */
+window.__PICK__ = window.__PICK__ || (function(){
+  try{ return JSON.parse(localStorage.getItem('pick_topics')||'{}'); }catch(e){ return {}; }
+})();
+window.__ORDER__ = window.__ORDER__ || (localStorage.getItem('topic_order') || 'chapter');
+function pickSave(){
+  try{ localStorage.setItem('pick_topics', JSON.stringify(window.__PICK__)); }catch(e){}
+}
+function pickTopic(id, on){
+  if(on) window.__PICK__[id]=1; else delete window.__PICK__[id];
+  pickSave(); pickCount();
+}
+function pickCount(){
+  const n = Object.keys(window.__PICK__).length;
+  const b = document.getElementById('pickbar');
+  if(b) b.textContent = n ? `已勾选 ${n} 个` : '还没勾选';
+  const btn = document.getElementById('pickgo');
+  if(btn){ btn.disabled = !n; btn.style.opacity = n?1:.45; btn.textContent = n?`开始学这 ${n} 个（按章节顺序）`:'开始学勾选的'; }
+}
+function setOrder(o){
+  window.__ORDER__ = o;
+  try{ localStorage.setItem('topic_order', o); }catch(e){}
+  render();
+}
+function pickAll(ch, on){
+  D.topics.filter(t=>!ch || t.chapter===ch).forEach(t=>{ if(on) window.__PICK__[t.id]=1; else delete window.__PICK__[t.id]; });
+  pickSave(); render();
+}
+function bookOf(id){
+  const tb = (window.__TEXTBOOK__||{})[id];
+  if(!tb || !tb.length) return '';
+  const s = tb[0];
+  const pg = (s.pages && s.pages.length) ? ` p${s.pages[0]}${s.pages[1]>s.pages[0]?'–'+s.pages[1]:''}` : '';
+  return `<span class="pill" style="background:var(--info-soft,#eef2f7)">📖 教材 ${s.label}${pg}</span>`;
+}
+function topicHTML(){
+  const freq = id => (statsFor([id])[0]||{n:0,pts:0});
+  const chs = [...new Set(D.topics.map(t=>t.chapter))];   // 已是教材顺序（第一→六章→下册）
+  const byFreq = [...D.topics].sort((a,b)=>freq(b.id).n-freq(a.id).n);
+  const PICKED = Object.keys(window.__PICK__).length;
+  const bar = `<div class="card" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;padding:12px 15px">
+    <span style="font-size:13px;color:var(--muted)">怎么排：</span>
+    <button class="btn sm ${window.__ORDER__==='chapter'?'pri':''}" onclick="setOrder('chapter')">📖 教材章节顺序</button>
+    <button class="btn sm ${window.__ORDER__==='freq'?'pri':''}" onclick="setOrder('freq')">🔥 真题频次</button>
+    <span style="flex:1"></span>
+    <span id="pickbar" style="font-size:13px;color:var(--muted)"></span>
+    <button class="btn sm ghost" onclick="pickAll(null,false)">清空勾选</button>
+    <button class="btn sm pri" id="pickgo" onclick="studyPicked()">开始学勾选的</button>
+  </div>`;
+  let body = '';
+  if(window.__ORDER__==='freq'){
+    body = `<details class="treegrp" open><summary>🔥 按真题出现次数排序 <span style="color:var(--muted);font-size:12.5px">· 考得多的排前面（适合冲刺）</span></summary>
+      ${byFreq.map(t=>{const st=freq(t.id); return rowHTML(t, st, true);}).join('')}</details>`;
+  } else {
+    body = chs.map(ch=>{
+      const ts = D.topics.filter(t=>t.chapter===ch);
+      const open = ch.includes('第一章')||ch.includes('第二章');
+      return `<details class="treegrp" ${open?'open':''}>
+        <summary>${ch} <span style="color:var(--muted);font-size:12.5px">· ${ts.length} 知识点</span>
+          <span style="float:right;font-size:12px;color:var(--muted);cursor:pointer"
+            onclick="event.preventDefault();event.stopPropagation();pickAll('${ch}',true)">全选本章</span></summary>
+        ${ts.map(t=>rowHTML(t, freq(t.id), false)).join('')}</details>`;
+    }).join('');
+  }
+  setTimeout(pickCount, 0);
+  return `<h1>按知识点学</h1>
+  <p class="lead">可以<b>按教材章节顺序</b>走，也可以<b>按真题频次</b>排；想学哪几个就勾哪几个 —— 自己挑。</p>
+  ${SRCHBOX()}${bar}${body}
+  ${PICKED?`<div class="card"><span class="chip g">学习清单</span>
+    <span style="font-size:13px;color:var(--muted)">已勾选 ${PICKED} 个，点上面的按钮按章节顺序连着学</span></div>`:''}`;
+}
+/* ============ 搜索框（找茬智能体建议："1615 道题没有检索 = 题库等于不存在"）============
+   学生真实动作："我想找洛必达" / "上次那个 ε-δ 在哪" / "旋转体体积怎么算"。
+   零成本实现：每行带 data-search（名字/章节/一句话本质/比喻/教材小节），
+   输入时实时过滤，并把空掉的章节标题一起收起。 */
+function SRCHBOX(){
+  return `<div class="card" style="padding:11px 14px;display:flex;align-items:center;gap:9px;flex-wrap:wrap">
+    <span style="font-size:15px">🔍</span>
+    <input id="topicq" placeholder="搜知识点 —— 洛必达 / 等价无穷小 / 旋转体体积 / 定积分…"
+      oninput="filterTopics(this.value)"
+      style="flex:1 1 220px;min-width:0;border:1px solid var(--line);border-radius:9px;
+        padding:8px 11px;font-size:14px;background:var(--surface);color:var(--ink)"
+      aria-label="搜索知识点">
+    <span id="topicq_n" style="font-size:12.5px;color:var(--muted);white-space:nowrap"></span>
+    <button class="btn sm ghost" onclick="document.getElementById('topicq').value='';filterTopics('')">清空</button>
+  </div>`;
+}
+function filterTopics(kw){
+  const q = String(kw||'').trim().toLowerCase();
+  let shown = 0, total = 0;
+  document.querySelectorAll('#view .trow').forEach(row=>{
+    total++;
+    const hit = !q || String(row.dataset.search||'').toLowerCase().includes(q);
+    row.style.display = hit ? '' : 'none';
+    if(hit) shown++;
+  });
+  document.querySelectorAll('#view .treegrp').forEach(g=>{
+    const any = [].some.call(g.querySelectorAll('.trow'), r=>r.style.display !== 'none');
+    g.style.display = any ? '' : 'none';            // 本章全被过滤掉就把章节也收起来
+  });
+  const el = document.getElementById('topicq_n');
+  if(el) el.textContent = q ? (shown + ' / ' + total + ' 个知识点') : '';
+}
+function rowHTML(t, st, showChapter){
+  const on = !!window.__PICK__[t.id];
+  /* data-search：给搜索框用。把"学生可能输入的词"都放进来 ——
+     知识点名、章节、一句话本质、教材小节、苏浩/老师讲义标题里的关键词。
+     找茬智能体指出"1615 道题没有检索 = 题库等于不存在"，这是最小可用版。 */
+  const _it = (D.intuition||{})[t.id] || {};
+  const _tb = (typeof TEXTBOOK_SECTION === 'function' ? String(TEXTBOOK_SECTION(t.id)||'') : '');
+  /* 索引必须包含**公式名与定理名**，否则学生按"旋转体体积"这种书上小节名搜不到
+     （实测：只放名字+比喻时搜"旋转体"命中 0 ✗）。卡片的公式名/定理名/例题题干
+     正是学生记得住的词。 */
+  const _c = (D.cards||{})[t.id] || {};
+  const _names = [].concat(_c.formulas||[], _c.theorems||[], _c.definitions||[])
+                   .map(x=>String((x&&x.name)||'')).join(' ');
+  const _ex = (_c.examples||[]).map(e=>String((e&&e.stem)||'').slice(0,80)).join(' ');
+  const _srch = [t.id, t.name, t.chapter, _it.analogy||'', _it.why||'', _tb,
+                 (t.canonical||[]).join(' '), _names, _ex].join(' ').replace(/"/g,' ');
+  return `<div class="trow" data-search="${esc(_srch)}" style="${on?'background:var(--ok-soft,#eef4ef);border-radius:9px':''}">
+    <input type="checkbox" ${on?'checked':''} onchange="pickTopic('${t.id}',this.checked)"
+      style="width:15px;height:15px;cursor:pointer;flex:0 0 auto" title="勾上它，之后可以只学勾选的">
+    <span class="dot l${mlevel(t.id)}"></span>
+    <span>${t.name}${showChapter?`<span style="color:var(--muted);font-size:12px"> · ${t.chapter}</span>`:''}</span>
+    ${bookOf(t.id)}
+    <span class="pill">${st.n?`真题 ${st.n} 题 · ${st.pts} 分`:'暂无真题'} ｜ 视频 ${t.lectures.length} 节</span>
+    ${(D.cards||{})[t.id] ? '<span class="chip g" style="margin:0">知识卡</span>' : ''}
+    ${(DEMOS[t.id]||[]).length ? '<span class="chip b" style="margin:0">可交互</span>' : ''}
+    <button class="btn sm" onclick="learn('${t.id}')">详情</button>
+    <button class="btn sm pri" onclick="drillTopic('${t.id}')">练</button></div>`;
+}
+/* 按勾选连着学：一条线走完自己挑的那几个（章节顺序，每点带一句话本质 + 入口） */
+function studyPicked(){
+  const ids = D.topics.filter(t=>window.__PICK__[t.id]).map(t=>t.id);
+  if(!ids.length) return;
+  const rows = ids.map((id,i)=>{
+    const t = T[id] || {};
+    const c = (D.cards||{})[id] || {};
+    const st = statsFor([id])[0] || {n:0, pts:0};
+    const tb = (window.__TEXTBOOK__||{})[id] || [];
+    return `<div style="display:flex;gap:12px;padding:13px 0;border-bottom:1px solid var(--line)">
+      <div style="flex:0 0 30px;font-weight:700;color:var(--muted)">${i+1}</div>
+      <div style="min-width:0;flex:1">
+        <div style="font-size:15px;font-weight:600;margin-bottom:3px">${t.name||id}
+          <span style="font-weight:400;color:var(--muted);font-size:12.5px">· ${t.chapter||''}</span></div>
+        ${c.essence?`<div style="font-size:13px;color:var(--ink2);margin:3px 0">💡 ${rich(c.essence)}</div>`:''}
+        <div style="margin-top:5px;display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+          ${tb[0]?`<span class="pill">📖 ${tb[0].label}｜教材 p${(tb[0].pages||[])[0]||'-'}</span>`:''}
+          <span class="pill">真题 ${st.n} 题${st.pts?' · '+st.pts+' 分':''}</span>
+          <span class="pill">视频 ${(t.lectures||[]).length} 节</span>
+          ${(DEMOS[id]||[]).length||(DEMOS[id]||[]).length?'<span class="chip b" style="margin:0">可交互</span>':''}
+        </div>
+      </div>
+      <div style="flex:0 0 auto;display:flex;flex-direction:column;gap:6px">
+        <button class="btn sm pri" onclick="learn('${id}')">打开这一块</button>
+        <button class="btn sm" onclick="drillTopic('${id}')">练这点的题</button></div></div>`;
+  }).join('');
+  document.getElementById('view').innerHTML = `
+    <button class="btn sm ghost" onclick="render()">← 返回</button>
+    <h1>我挑的学习清单</h1>
+    <p class="lead">共 ${ids.length} 个知识点，${(chaptersOf(ids)||[]).length} 个章节 —— 按章节顺序连着走。</p>
+    <div class="card">${rows}</div>
+    <div class="card" style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn pri" onclick="drillPicked()">把清单里的题连着练一遍（${ids.reduce((a,id)=>a+(statsFor([id])[0]||{n:0}).n,0)} 题）</button>
+      <button class="btn" onclick="pickAll(null,false);render()">清空重挑</button></div>`;
+}
+function chaptersOf(ids){
+  const s=new Set(); ids.forEach(id=>{ const t=T[id]; if(t&&t.chapter) s.add(t.chapter); }); return [...s];
+}
+function drillPicked(){
+  const ids = D.topics.filter(t=>window.__PICK__[t.id]).map(t=>t.id);
+  RUN = {list: QS().filter(q=>ids.includes(q.topic)), i:0};
+  if(!RUN.list.length){ alert('勾选的知识点里暂时没有题目'); return; }
+  renderRun();
+}
+/* ============ 学习路线：把"资料陈列"变成"教学" ============
+   用户实测评价：「学习知识点也起不到学习的作用」—— 原页面把视频/卡片/讲义/
+   教材/演示/真题**平铺成一列**，没有任何先后与节奏，学生不知道从哪看起、
+   看到什么程度算学会 ✗。
+   这里给出一条 4 步路线（先懂一句话 → 看它怎么动 → 看老师怎么讲 → 自己动手），
+   并显示"这一步要干什么、大概多久"，让学生有明确的下一步。 */
+/* ============ 先建立直觉（用户要的"形象的解释"）============
+   学生原话式反馈：「学习知识点起不到学习的作用」—— 因为一上来就是定义/定理/公式，
+   那是"把书搬上来"。这里在**看定义之前**先给：为什么要学它 + 一个生活比喻 + 常见卡点。
+   内容由 build_intuition.py 生成（提示词明确要求：intro 里不许出现任何公式符号）。 */
+function INTUITION(id){
+  const it = (D.intuition||{})[id];
+  if(!it || !it.intro) return '';
+  return `<div class="card" style="border-left:4px solid var(--info,#6b8899);background:#f2f6f8">
+    <div style="display:flex;gap:8px;align-items:baseline;flex-wrap:wrap">
+      <b style="font-size:14.5px">💡 先建立直觉</b>
+      <span style="font-size:12.5px;color:var(--muted)">看定义之前先读这段，30 秒</span>
+    </div>
+    ${it.why?`<div style="margin-top:8px;font-size:13.5px;color:var(--ink2)"><b>为什么非得学它：</b>${esc(it.why)}</div>`:''}
+    <div style="margin-top:8px;font-size:14px;line-height:1.95">${esc(it.intro)}</div>
+    ${it.analogy?`<div style="margin-top:9px;padding:9px 12px;background:#fff;border:1px dashed var(--line);
+      border-radius:9px;font-size:13.5px"><b>一句话记住：</b>${esc(it.analogy)}</div>`:''}
+    ${(it.stuck||[]).length?`<div style="margin-top:9px">
+      <div style="font-size:13px;font-weight:600;margin-bottom:4px">别人通常卡在这三处</div>
+      <ol style="margin:0 0 0 18px;padding:0;font-size:13px;color:var(--ink2);line-height:1.85">
+        ${it.stuck.map(x=>`<li>${esc(x)}</li>`).join('')}</ol></div>`:''}
+  </div>`;
+}
+function LEARNROUTE(id, t, qs){
+  const hasDemo = (DEMOS[id]||[]).length > 0;
+  const card = (D.cards||{})[id];
+  const nEx = card && card.examples ? card.examples.length : 0;
+  const nDef = card && card.definitions ? card.definitions.length : 0;
+  const nTh = card && card.theorems ? card.theorems.length : 0;
+  const nF = card && card.formulas ? card.formulas.length : 0;
+  const nQ = qs.length;
+  const done = S.learned && S.learned[id] ? 1 : 0;
+  /* ⚠️ 步骤列表要**按实际有的东西生成**，不能写死 4 步：
+     找茬实测发现（K10 求导法则）——原版在没有交互演示时，第 2 步标题写成
+     "看老师怎么讲 ·（这块暂无交互演示）直接看知识卡的定义与公式"，和第 3 步**同名**，
+     还把作者侧的占位说明漏到了学生脸上 ✗。现在：没有演示就是 3 步，缺料不占位。 */
+  const steps = [];
+  steps.push(['1', '先懂一句话',
+    card && card.essence ? card.essence : '看下面的「一句话本质」，30 秒建立直觉',
+    '约 1 分钟']);
+  if (hasDemo) {
+    steps.push(['2', '看它怎么动', '拖着滑块看结论怎么跟着变 —— 这一步把"记住"变成"看懂"', '约 3 分钟']);
+  }
+  const hasCards = nDef + nTh + nF > 0;
+  steps.push([String(steps.length + 1), hasCards ? '看定义与公式' : '看老师怎么讲',
+    hasCards ? `知识卡：${[nDef?nDef+' 个定义':null, nTh?nTh+' 条定理':null, nF?nF+' 个公式':null].filter(Boolean).join('、')}`
+               + (nEx ? `，加 ${nEx} 道例题的完整解法` : '')
+             : '把下面的知识卡与讲义原文过一遍',
+    '约 10 分钟']);
+  steps.push([String(steps.length + 1), '自己动手',
+    nQ ? `练 ${Math.min(5,nQ)} 道（这块共 ${nQ} 道可练）：做错自动进错题本，连对 2 次移出` : '这块暂时没有可练的题',
+    '约 15 分钟']);
+  return `<div class="card" style="border-left:4px solid var(--ok,#5c8a6a);background:var(--ok-soft,#e6f0e9)">
+    <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap">
+      <b style="font-size:15px">📖 这一块怎么学</b>
+      <span style="font-size:12.5px;color:var(--muted)">按 1→4 走一遍，约 30 分钟；不用全看完，卡住再回头查</span>
+      <span style="flex:1"></span>
+      <button class="btn sm pri" onclick="LEARNSTART('${id}','${nQ?'drill':'card'}')">
+        ${nQ?'直接开始练（跳过讲解）':'从头开始学'}</button>
+    </div>
+    <div style="margin-top:10px;display:flex;flex-direction:column;gap:7px">
+      ${steps.map(s=>`<div style="display:flex;gap:9px;align-items:flex-start">
+        <span style="display:inline-block;width:19px;height:19px;line-height:19px;text-align:center;
+          border-radius:99px;background:var(--ok,#5c8a6a);color:#fff;font-size:11.5px;flex:0 0 19px">${s[0]}</span>
+        <div style="min-width:0">
+          <b style="font-size:13.5px">${s[1]}</b>
+          <span style="font-size:12px;color:var(--muted)"> · ${s[3]}</span>
+          <div style="font-size:13px;color:var(--ink2);line-height:1.65">${s[2]}</div>
+        </div></div>`).join('')}
+    </div>
+  </div>`;
+}
+function LEARNSTART(id, where){
+  if(where==='drill'){ drillTopic(id); return; }
+  const v=document.getElementById('view');
+  window.scrollTo(0,0);
+  toast('从上面「① 一句话本质」往下读就行');
+}
+function learn(id){
+  try{ if(location.hash !== '#learn:'+id) history.pushState(null,'','#learn:'+id); }catch(e){}
+  window.scrollTo(0,0);
+  S.last = id; save();                       // 记住位置：首页可"继续上次"（跨天学习不迷路）
+  const t=T[id], qs=QS().filter(q=>q.topic===id);
+  document.getElementById('view').innerHTML=`
+    <button class="btn sm ghost" onclick="render()">← 返回</button>
+    <button class="btn sm" onclick="copyLink(this)" style="margin-left:6px"
+      title="复制这一页的链接，发给同学能直接打开">🔗 分享这一页</button>
+    <h1>${t.name}</h1><p class="lead">${t.chapter}</p>
+    ${LEARNROUTE(id, t, qs)}
+    ${INTUITION(id)}
+    ${VIDEOBLOCK(id)}
+    ${CARDBLOCK(id)}
+    ${SOURCEBLOCK(id)}
+    ${TEXTBOOK(id)}
+    ${(DEMOS[id]||[]).map(([f, cap]) => `<div class="card" style="padding:0;overflow:hidden">
+      <div style="padding:12px 15px 0"><span class="chip b">交互演示</span>
+        <span style="font-size:13.5px">${cap}</span></div>
+      <iframe src="demos/${f}" style="width:100%;height:520px;border:0;display:block"
+        loading="lazy" title="交互演示"></iframe></div>`).join('')}
+    <div class="card"><span class="chip g">这个点的真题</span>
+      ${qs.length?qs.map(q=>qHTML(q)).join(''):'<div class="empty">暂无真题命中</div>'}</div>
+    <button class="btn pri" onclick="drillTopic('${id}')">只练这个知识点</button>`;
+  initPlayer();
+  scrollTo(0,0);
+}
+function fmt(s){ if(s==null) return ''; const h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60;
+  return (h?h+':':'')+String(m).padStart(2,'0')+':'+String(x).padStart(2,'0'); }
+/* 做题 */
+let RUN=null;
+/* 举一反三里点"看这道题"→ 立刻进这道题的作答页 */
+function goQ(id){
+  const q = QS().find(x=>x.id===id);
+  if(!q){ alert('没找到这道题'); return; }
+  RUN = {list:[q], i:0, mode:'single'};
+  renderRun();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function drillTopic(id){ RUN={list:QS().filter(q=>q.topic===id), i:0}; renderRun(); }
+function drillType(ty){ RUN={list:QS().filter(q=>q.type===ty), i:0}; renderRun(); }
+let PTIMER=null;
+/* ============ 真题模拟：整卷计时 + 交卷算分 ============
+   之前"真题模拟"只给一个题目列表，点开始就是普通练习（边做边看答案）。
+   真正的模拟考要：计时、作答不泄漏答案、交卷一次性算分、错题自动进错题本。 */
+function startPaper(qs, name){
+  if(!qs.length) return;
+  RUN={list:qs, i:0, mode:'paper', name:name, t0:Date.now(), ans:{}, res:null};
+  /* ⚠️ 计时器必须**真的跑起来**：原先只声明了 let PTIMER=null、从没启动，
+     学生做整卷时永远看到"0 分 00 秒"（用户实测反馈）。这里每秒写一次 #ptimer，
+     交卷后 RUN.res 有值 → tick 自动停表并定格用时。 */
+  tickPTimer();
+  clearInterval(PTIMER);
+  PTIMER = setInterval(tickPTimer, 1000);
+  renderRun();
+}
+function tickPTimer(){
+  const el = document.getElementById('ptimer');
+  if(!el){ clearInterval(PTIMER); PTIMER=null; return; }   // 离开整卷页面就当停表
+  if(!RUN || RUN.mode!=='paper'){ clearInterval(PTIMER); PTIMER=null; return; }
+  if(RUN.res){ clearInterval(PTIMER); PTIMER=null;
+    el.textContent = fmtDur(RUN.res.ms); return; }         // 交卷后定格
+  el.textContent = fmtDur(Date.now()-RUN.t0);
+}
+function fmtDur(ms){
+  const s=Math.floor(ms/1000), m=Math.floor(s/60);
+  return `${m} 分 ${String(s%60).padStart(2,'0')} 秒`;
+}
+function paperBar(){
+  if(!RUN || RUN.mode!=='paper') return '';
+  const n=Object.keys(RUN.ans).length;
+  return `<div class="card" id="pbar" style="position:sticky;top:8px;z-index:6;display:flex;gap:12px;
+      align-items:center;flex-wrap:wrap;margin:0 0 14px;box-shadow:var(--sh2)">
+    <b style="font-size:14px">${esc(RUN.name||'模拟卷')}</b>
+    <span class="chip">⏱ <span id="ptimer">${RUN.res?fmtDur(RUN.res.ms):'0 分 00 秒'}</span></span>
+    <span class="chip b">已答 <span id="pans">${n}</span>/${RUN.list.length}</span>
+    ${RUN.res?'':`<button class="btn sm pri" style="margin-left:auto" onclick="submitPaper()">交卷算分</button>`}
+  </div>`;
+}
+function paperQ(q){
+  const cur=RUN.ans[q.id];
+  const opts=(q.options||[]).map((o,k)=>`<div class="opt${cur===k?' sel':''}" id="o${q.id}${k}"
+      onclick="saq('${q.id}',${k})"><b>${'ABCD'[k]||''}</b><span>${rich(o)}</span></div>`).join('');
+  return `<div class="qwrap">
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
+      ${q.source.no?`<span class="chip b">第 ${q.source.no} 题</span>`:''}
+      ${typeof q.points==='number'?`<span class="chip m">${q.points} 分</span>`:''}
+      <!-- 找茬智能体建议："这题考什么 → 一键跳到对应知识卡"。
+           原来这里是个死标签（看得出考什么，但点不动）✗；现在直接是入口。 -->
+      <button class="btn sm ghost" style="margin:0;padding:3px 9px"
+        onclick="learn('${q.topic}')"
+        title="看这个知识点的讲解、公式、例题与交互演示">📖 考的是：${esc((T[q.topic]||{}).name||q.topic)} →</button>
+      ${q.kind&&q.kind!=='真题'?`<span class="chip">${esc(q.kind)}</span>`:''}
+    </div>
+    <div class="qstem">${rich(q.stem)}</div>
+    ${opts?`<div class="opts">${opts}</div>`:
+      `<input class="tin" id="pin${q.id}" value="${cur!=null?esc(String(cur)):''}"
+        oninput="saq('${q.id}',this.value)" placeholder="在此作答（填空/结果）">`}
+  </div>`;
+}
+function saq(id,v){
+  RUN.ans[id]=v;
+  if(typeof v==='number')
+    document.querySelectorAll(`[id^="o${id}"]`).forEach((e,i)=>e.classList.toggle('sel', i===v));
+  const e=document.getElementById('pans');
+  if(e) e.textContent=Object.keys(RUN.ans).length;
+}
+function submitPaper(){
+  const miss=RUN.list.filter(q=>RUN.ans[q.id]==null||RUN.ans[q.id]==='').length;
+  if(miss && !confirm(`还有 ${miss} 题没作答，确定交卷？`)) return;
+  let got=0, full=0, right=0;
+  RUN.list.forEach(q=>{
+    const p=(typeof q.points==='number'?q.points:0);
+    full+=p;
+    let ok=false;
+    if(q.options&&q.options.length){ const ai=answerIndex(q); ok=(ai!=null&&RUN.ans[q.id]===ai); }
+    else { const key=(q.answer||'').replace(/\s/g,'');
+           ok=!!key && String(RUN.ans[q.id]||'').replace(/\s/g,'')===key; }
+    q._ok=ok;
+    if(ok){ got+=p; right++; }
+    markAnswer(q, ok);            // 错题自动进错题本（与练习同一套逻辑）
+  });
+  RUN.res={ms:Date.now()-RUN.t0, got:got, full:full, right:right, n:RUN.list.length};
+  renderRun();
+  scrollTo(0,0);
+}
+function paperResult(){
+  const r=RUN.res, rate=r.n?Math.round(100*r.right/r.n):0;
+  const scored=r.full>0?`${r.got} / ${r.full} 分`:`${r.right} / ${r.n} 题`;
+  return `<h1>模拟考结果</h1>
+  <div class="card"><div style="display:flex;gap:22px;flex-wrap:wrap;align-items:baseline">
+    <div><div style="font-size:12px;color:var(--muted)">得分</div>
+      <div style="font-size:26px;font-weight:650;color:var(--p-ink)">${scored}</div></div>
+    <div><div style="font-size:12px;color:var(--muted)">正确率</div>
+      <div style="font-size:26px;font-weight:650">${rate}%</div></div>
+    <div><div style="font-size:12px;color:var(--muted)">用时</div>
+      <div style="font-size:26px;font-weight:650">${fmtDur(r.ms)}</div></div>
+    <div style="margin-left:auto;display:flex;gap:8px">
+      <button class="btn" onclick="render()">退出</button>
+      <button class="btn pri" onclick="startPaper(RUN.list,RUN.name)">再做一遍</button></div>
+  </div></div>
+  <h2>逐题结果</h2>
+  ${RUN.list.map((q,i)=>`<div class="qwrap" style="border-left:3px solid ${q._ok?'var(--ok)':'var(--bad)'}">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px">
+      <span class="chip ${q._ok?'g':'d'}">${q._ok?'✓ 正确':'✗ 错误'}</span>
+      ${q.source.no?`<span class="chip b">第 ${q.source.no} 题</span>`:''}
+      ${typeof q.points==='number'?`<span class="chip m">${q.points} 分</span>`:''}
+      <span class="chip g">${(T[q.topic]||{}).name||q.topic}</span>
+      <button class="btn sm" style="margin-left:auto" onclick="learn('${q.topic}')">去学这个点</button>
+    </div>
+    <div class="qstem">${rich(q.stem)}</div>
+    <div style="margin-top:8px;font-size:13.5px;color:var(--ok-ink)"><b>正确答案：</b>${rich(q.answer||'（暂无官方答案，正在复核）')}</div>
+    ${q.solution?`<div style="margin-top:6px;color:var(--ink2)"><b>解析：</b><div style="white-space:pre-line;margin-top:3px">${rich(q.solution)}</div></div>`:''}
+    ${q.answer_suspect?`<div style="margin-top:6px;padding:9px 11px;border-radius:9px;
+      background:#fdf6e7;border:1px solid #eadfc4;color:#7a5c17;font-size:13px">
+      <b>⚠ 书上答案存疑</b>：核验时认为原答案可能有误，正解为 <b>${rich(q.answer_suspect)}</b>（已保留原答案，请你以课堂为准）</div>`:''}
+  </div>`).join('')}`;
+}
+function renderRun(){
+  const v=document.getElementById('view');
+  if(!RUN||!RUN.list.length){ v.innerHTML=`<button class="btn sm ghost" onclick="render()">← 返回</button>
+    <h1>练习</h1><div class="empty">这个范围暂时没有题（题库正在从真题卷里持续补）</div>`; return; }
+  if(RUN.mode==='paper'){
+    if(RUN.res){ v.innerHTML=`<button class="btn sm ghost" onclick="render()">← 返回</button>`+paperResult(); scrollTo(0,0); return; }
+    const pq=RUN.list[RUN.i];
+    v.innerHTML=paperBar()+paperQ(pq)+`
+     <div style="margin-top:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+       <button class="btn" onclick="prevQ()">← 上一题</button>
+       <button class="btn pri" onclick="nextQ()">下一题 →</button>
+       <span style="color:var(--muted);font-size:12.5px">第 ${RUN.i+1} / ${RUN.list.length} 题（交卷前不显示答案）</span>
+     </div>`;
+    scrollTo(0,0); return;
+  }
+  const q=RUN.list[RUN.i];
+  v.innerHTML=`<button class="btn sm ghost" onclick="render()">← 退出练习</button>
+   <div class="kv" style="margin:8px 0 0"><span>第 ${RUN.i+1} / ${RUN.list.length} 题</span>
+     <span>${(T[q.topic]||{}).name||''}</span></div>
+   ${qHTML(q,true)}
+   <div style="margin-top:10px;display:flex;gap:8px">
+     <button class="btn" onclick="prevQ()">上一题</button>
+     <button class="btn pri" onclick="nextQ()">下一题 →</button></div>`;
+  scrollTo(0,0);
+}
+function nextQ(){ if(RUN.i<RUN.list.length-1){RUN.i++;renderRun();} }
+function prevQ(){ if(RUN.i>0){RUN.i--;renderRun();} }
+/* 题目卡片 */
+function qHTML(q, interactive){
+  const opts=(q.options||[]).map((o,k)=>`<div class="opt" id="o${q.id}${k}" onclick="pick('${q.id}',${k})">
+     <b>${'ABCD'[k]||''}</b><span>${rich(o)}</span></div>`).join('');
+  return `<div class="qwrap" id="q${q.id}">
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
+      <span class="chip">${[q.source.year,q.source.term,q.source.exam].filter(x=>x&&x!=='未知').join(' · ')||'年份待核'}</span>
+      ${q.source.subject && q.source.subject!=='未知' ? `<span class="chip b">${q.source.subject}</span>` : ''}
+      ${q.source.no ? `<span class="chip b">第 ${q.source.no} 题</span>` : ''}
+      ${typeof q.points==='number'?`<span class="chip m">${q.points} 分</span>`:''}
+      <span class="chip g">${(T[q.topic]||{}).name||q.topic}</span>
+      <span class="chip m">${q.book}</span>${VCHIP(q)}
+    </div>
+    <div class="qstem">${rich(q.stem)}</div>
+    ${opts?`<div class="opts">${opts}</div>`:''}
+    ${interactive&&!opts?`<input class="tin" id="in${q.id}" placeholder="在此作答（填空/结果）">
+      <button class="btn pri" style="margin-top:9px" onclick="submitFill('${q.id}')">提交</button>`:''}
+    ${interactive&&opts?`<button class="btn pri" style="margin-top:9px" onclick="submitPick('${q.id}')">提交</button>`:''}
+    <div id="fb${q.id}"></div>
+    <div class="src">来源：${[q.source.year&&q.source.year+' 年',(q.source.term&&q.source.term!=='未知')?q.source.term+'学期':'',(q.source.subject&&q.source.subject!=='未知')?q.source.subject:'',(q.source.exam&&q.source.exam!=='未知')?q.source.exam:''].filter(Boolean).join(' ')||'待核'}　｜　${q.source.file||''}</div>
+  </div>`;
+}
+let SEL={};
+function pick(id,k){ SEL[id]=k;
+  document.querySelectorAll(`[id^="o${id}"]`).forEach((e,i)=>{
+    e.classList.toggle('sel', i===k); e.classList.remove('right','wrong'); }); }
+function submitPick(id){
+  const q=D.questions.find(x=>x.id===id); if(!q) return;
+  const k=SEL[id]; if(k==null){ alert('先选一个'); return; }
+  const aIdx = answerIndex(q), ok = aIdx!=null && k===aIdx;
+  document.querySelectorAll(`[id^="o${id}"]`).forEach((e,i)=>{
+    e.classList.remove('sel'); if(i===aIdx) e.classList.add('right');
+    else if(i===k&&!ok) e.classList.add('wrong'); });
+  showFB(q, ok, aIdx==null?'（这道没有官方答案，正在复核）':'');
+  markAnswer(q, ok);
+}
+/* ============ 答案等价判定（前端版） ============
+   用户实测最要命的问题：原来 `val.replace(/\s/g,'')===q.answer.replace(...)` ——
+   纯字符串严格比较 ✗。学生写 `1/3`、标准答案是 `$\dfrac{1}{3}$` → 判"✗ 没对"，
+   而且**还被收进错题本** ✗ —— 做对了却被判错，等于把练习废掉了。
+   算法直接移植自流水线里的 answer-equivalence（那边用 21 条真值表校准过）：
+   常量→分数→根号 按固定顺序转成可求值式，再比字符串 + 数值容差。 */
+function normAns(s){
+  s = String(s==null?'':s);
+  s = s.replace(/\\pi/g,'pi').replace(/\\infty/g,'inf')
+       .replace(/\\ln/g,'ln').replace(/\\log/g,'log');
+  s = s.replace(/\\sqrt\s*\{([^{}]*)\}/g, function(m,a){ return 'sqrt('+a+')'; });      // 根号必须先于分数
+  s = s.replace(/\\[dt]?frac\s*\{([^{}]*)\}\s*\{([^{}]*)\}/g,
+                function(m,a,b){ return '(('+a+')/('+b+'))'; });
+  s = s.replace(/\\left|\\right/g,'');
+  s = s.replace(/\\[,;!]|\\cdot|\\times/g,'');
+  s = s.replace(/\\[a-zA-Z]+/g,'');
+  s = s.replace(/[\s$\\{}()\[\]]/g,'');
+  s = s.replace(/[\uff0d\u2212]/g,'-').replace(/\uff0c/g,',').replace(/\u3002/g,'')
+       .replace(/\u03c0/g,'pi').replace(/\uff0b/g,'+').replace(/\uff1d/g,'=').replace(/\u3000/g,'');
+  return s.toLowerCase();
+}
+function ansNum(s){
+  var t = normAns(s);
+  if(!t) return null;
+  t = t.replace(/sqrt([0-9]+(?:\.[0-9]+)?)/g, '__sq($1)');
+  t = t.replace(/pi/g,'__pi').replace(/\^/g,'**');
+  t = t.replace(/(^|[^a-z_])e(?![a-z_0-9])/g, '$1__e');
+  t = t.replace(/([0-9])__/g,'$1*__').replace(/([0-9])\(/g,'$1*(').replace(/\)([0-9])/g,')*$1');
+  if(!/^[0-9+\-*/()._a-z]*$/.test(t)) return null;      // 集合式校验，不用正则字符类
+  try{
+    var v = Function('__sq','__pi','__e','return ('+t+')')(Math.sqrt, Math.PI, Math.E);
+    return (typeof v==='number' && isFinite(v)) ? v : null;
+  }catch(e){ return null; }
+}
+function sameAns(a,b){
+  var na=normAns(a), nb=normAns(b);
+  if(na && na===nb) return true;
+  var xa=ansNum(a), xb=ansNum(b);
+  if(xa!==null && xb!==null) return Math.abs(xa-xb) <= 1e-6*Math.max(1,Math.abs(xa),Math.abs(xb));
+  return false;
+}
+function submitFill(id){
+  const q=D.questions.find(x=>x.id===id), val=(document.getElementById('in'+id).value||'').trim();
+  if(!val){ alert('先写点什么'); return; }
+  /* 三态，而不是"对/错"两态：
+     · 判等成立 → 做对了 ✓
+     · 两边都能算数且不等 → 明确判错（学生要的就是这个反馈）
+     · **我们判不准**（答案是文字表述、或表达式我们解析不了）→ 绝不说"错" ✗，
+       改成中性提示"我判不准，请对照答案自己核对"，**也不进错题本**。
+     ——"不确定就别说学生错"是这一块最重要的设计决定。 */
+  if(sameAns(val, q.answer)){
+    showFB(q, true, ''); markAnswer(q, true); return;
+  }
+  const comparable = ansNum(val)!==null && ansNum(q.answer)!==null;
+  if(comparable){
+    showFB(q, false, '（和你算的不一样，再对一遍）'); markAnswer(q, false); return;
+  }
+  showFB(q, null, '（这道题答案是文字表述，我判不准 —— 请对照下面的答案自己核对；对错由你判断，不计入错题本）');
+  markAnswer(q, null);
+}
+function answerIndex(q){   // 从答案里认出 A/B/C/D
+  const m=/^\s*[（(]?\s*([A-D])\s*[）)]?\s*$/.exec(q.answer||''); return m?m[1].charCodeAt(0)-65:null; }
+function showFB(q, ok, note){
+  const el=document.getElementById('fb'+q.id);
+  const cls = ok===true ? '' : (ok===false ? 'bad' : 'mid');
+  el.innerHTML=`<div class="ans ${cls}">
+    <b>${ok===true?'✓ 做对了':(ok===false?'✗ 不对':'🤔 我判不准')}</b>　${note||''}
+    ${q.answer?`<div style="margin-top:6px"><b>答案：</b>${rich(q.answer)}</div>`:'<div style="margin-top:6px">这道题暂无可核对的答案。</div>'}
+    ${q.solution?`<div style="margin-top:8px"><b>解析：</b><div style="white-space:pre-line;margin-top:3px">${rich(q.solution)}</div></div>`:''}
+    ${q.answer_suspect?`<div style="margin-top:8px;padding:9px 11px;border-radius:9px;
+      background:#fdf6e7;border:1px solid #eadfc4;color:#7a5c17;font-size:13px">
+      <b>⚠ 书上答案存疑</b>：核验时认为原答案可能有误，正解为 <b>${rich(q.answer_suspect)}</b>（已保留原答案，请你以课堂为准）</div>`:''}
+    ${q.solution_alt?`<div style="margin-top:9px;padding-top:8px;border-top:1px dashed var(--line)">
+      <b>换个思路（第二路解法）：</b>${rich(q.solution_alt)}</div>`:''}
+    ${q.resolve?`<div style="margin-top:9px;padding:10px 12px;background:var(--ok-soft,#eef4ef);
+      border-radius:10px"><b>✓ 独立验算</b>（${esc(q.resolve.verdict||'')}）
+      <div style="font-size:12.5px;margin-top:4px;line-height:1.7">${rich(q.resolve.how||'')}</div></div>`:''}
+    ${(q.verified||{}).by==='arbitrated'?`<div style="margin-top:9px;padding:10px 12px;background:var(--info-soft);
+      border-radius:10px;color:var(--info-ink)"><b>⚖ 第三方裁决：</b>
+      ${esc((q.arbitration||{}).verdict||'')}　${rich((q.arbitration||{}).answer||'')}
+      <div style="font-size:12.5px;margin-top:4px">${rich((q.arbitration||{}).why||'')}
+      —— 两路答案不一致，由第三方独立验算定案（可信度低于官方答案，供参考）</div></div>`:''}
+    ${VARIANTS(q)}
+    <div style="margin-top:8px;font-size:12.5px;color:var(--muted)">来源：${(q.source.file||'')}</div>
+  </div>`;
+}
+/* 按题型 */
+function drillHTML(){
+  /* 学生视角重做（原版问题：40 多种题型取值、选择/单项选择并列、例题混在考试题型里、不排序）。
+     现在：归一到 8 类 → 按题数排序 → 例题单独归到最下面（它不是考试题型，是打基础用的）。 */
+  const HINT = {
+    '选择':'考试第一道大题常见，3 分/题，快而稳',
+    '填空':'题量最大，5 分/题，最容易提分',
+    '计算':'主力大题，10 分/题，务必动笔算到最后',
+    '证明':'考逻辑表述，步骤分很关键',
+    '应用':'应用题，读懂题意先列式子',
+    '判断':'小题，抓反例最快',
+    '其他':'杂项（讨论/描述类）',
+    '例题':'课本/讲义例题 —— 不是考试题型，用来打基础和找手感'
+  };
+  const all = QS().filter(q=>q.type);
+  const byType = {};
+  all.forEach(q=>{ (byType[q.type]=byType[q.type]||[]).push(q); });
+  const exam = Object.keys(byType).filter(k=>k!=='例题')
+    .sort((a,b)=>byType[b].length-byType[a].length);
+  const rows = ks => ks.map(k=>{
+    const list = byType[k], pts = list.reduce((s,q)=>s+(Number(q.points)||0),0); // 必须 Number()：points 曾是字符串，+ 会拼成"01001…"
+    return `<div class="card" style="display:flex;align-items:center;gap:11px;flex-wrap:wrap">
+      <b style="font-size:14.5px;min-width:64px">${esc(k)}</b>
+      <span class="pill">${list.length} 题${pts?` · ${pts} 分`:''}</span>
+      <span style="font-size:12.5px;color:var(--muted);flex:1 1 200px">${HINT[k]||''}</span>
+      <button class="btn pri" onclick="drillType('${esc(k)}')">开始练</button></div>`;
+  }).join('');
+  return `<h1>按题型练</h1>
+  <p class="lead">想专门刷某一种题型就点它 —— 按题量从多到少排。</p>
+  ${rows(exam)||'<div class="empty">暂无</div>'}
+  ${byType['例题']?`<h2 style="margin-top:20px">打基础（非考试题型）</h2>${rows(['例题'])}`:''}`;
+}
+/* 错题本 */
+function wrongHTML(){
+  const ws = Object.entries(S.wrong).map(([id,w]) => ({q: D.questions.find(q=>q.id===id), w}))
+              .filter(x=>x.q);
+  /* 空状态也要"有用"：告诉用户规则 + 给出下一步入口（原来只有一句"去练几道吧"，
+     页面 109 字节近乎白屏，用户友好度差）。 */
+  if(!ws.length){
+    return `<h1>错题本</h1>
+    <p class="lead">做错的题自动进来；<b>连续 2 次做对</b>才移出。现在 0 题。</p>
+    <div class="card" style="text-align:center;padding:34px 20px">
+      <div style="font-size:40px;line-height:1;margin-bottom:10px">🎉</div>
+      <div style="font-size:16px;font-weight:600;margin-bottom:6px">错题本是空的</div>
+      <div style="font-size:13.5px;color:var(--muted);line-height:1.9">
+        两种用法：<br>
+        ① 平时练题 —— 做错的自动收进来，连对 2 次自动移出，不用自己整理；<br>
+        ② 考前专攻 —— 攒够错题后点下面第二个按钮，只刷错题。
+      </div>
+      <div style="margin-top:18px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+        <button class="btn pri" onclick="go('topic')">📚 挑知识点去练</button>
+        <button class="btn" onclick="go('exam')">📝 做一套真题模拟</button>
+        <button class="btn" onclick="go('drill')">🧩 按题型练</button>
+      </div>
+    </div>`;
+  }
+  /* 按知识点归类：错得多的排前面 —— 一眼看出该补哪块（原来是一长串平铺） */
+  const byTopic = {};
+  ws.forEach(x => {
+    const id = x.q.topic || 'other';
+    (byTopic[id] = byTopic[id] || []).push(x);
+  });
+  const order = Object.keys(byTopic).sort((a,b) => byTopic[b].length - byTopic[a].length);
+  const top = ws.slice().sort((a,b) => (b.w.c||0) - (a.w.c||0)).slice(0,3);
+  return `<h1>错题本</h1>
+  <p class="lead">做错的题自动进来；<b>连续 2 次做对</b>才移出。现在 ${ws.length} 题、${order.length} 个知识点。</p>
+  <div class="card" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+    <span style="font-size:13.5px">最该补的：</span>
+    ${order.slice(0,3).map(id=>`<span class="pill">${(T[id]||{}).name || id} · ${byTopic[id].length} 题</span>`).join('')}
+    <span style="flex:1"></span>
+    <button class="btn pri" onclick="RUN={list:Object.keys(S.wrong).map(id=>D.questions.find(q=>q.id===id)).filter(Boolean),i:0};renderRun()">只练错题（${ws.length} 题）</button>
+    <button class="btn" onclick="go('topic')">去挑知识点</button>
+  </div>
+  ${order.map(id=>`<details class="treegrp" ${order.indexOf(id)<2?'open':''}>
+    <summary>${(T[id]||{}).name || id} <span style="color:var(--muted);font-size:12.5px">· ${byTopic[id].length} 题</span></summary>
+    ${byTopic[id].map(({q,w})=>qHTML(q,true)+`<div style="margin:-6px 0 14px;font-size:12.5px;color:var(--muted)">
+      错 ${w.c} 次 ｜ 连对 ${w.streak||0}/2</div>`).join('')}
+  </details>`).join('')}`;
+}
+/* 真题模拟 */
+/* 注意：不能把局部变量 groups 写进 onclick —— 点击时作用域里没有它，会静默 ReferenceError。
+   所以建表时把卷子存进全局 PAPERS，按钮只传索引。 */
+const PAPERS=[], PAPER_NAMES=[];
+function startPaperIdx(i){ startPaper(PAPERS[i], PAPER_NAMES[i]); }
+function examHTML(){
+  const groups={};
+  /* 模拟考只收"真题卷"，且必须有可辨年份 ——
+     否则讲义例题（无年份）会被拼成一个 237 题的假"卷子"，年份不明的碎片也会混进来。 */
+  QS().filter(q=>(q.kind||'真题')==='真题').forEach(q=>{
+    const y=String(q.source.year||'').trim();
+    if(!/^20\d\d$/.test(y)) return;
+    const k=`${y} ${String(q.source.term||'').replace('未知','').trim()} ${String(q.source.exam||'').replace('未知','').trim()}`.trim();
+    (groups[k]=groups[k]||[]).push(q);
+  });
+  const keys=Object.keys(groups).filter(k=>groups[k].length>=2).sort().reverse();
+  PAPERS.length=0; PAPER_NAMES.length=0;
+  keys.forEach(k=>{ PAPERS.push(groups[k]); PAPER_NAMES.push(k); });
+  /* 用户实测提问：「卷子里面题目为什么那么少？每份卷子的分数不是都一样吗？」
+     —— 真卷都是 10~12 大题 / 100 分。我们少是因为**源卷是"试题+答案"混排**，
+     有些页只有答案、题干没抽到（被"答案碎片"过滤器正确丢掉），所以收录不全。
+     这里如实标注"已收录 N 题 / M 分"并给出原卷满分对照，别让学生误以为卷子是完整的。
+     同时给一条正路：想练全套就用「期中/期末复习 + 按知识点学」，那里是 1600 道全库。 */
+  const FULL_PTS = 100;
+  return `<h1>真题模拟</h1>
+  <p class="lead">整卷计时作答，交卷后自动算分、错题自动进错题本（交卷前不显示答案）。</p>
+  <div class="card" style="background:var(--warn-soft,#f7f1e6);border-color:#e8dcc4;font-size:13px;line-height:1.9">
+    <b>关于"题数/总分为什么不满"</b>：真卷是 10~12 大题、<b>满分 100 分</b>；
+    下面是题库里<b>已收录并能核对答案</b>的题（源卷是"试题+答案"混排，部分页只有答案、题干缺），
+    所以显示为"已收录 N 题 · M 分"。
+    想练全套就回 <b>「期中复习 / 按知识点学」</b> —— 那里是 1600+ 道全库，按知识点覆盖更全。
+  </div>
+  <table><thead><tr><th>卷子</th><th class="num">已收录</th><th class="num">分值</th><th class="num">已做</th><th></th></tr></thead><tbody>
+  ${keys.map(k=>{ const qs=groups[k], pts=qs.reduce((a,q)=>a+(Number(q.points)||0),0);
+    const dn=qs.filter(q=>S.done[q.id]).length;
+    const thin = qs.length < 8;
+    return `<tr><td>${k}${thin?' <span class="chip" style="background:var(--warn-soft,#f7f1e6)">收录较少</span>':''}</td>
+      <td class="num">${qs.length} 题</td>
+      <td class="num">${pts}${pts>0&&pts<FULL_PTS?`<span style="color:var(--muted);font-size:11.5px"> / ${FULL_PTS}</span>`:''}</td>
+      <td class="num">${dn}/${qs.length}</td>
+      <td><button class="btn sm pri" onclick="startPaperIdx(${keys.indexOf(k)})">⏱ 开始模拟</button></td></tr>`;
+  }).join('')}</tbody></table>`;
+}
+function exportRec(){
+  const blob=new Blob([JSON.stringify(S,null,1)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download='高数学习记录.json'; a.click();
+}
+/* 深链接：index.html#mid 直接进期中复习（方便分享与书签） */
+let HASH = (location.hash || '').replace('#', '');
+if (typeof HASH_ALIAS === 'object' && HASH in HASH_ALIAS) HASH = HASH_ALIAS[HASH];
+if (GOALS.some(g => g.k === HASH)) S.goal = HASH;
+else if (HASH === '') S.goal = S.goal || '';
+/* 深链接 #learn:K02 直接打开某知识点的学习页（含知识卡/讲义原文/视频片段/演示/真题） */
+const MLEARN = /^learn:(K\d+)$/.exec(HASH);
+if (MLEARN) S.learnTarget = MLEARN[1];
+document.body.classList.toggle('dark',!!S.dark);
+renderSide();
+if (S.learnTarget && D.topics.some(x=>x.id===S.learnTarget)) { go; learn(S.learnTarget); delete S.learnTarget; }
+else render();
+addEventListener('hashchange', () => {            // 浏览器返回/前进键要能用
+  let h=(location.hash||'').replace('#','');
+  if (HASH_ALIAS[h] !== undefined) h = HASH_ALIAS[h];
+  const ml = /^learn:(K\d+)$/.exec(h);
+  if (ml) { learn(ml[1]); return; }
+  if (h === S.goal) return;                       // 自己 pushState 造成的不重复渲染
+  if (GOALS.some(g=>g.k===h)) { S.goal=h; save(); window.scrollTo(0,0); render(); }
+});
+
+/* ===== 巡检钩子（供 qa_check.py / 自动化检查使用）=====
+   const/let 声明的顶层变量不会挂到 window 上，外部脚本（如同源 iframe）拿不到，
+   所以这里显式暴露一个只读入口。不影响任何正常功能。 */
+window.__APP__ = {
+  get S(){ return S; }, get D(){ return D; }, get T(){ return T; },
+  get DEMOS(){ return DEMOS; }, get VID(){ return VID; },
+  go: go, render: render, learn: learn, QS: QS, statsFor: statsFor
+};
+</script>
+</body>
+</html>

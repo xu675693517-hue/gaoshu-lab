@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>微积分基本定理 · 变上限积分</title>
+<link rel="stylesheet" href="../assets/katex/katex.min.css">
+<style>
+:root{--page:#f7f4ef;--surface:#ffffff;--ink:#2a2f2e;--muted:#8a908e;--line:#e5dfd6;--sage:#6e8b7b;--sage-deep:#4e6a5b;--blue:#6b8899;--sand:#b39a6e;--rose:#b5705f;--mauve:#93899c;}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;overflow-x:hidden;background:var(--page);color:var(--ink);font-family:"Segoe UI","Microsoft YaHei",sans-serif;font-size:14px;line-height:1.45}
+.wrap{max-width:860px;margin:0 auto;padding:10px 14px 12px}
+h1{font-size:16px;margin:0 0 2px;font-weight:600;letter-spacing:.2px}
+.sub{font-size:12px;color:var(--muted);margin:0}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px}
+.bar{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:7px 0;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:6px 10px}
+.bar label{font-size:12px;color:var(--muted)}
+select{font:inherit;font-size:12.5px;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:3px 6px}
+input[type=range]{-webkit-appearance:none;appearance:none;height:22px;background:transparent;flex:1;min-width:150px;margin:0}
+input[type=range]::-webkit-slider-runnable-track{height:5px;background:var(--line);border-radius:3px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;margin-top:-5px;border-radius:50%;background:var(--sage-deep);border:2px solid var(--surface);box-shadow:0 1px 2px rgba(0,0,0,.18)}
+input[type=range]::-moz-range-track{height:5px;background:var(--line);border-radius:3px}
+input[type=range]::-moz-range-thumb{width:14px;height:14px;border:2px solid var(--surface);border-radius:50%;background:var(--sage-deep)}
+.val{font-variant-numeric:tabular-nums;font-weight:600;color:var(--sage-deep);min-width:3.2em;display:inline-block}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.grid .card{padding:5px}
+canvas{display:block;width:100%;height:192px}
+.stats{display:flex;gap:7px;flex-wrap:wrap;margin-top:7px}
+.st{flex:1;min-width:112px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:5px 8px}
+.st .k{font-size:11px;color:var(--muted)}
+.st .v{font-size:15px;font-variant-numeric:tabular-nums;font-weight:600}
+.st .tex{font-size:12px;overflow:hidden}
+.concl{margin-top:7px;background:#eef1ec;border:1px solid var(--line);border-left:3px solid var(--sage-deep);border-radius:8px;padding:6px 9px;font-size:12.4px}
+.concl b{color:var(--sage-deep)}
+.hl{color:var(--sage-deep);font-weight:600}
+.hl2{color:var(--rose);font-weight:600}
+@media (max-width:640px){.grid{grid-template-columns:1fr}canvas{height:176px}}
+@media (max-width:520px){.st .tex{font-size:10.5px}.st{min-width:132px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>微积分基本定理 · 变上限积分</h1>
+  <p class="sub">让上限 x 动起来：阴影面积 <span class="tex" data-tex="F(x)=\int_{0}^{x}f(t)\,dt"></span> 随 x 变化，而它的变化率正好是 <span class="tex" data-tex="F'(x)=f(x)"></span>。</p>
+
+  <div class="bar">
+    <label>被积函数</label>
+    <select id="fn">
+      <option value="sin">f(t) = sin t</option>
+      <option value="sq">f(t) = t²</option>
+    </select>
+    <label>积分上限 x =</label><span class="val" id="xv">1.00</span>
+    <input type="range" id="xx" min="0" max="3" step="0.01" value="1">
+  </div>
+
+  <div class="grid">
+    <div class="card"><canvas id="c1"></canvas></div>
+    <div class="card"><canvas id="c2"></canvas></div>
+  </div>
+
+  <div class="stats">
+    <div class="st"><div class="k">阴影面积（Simpson 数值积分）</div><div class="v" id="vArea">—</div><div class="k">∫₀ˣ f(t)dt，x 以上为正、以下为负</div></div>
+    <div class="st"><div class="k">闭式 F(x) 的值</div><div class="v" id="vF">—</div><div class="tex" id="tF" data-tex="F(x)=1-\cos x"></div></div>
+    <div class="st"><div class="k">F′(x) 数值微分 vs f(x)</div><div class="v" id="vD">—</div><div class="k" id="kD">—</div></div>
+    <div class="st" style="flex:1.45"><div class="k">牛顿–莱布尼茨</div><div class="tex" id="tNL" data-tex="F(x)=G(x)-G(0)"></div><div class="k" id="kNL">—</div></div>
+  </div>
+
+  <div class="concl"><b>一句话本质：</b><span id="ctxt">—</span></div>
+</div>
+
+<script src="../assets/katex/katex.min.js"></script>
+<script>
+(function(){
+  "use strict";
+  var C={ink:'#2a2f2e',muted:'#8a908e',line:'#e5dfd6',sage:'#6e8b7b',sageDeep:'#4e6a5b',blue:'#6b8899',sand:'#b39a6e',rose:'#b5705f',mauve:'#93899c'};
+  var $=function(s){return document.querySelector(s);};
+
+  /* ---------- KaTeX 兜底渲染 ---------- */
+  function kt(el){
+    if(!el) return;
+    var s=el.getAttribute('data-tex'); if(s===null) return;
+    try{
+      if(window.katex && typeof katex.renderToString==='function'){
+        el.innerHTML=katex.renderToString(s,{displayMode:el.hasAttribute('data-display'),throwOnError:false,strict:false});
+        return;
+      }
+    }catch(e){}
+    el.textContent=s.replace(/\\[a-zA-Z]+/g,' ').replace(/[{}]/g,'').replace(/\s+/g,' ').trim();
+  }
+  function renderTex(root){ var n=(root||document).querySelectorAll('.tex'); for(var i=0;i<n.length;i++) kt(n[i]); }
+  function setTex(el,s){ if(!el) return; el.setAttribute('data-tex',s); kt(el); }
+
+  var SUP={'-':'\u207B','0':'\u2070','1':'\u00B9','2':'\u00B2','3':'\u00B3','4':'\u2074','5':'\u2075','6':'\u2076','7':'\u2077','8':'\u2078','9':'\u2079'};
+  function sup(n){ return String(n).split('').map(function(c){return SUP[c]||c;}).join(''); }
+  function fmtErr(v){
+    if(!isFinite(v)) return '—';
+    if(v===0) return '0';
+    var e=Math.floor(Math.log10(Math.abs(v))), m=v/Math.pow(10,e);
+    if(e>=-1 && e<=0) return v.toFixed(4);
+    return m.toFixed(2)+'\u00D710'+sup(e);
+  }
+  function fit(cv){
+    var dpr=Math.max(1,window.devicePixelRatio||1);
+    var w=cv.clientWidth||380, h=cv.clientHeight||242;
+    cv.width=Math.round(w*dpr); cv.height=Math.round(h*dpr);
+    var ctx=cv.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,w,h);
+    return {ctx:ctx,w:w,h:h};
+  }
+  function mono(ctx,size){ ctx.font=size+'px "Segoe UI","Microsoft YaHei",sans-serif'; }
+
+  /* ---------- f 与它的原函数 G ---------- */
+  var TMAX=3.2;
+  var FNS={
+    sin:{
+      name:'sin t', tex:'\\sin t',
+      f:Math.sin,
+      G:function(x){ return -Math.cos(x); },
+      gdisp:'\u2212cos t', fdisp:'1 \u2212 cos x', Ftex:'F(x)=1-\\cos x',
+      F:function(x){ return 1-Math.cos(x); },
+      ymin:-1.35, ymax:1.35, yticks:[-1,0,1],
+      Frange:[0,2.05],
+      nltex:'F(x)=G(x)-G(0)=1-\\cos x'
+    },
+    sq:{
+      name:'t\u00B2', tex:'t^{2}',
+      f:function(t){return t*t;},
+      G:function(x){ return x*x*x/3; },
+      gdisp:'t\u00B3/3', fdisp:'x\u00B3/3', Ftex:'F(x)=\\dfrac{x^{3}}{3}',
+      F:function(x){ return x*x*x/3; },
+      ymin:0, ymax:9.6, yticks:[0,3,6,9],
+      Frange:[0,9.0],
+      nltex:'F(x)=G(x)-G(0)=\\dfrac{x^{3}}{3}'
+    }
+  };
+  var key='sin', x=1;
+
+  /* ---------- 数值工具 ---------- */
+  function simpson(f,a,b,N){
+    if(b<=a) return 0;
+    if(N%2) N++;
+    var h=(b-a)/N, s=f(a)+f(b);
+    for(var i=1;i<N;i++) s += f(a+i*h)*(i%2?4:2);
+    return s*h/3;
+  }
+  function numDeriv(Fn,x0){
+    var h=1e-4; return (Fn(x0+h)-Fn(x0-h))/(2*h);
+  }
+
+  /* ---------- 左图：f(t) 与 [0,x] 下的（带符号）面积 ---------- */
+  function drawLeft(){
+    var O=FNS[key], g=fit($('#c1')), ctx=g.ctx, w=g.w, h=g.h;
+    var m={l:34,r:12,t:24,b:24};
+    var X=function(t){ return m.l+t/TMAX*(w-m.l-m.r); };
+    var Y=function(v){
+      var yv=Math.max(O.ymin,Math.min(O.ymax,v));
+      return h-m.b-(yv-O.ymin)/(O.ymax-O.ymin)*(h-m.t-m.b);
+    };
+    ctx.strokeStyle=C.line; ctx.lineWidth=1; mono(ctx,10);
+    var i;
+    for(i=0;i<=3;i++){
+      ctx.beginPath(); ctx.moveTo(X(i),Y(O.ymin)); ctx.lineTo(X(i),Y(O.ymax)); ctx.stroke();
+      ctx.fillStyle=C.muted; ctx.textAlign='center'; ctx.fillText(String(i),X(i),h-m.b+13);
+    }
+    // 纵轴刻度
+    for(i=0;i<O.yticks.length;i++){
+      var yv=O.yticks[i];
+      ctx.setLineDash([2,3]); ctx.beginPath(); ctx.moveTo(X(0),Y(yv)); ctx.lineTo(X(TMAX),Y(yv)); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle=C.muted; ctx.textAlign='right';
+      ctx.fillText(yv>0?('+'+yv):String(yv),X(0)-4,Y(yv)+3.5);
+    }
+    // 零轴
+    ctx.strokeStyle=C.ink; ctx.lineWidth=1.2;
+    ctx.beginPath(); ctx.moveTo(X(0),Y(0)); ctx.lineTo(X(TMAX),Y(0)); ctx.stroke();
+
+    // 带符号面积（分段填充）
+    var NS=240, j;
+    for(j=0;j<NS;j++){
+      var t0=x*j/NS, t1=x*(j+1)/NS, tm=(t0+t1)/2, v=O.f(tm);
+      if(Math.abs(t1-t0)<1e-9) continue;
+      ctx.fillStyle = v>=0 ? 'rgba(130,149,139,.42)' : 'rgba(175,133,130,.42)';
+      ctx.beginPath();
+      ctx.rect(X(t0), Y(Math.max(v,0)), Math.max(X(t1)-X(t0),0.8), Math.abs(Y(v)-Y(0)));
+      ctx.fill();
+    }
+    // 曲线
+    ctx.strokeStyle=C.blue; ctx.lineWidth=2.2; ctx.beginPath();
+    for(i=0;i<=300;i++){ var t=i/300*TMAX; if(i===0) ctx.moveTo(X(t),Y(O.f(t))); else ctx.lineTo(X(t),Y(O.f(t))); }
+    ctx.stroke();
+    // 上限 x 的竖线
+    ctx.strokeStyle=C.rose; ctx.lineWidth=1.5; ctx.setLineDash([4,3]);
+    ctx.beginPath(); ctx.moveTo(X(x),Y(O.ymin)); ctx.lineTo(X(x),Y(O.ymax)); ctx.stroke();
+    ctx.setLineDash([]);
+    // 标注
+    mono(ctx,10.5); ctx.textAlign='left'; ctx.fillStyle=C.ink;
+    ctx.fillText('绿色≈正面积，玫红≈负面积：f(t) = '+O.name,X(0)-24,14);
+    ctx.fillStyle=C.rose; ctx.textAlign='center'; ctx.fillText('x='+x.toFixed(2),X(x),Y(O.ymax)+11);
+    ctx.textAlign='left'; ctx.fillStyle=C.muted; ctx.fillText('t',X(TMAX)-6,h-m.b+13);
+  }
+
+  /* ---------- 右图：F(x) 曲线 + 切线斜率 = f(x) ---------- */
+  function drawRight(){
+    var O=FNS[key], g=fit($('#c2')), ctx=g.ctx, w=g.w, h=g.h;
+    var m={l:40,r:14,t:24,b:24};
+    var XMIN=0, XMAX=3, YLO=O.Frange[0], YHI=O.Frange[1];
+    var X=function(v){ return m.l+(v-XMIN)/(XMAX-XMIN)*(w-m.l-m.r); };
+    var Y=function(v){ return h-m.b-(v-YLO)/(YHI-YLO)*(h-m.t-m.b); };
+    ctx.strokeStyle=C.line; ctx.lineWidth=1; mono(ctx,10);
+    var i;
+    for(i=0;i<=3;i++){
+      ctx.beginPath(); ctx.moveTo(X(i),Y(YLO)); ctx.lineTo(X(i),Y(YHI)); ctx.stroke();
+      ctx.fillStyle=C.muted; ctx.textAlign='center'; ctx.fillText(String(i),X(i),h-m.b+13);
+    }
+    ctx.strokeStyle=C.ink; ctx.lineWidth=1.2;
+    ctx.beginPath(); ctx.moveTo(X(0),Y(YLO)); ctx.lineTo(X(XMAX),Y(YLO)); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(X(0),Y(YLO)); ctx.lineTo(X(0),Y(YHI)); ctx.stroke();
+
+    // F(x) 曲线
+    ctx.strokeStyle=C.sageDeep; ctx.lineWidth=2.2; ctx.beginPath();
+    for(i=0;i<=240;i++){ var t=i/240*XMAX, v=O.F(t); if(i===0) ctx.moveTo(X(t),Y(v)); else ctx.lineTo(X(t),Y(v)); }
+    ctx.stroke();
+    // 切线（斜率 = f(x)）—— 视觉版的 F′(x)=f(x)
+    ctx.save();
+    ctx.beginPath(); ctx.rect(m.l,m.t,w-m.l-m.r,h-m.t-m.b); ctx.clip();
+    var Fx=O.F(x), slope=O.f(x), dt=0.55;
+    ctx.strokeStyle=C.sand; ctx.lineWidth=1.8; ctx.setLineDash([5,3]);
+    ctx.beginPath();
+    ctx.moveTo(X(x-dt),Y(Fx-slope*dt)); ctx.lineTo(X(x+dt),Y(Fx+slope*dt)); ctx.stroke();
+    ctx.setLineDash([]); ctx.restore();
+    // 当前点
+    ctx.strokeStyle='rgba(175,133,130,.5)'; ctx.lineWidth=1; ctx.setLineDash([3,3]);
+    ctx.beginPath(); ctx.moveTo(X(x),Y(YLO)); ctx.lineTo(X(x),Y(Fx)); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(X(0),Y(Fx)); ctx.lineTo(X(x),Y(Fx)); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle=C.rose; ctx.beginPath(); ctx.arc(X(x),Y(Fx),4.5,0,Math.PI*2); ctx.fill();
+
+    mono(ctx,10.5); ctx.textAlign='left'; ctx.fillStyle=C.ink;
+    ctx.fillText('F(x) = ∫₀ˣ f(t)dt（沙色虚线斜率 = f(x)）',X(0)-30,14);
+    ctx.fillStyle=C.rose; ctx.fillText('F('+x.toFixed(2)+') = '+Fx.toFixed(4),X(x)+6,Y(Fx)-6);
+    ctx.fillStyle=C.sand; ctx.fillText('切线斜率 = f('+x.toFixed(2)+') = '+slope.toFixed(4),X(0)+8,m.t+34);
+  }
+
+  /* ---------- 数值 + 结论 ---------- */
+  function update(){
+    var O=FNS[key];
+    $('#xv').textContent=x.toFixed(2);
+    var area=simpson(O.f,0,x,4000);
+    var Fv=O.F(x);
+    var d=numDeriv(O.F,x), fx=O.f(x);
+    $('#vArea').textContent=area.toFixed(6);
+    $('#vF').textContent=Fv.toFixed(6);
+    setTex($('#tF'),O.Ftex);
+    $('#vD').textContent=d.toFixed(6);
+    $('#kD').innerHTML='f('+x.toFixed(2)+') = <span class="hl">'+fx.toFixed(6)+'</span>；差 = '+fmtErr(Math.abs(d-fx));
+    setTex($('#tNL'),O.nltex);
+    $('#kNL').textContent='G(t) = '+O.gdisp+'，G(0) = '+O.G(0).toFixed(4)+' \u27F9 F(x) = G(x) \u2212 G(0) = '+O.fdisp;
+
+    var txt='上限 x 每挪一点，阴影面积就多出 f(x)·Δx —— 面积函数的导数正是被积函数：x='+x.toFixed(2)
+      +' 时数值微分 F′='+d.toFixed(6)+'，而 f('+x.toFixed(2)+')='+fx.toFixed(6)+'，差仅 '+fmtErr(Math.abs(d-fx))
+      +'。对上号后，算定积分只剩「找原函数 G、代上下限」：F('+x.toFixed(2)+')='+Fv.toFixed(6)+'，与数值积分一致。'
+      + (key==='sin' && x>Math.PI ? '提示：x>π 后 sin t<0，阴影按带符号面积算，故 F(x) 越过分段峰值 2 后回落。' : '');
+    $('#ctxt').textContent=txt;
+
+    drawLeft(); drawRight();
+  }
+
+  var slider=$('#xx');
+  function onSlider(){ x=parseFloat(slider.value)||0; update(); }
+  slider.addEventListener('input',onSlider);
+  slider.addEventListener('change',onSlider);
+  $('#fn').addEventListener('input',function(){
+    key=this.value;
+    slider.value=(key==='sq')? '1' : '1';
+    x=parseFloat(slider.value);
+    update();
+  });
+  window.addEventListener('resize',function(){ drawLeft(); drawRight(); });
+
+  var boot=function(){ renderTex(document); update(); if(window.requestAnimationFrame) requestAnimationFrame(function(){ drawLeft(); drawRight(); }); };
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();
+  window.addEventListener('load',function(){ renderTex(document); update(); });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>导数的定义 · 割线趋近切线</title>
+<link rel="stylesheet" href="../assets/katex/katex.min.css">
+<script src="../assets/katex/katex.min.js"></script>
+<style>
+:root{
+  --page:#f7f4ef; --surface:#ffffff; --ink:#2a2f2e; --muted:#8a908e;
+  --line:#e5dfd6; --sage:#6e8b7b; --sage-deep:#4e6a5b; --blue:#6b8899;
+  --sand:#b39a6e; --rose:#b5705f; --mauve:#93899c;
+}
+*{box-sizing:border-box}
+html{overflow-x:hidden}
+body{margin:0;padding:0;background:var(--page);color:var(--ink);
+  font-family:"Segoe UI","Microsoft YaHei",sans-serif;overflow-x:hidden;
+  -webkit-font-smoothing:antialiased}
+.wrap{max-width:860px;margin:0 auto;padding:8px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;
+  padding:12px 16px 10px;box-shadow:0 1px 3px rgba(47,53,55,.05)}
+.head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+h1{margin:0;font-size:16.5px;font-weight:600;letter-spacing:.2px}
+h1 small{font-weight:400;color:var(--muted);font-size:12.5px;margin-left:6px}
+.pill{font-size:12px;color:var(--sage-deep);background:#e7ebe7;border:1px solid #d3dcd5;
+  border-radius:999px;padding:2px 10px;white-space:nowrap}
+.strip{min-height:40px;display:flex;align-items:center;gap:10px;overflow:hidden;
+  margin:4px 0 2px;padding:2px 0;font-size:14px;flex-wrap:nowrap}
+.strip .katex{font-size:1.02em}
+.strip .lbl{font-size:12px;color:var(--muted);white-space:nowrap;flex:0 0 auto}
+.fb{font-family:Consolas,"Courier New",monospace;font-size:12.5px;color:var(--ink)}
+#plot{display:block;width:100%;height:auto;background:#fffdfa;border:1px solid var(--line);
+  border-radius:10px}
+.ctrl{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:8px 0 6px}
+.slot{display:flex;align-items:center;gap:8px;flex:1 1 240px;min-width:200px}
+.slot label{font-size:12.5px;color:var(--muted);white-space:nowrap}
+input[type=range]{flex:1 1 auto;min-width:90px;height:20px;accent-color:var(--sage-deep);
+  background:transparent;cursor:pointer}
+.val{font-family:Consolas,"Courier New",monospace;font-size:12.5px;color:var(--sage-deep);
+  min-width:56px;text-align:right}
+.btns{display:flex;gap:6px}
+button{font-family:inherit;font-size:12.5px;color:var(--ink);background:#f1eee8;
+  border:1px solid var(--line);border-radius:8px;padding:4px 11px;cursor:pointer}
+button:hover{background:#eae5dc}
+button.on{background:var(--sage-deep);border-color:var(--sage-deep);color:#fbfbf8}
+.read{display:flex;gap:8px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin:0 0 7px}
+.read b{font-family:Consolas,"Courier New",monospace;color:var(--ink);font-weight:600}
+.concl{border-left:3px solid var(--sage-deep);background:#eaece7;border-radius:0 8px 8px 0;
+  padding:8px 12px;font-size:13px;line-height:1.5}
+.concl b{font-family:Consolas,"Courier New",monospace;color:var(--sage-deep)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--muted);margin:2px 0 0}
+.legend i{display:inline-block;width:16px;height:0;border-top-width:2.5px;border-top-style:solid;
+  vertical-align:middle;margin-right:4px}
+svg text{font-family:"Segoe UI","Microsoft YaHei",sans-serif}
+</style>
+</head>
+<body>
+<div class="wrap"><div class="card">
+  <div class="head">
+    <h1>导数的定义 · 割线趋近切线<small>f(x)=x²，在 x₀=1 处</small></h1>
+    <div class="btns">
+      <button id="bq" class="on">f(x)=x²</button>
+      <button id="bc">f(x)=x³</button>
+    </div>
+  </div>
+
+  <div class="strip">
+    <span class="lbl">当前差商</span>
+    <span id="dqTex"></span>
+  </div>
+
+  <svg id="plot" viewBox="0 0 860 218" preserveAspectRatio="xMidYMid meet" role="img"
+       aria-label="割线趋近切线的动态示意图">
+    <defs><clipPath id="clip"><rect id="clipR" x="0" y="0" width="860" height="218"></rect></clipPath></defs>
+    <g id="gGrid"></g>
+    <g id="gAxes"></g>
+    <g id="gTicks"></g>
+    <g clip-path="url(#clip)">
+      <path id="pCurve" fill="none" stroke="#6e8b7b" stroke-width="2.4" stroke-linejoin="round"></path>
+      <path id="pTan" fill="none" stroke="#4e6a5b" stroke-width="2" stroke-dasharray="7 4"></path>
+      <path id="pSec" fill="none" stroke="#6b8899" stroke-width="2.2"></path>
+      <path id="pTri" fill="none" stroke="#b39a6e" stroke-width="1.6" stroke-dasharray="4 3"></path>
+      <line id="lV" stroke="#b39a6e" stroke-width="1.2" stroke-dasharray="3 3"></line>
+      <circle id="cA" r="5" fill="#4e6a5b" stroke="#fffdfa" stroke-width="1.6"></circle>
+      <circle id="cB" r="5" fill="#6b8899" stroke="#fffdfa" stroke-width="1.6"></circle>
+      <circle id="cX0" r="3.4" fill="#b5705f" stroke="#fffdfa" stroke-width="1.4"></circle>
+    </g>
+    <g id="gLabels"></g>
+  </svg>
+
+  <div class="legend">
+    <span><i style="border-top-color:#6e8b7b"></i>曲线 y=f(x)</span>
+    <span><i style="border-top-color:#4e6a5b;border-top-style:dashed"></i>切线（斜率 f′(x₀)，固定）</span>
+    <span><i style="border-top-color:#6b8899"></i>割线（斜率 = 差商，随 h 变）</span>
+    <span><i style="border-top-color:#b39a6e;border-top-style:dashed"></i>Δx / Δy</span>
+  </div>
+
+  <div class="ctrl">
+    <div class="slot">
+      <label for="sh">增量 h =</label>
+      <input id="sh" type="range" min="0.01" max="1.5" step="0.01" value="0.5">
+      <span class="val" id="vh">0.50</span>
+    </div>
+  </div>
+
+  <div class="read">
+    <span>h = <b id="rh">0.50</b></span>
+    <span>Δy = <b id="rdy">0.0000</b></span>
+    <span>差商 Δy/Δx = <b id="rdq">0.000000</b></span>
+    <span>f′(x₀) = <b id="rdd">2.000000</b></span>
+    <span>斜率差 = <b id="rdiff">0.000000</b></span>
+    <span>割线与切线夹角 = <b id="rang">0.00°</b></span>
+  </div>
+
+  <div class="concl" id="concl">—</div>
+</div></div>
+
+<script>
+/* ---------- 工具 ---------- */
+function tex(el, s, fb){
+  try{
+    if(typeof katex === 'undefined' || typeof katex.renderToString !== 'function')
+      throw new Error('katex unavailable');
+    el.innerHTML = katex.renderToString(s, {throwOnError:false, displayMode:false});
+  }catch(e){
+    el.className = 'fb';
+    el.textContent = fb;
+  }
+}
+function niceTicks(lo, hi, n){
+  const span = hi - lo;
+  if(!(span > 0) || !isFinite(span)) return [lo];
+  const raw = span / n, mag = Math.pow(10, Math.floor(Math.log10(raw))), nm = raw / mag;
+  let st = nm <= 1 ? 1 : nm <= 2 ? 2 : nm <= 2.5 ? 2.5 : nm <= 5 ? 5 : 10;
+  st *= mag;
+  const out = [];
+  for(let v = Math.ceil(lo/st)*st; v <= hi + 1e-9; v += st) out.push(+(v.toFixed(10)));
+  return out;
+}
+function nf(v, d){ if(!isFinite(v)) return '—'; if(Math.abs(v) < 5e-13) v = 0; return v.toFixed(d); }
+const SVGNS = 'http://www.w3.org/2000/svg';
+function el(tag, attrs){
+  const e = document.createElementNS(SVGNS, tag);
+  for(const k in attrs) e.setAttribute(k, attrs[k]);
+  return e;
+}
+
+/* ---------- 数据 ---------- */
+const FNS = {
+  q: {name:'x²', tex:'f(x)=x^{2}', f:x=>x*x,       d:x=>2*x,     dv:2},
+  c: {name:'x³', tex:'f(x)=x^{3}', f:x=>x*x*x,     d:x=>3*x*x,   dv:3}
+};
+const X0 = 1;
+let cur = 'q';
+
+/* ---------- 画布 ---------- */
+const W = 860, H = 218, ML = 48, MR = 16, MT = 12, MB = 32;
+const PX0 = ML, PX1 = W - MR, PY0 = MT, PY1 = H - MB;
+document.getElementById('clipR').setAttribute('y', 0);
+
+function domain(f){
+  const xMin = -0.6, xMax = 2.6;
+  let lo = Infinity, hi = -Infinity;
+  const push = v => { if(isFinite(v)){ if(v<lo) lo=v; if(v>hi) hi=v; } };
+  for(let i=0;i<=240;i++) push(f(xMin + (xMax-xMin)*i/240));
+  const h = +document.getElementById('sh').value;
+  push(f(X0)); push(f(X0+h));
+  const m1 = fns.d(X0), dq = (f(X0+h)-f(X0))/h;
+  push(f(X0) + m1*(xMin-X0)); push(f(X0) + m1*(xMax-X0));
+  push(f(X0) + dq*(xMin-X0)); push(f(X0) + dq*(xMax-X0));
+  const pad = (hi-lo)*0.12 || 1;
+  return {xMin, xMax, yMin: lo-pad, yMax: hi+pad};
+}
+let fns = FNS[cur];
+
+function render(){
+  const hv = +document.getElementById('sh').value;
+  const f = fns.f, d = fns.d;
+  const dom = domain(f);
+  const X = x => PX0 + (x-dom.xMin)/(dom.xMax-dom.xMin)*(PX1-PX0);
+  const Y = y => PY1 - (y-dom.yMin)/(dom.yMax-dom.yMin)*(PY1-PY0);
+
+  /* 网格 + 轴 */
+  const gGrid = document.getElementById('gGrid'), gAxes = document.getElementById('gAxes'),
+        gTicks = document.getElementById('gTicks');
+  gGrid.innerHTML=''; gAxes.innerHTML=''; gTicks.innerHTML='';
+  const xt = niceTicks(dom.xMin, dom.xMax, 6), yt = niceTicks(dom.yMin, dom.yMax, 5);
+  xt.forEach(v => gGrid.appendChild(el('line', {x1:X(v),y1:PY0,x2:X(v),y2:PY1,
+    stroke:'#ece7de','stroke-width':1})));
+  yt.forEach(v => gGrid.appendChild(el('line', {x1:PX0,y1:Y(v),x2:PX1,y2:Y(v),
+    stroke:'#ece7de','stroke-width':1})));
+  if(dom.yMin < 0 && dom.yMax > 0)
+    gAxes.appendChild(el('line', {x1:PX0,y1:Y(0),x2:PX1,y2:Y(0),stroke:'#c8c0b4','stroke-width':1.3}));
+  if(dom.xMin < 0 && dom.xMax > 0)
+    gAxes.appendChild(el('line', {x1:X(0),y1:PY0,x2:X(0),y2:PY1,stroke:'#c8c0b4','stroke-width':1.3}));
+  xt.forEach(v => {
+    const t = el('text', {x:X(v), y:PY1+14, 'font-size':10.5, fill:'#8a908e','text-anchor':'middle'});
+    t.textContent = nf(v, Math.abs(v)<10 && v%1!==0 ? 1 : 0);
+    gTicks.appendChild(t);
+  });
+  yt.forEach(v => {
+    const t = el('text', {x:PX0-6, y:Y(v)+3.5, 'font-size':10.5, fill:'#8a908e','text-anchor':'end'});
+    t.textContent = nf(v, Math.abs(v)<10 && v%1!==0 ? 1 : 0);
+    gTicks.appendChild(t);
+  });
+
+  /* 曲线 */
+  let dp = '';
+  for(let i=0;i<=400;i++){
+    const x = dom.xMin + (dom.xMax-dom.xMin)*i/400, y = f(x);
+    if(!isFinite(y)) continue;
+    dp += (dp ? ' L ' : 'M ') + X(x).toFixed(2) + ' ' + Y(y).toFixed(2);
+  }
+  document.getElementById('pCurve').setAttribute('d', dp);
+
+  /* 数值 */
+  const y0 = f(X0), y1 = f(X0+hv);
+  const dq = (y1 - y0)/hv, m1 = d(X0);
+  const diff = Math.abs(dq - m1);
+  const denom = 1 + dq*m1;
+  const ang = Math.abs(Math.atan(Math.abs(denom) < 1e-9 ? Math.PI/2 : diff/denom)*180/Math.PI);
+
+  /* 切线（过 A，斜率 m1）与割线（过 A，斜率 dq） */
+  const pTan = document.getElementById('pTan'), pSec = document.getElementById('pSec');
+  pTan.setAttribute('d', `M ${X(dom.xMin)} ${Y(y0+m1*(dom.xMin-X0))} L ${X(dom.xMax)} ${Y(y0+m1*(dom.xMax-X0))}`);
+  pSec.setAttribute('d', `M ${X(dom.xMin)} ${Y(y0+dq*(dom.xMin-X0))} L ${X(dom.xMax)} ${Y(y0+dq*(dom.xMax-X0))}`);
+
+  /* 斜率三角形（Δx 水平 / Δy 竖直） */
+  const tri = document.getElementById('pTri');
+  tri.setAttribute('d', `M ${X(X0)} ${Y(y0)} L ${X(X0+hv)} ${Y(y0)} L ${X(X0+hv)} ${Y(y1)}`);
+  document.getElementById('lV').setAttribute('x1', X(X0+hv)),
+  document.getElementById('lV').setAttribute('y1', Y(y1)),
+  document.getElementById('lV').setAttribute('x2', X(X0+hv)),
+  document.getElementById('lV').setAttribute('y2', PY1);
+
+  const cA = document.getElementById('cA'), cB = document.getElementById('cB'), cX0 = document.getElementById('cX0');
+  cA.setAttribute('cx', X(X0));  cA.setAttribute('cy', Y(y0));
+  cB.setAttribute('cx', X(X0+hv)); cB.setAttribute('cy', Y(y1));
+  cX0.setAttribute('cx', X(X0)); cX0.setAttribute('cy', Y(y0));
+
+  /* 标签 */
+  const gL = document.getElementById('gLabels'); gL.innerHTML='';
+  const mk = (x, y, s, fill, anchor, dx=0, dy=0) => {
+    const t = el('text', {x:x+dx, y:y+dy, 'font-size':11.5, fill:fill, 'text-anchor':anchor||'start',
+      'font-weight':500});
+    t.textContent = s; gL.appendChild(t);
+  };
+  mk(X(X0), Y(y0), 'A('+X0+', '+nf(y0,0)+')', '#4e6a5b', 'end', -8, -6);
+  const bx = X(X0+hv), bRight = bx > 620;
+  mk(bx, Y(y1), 'B('+nf(X0+hv,2)+', '+nf(y1,2)+')', '#6b8899', bRight ? 'end' : 'start',
+     bRight ? -10 : 8, -9);
+  mk(bx, PY1-4, 'Δx = h', '#b39a6e', 'middle', 0, -2);
+  /* 竖直边太短时省略 Δy 标注（否则必然与 B 标签挤在一起），图例已说明虚线含义 */
+  if(Math.abs(Y(y0) - Y(y1)) >= 24)
+    mk(bx + 8, Y(y1) + (Y(y0)-Y(y1))*0.62, 'Δy', '#b39a6e', 'start', 2, 0);
+  const clampY = v => Math.max(PY0 + 13, Math.min(PY1 - 6, v));
+  const tx = dom.xMin + (dom.xMax-dom.xMin)*0.06;
+  mk(X(tx), clampY(Y(y0+m1*(tx-X0))), '切线', '#4e6a5b', 'start', 2, -7);
+  const sx = dom.xMin + (dom.xMax-dom.xMin)*0.30;
+  mk(X(sx), clampY(Y(y0+dq*(sx-X0))), '割线', '#6b8899', 'start', 2, 13);
+
+  /* KaTeX 差商 */
+  tex(document.getElementById('dqTex'),
+      `\\dfrac{f(${X0}+${nf(hv,2)})-f(${X0})}{${nf(hv,2)}} = \\dfrac{${nf(y1,4)}-${nf(y0,4)}}{${nf(hv,2)}} = ${nf(dq,6)}`,
+      `(f(1+${nf(hv,2)})-f(1))/${nf(hv,2)} = ${nf(dq,6)}`);
+
+  /* 数字面板 */
+  document.getElementById('vh').textContent = nf(hv,2);
+  document.getElementById('rh').textContent = nf(hv,2);
+  document.getElementById('rdy').textContent = nf(y1-y0,4);
+  document.getElementById('rdq').textContent = nf(dq,6);
+  document.getElementById('rdd').textContent = nf(m1,6);
+  document.getElementById('rdiff').textContent = nf(diff,6);
+  document.getElementById('rang').textContent = ang.toFixed(2)+'°';
+
+  /* 结论条 */
+  const closing = hv <= 0.05 ? '此时割线与切线几乎重合。' : 'h 再小一些，割线会更贴近切线。';
+  document.getElementById('concl').innerHTML =
+    `h = <b>${nf(hv,2)}</b> 时，割线斜率（差商）为 <b>${nf(dq,6)}</b>，` +
+    `切线斜率 f′(x₀) = <b>${nf(m1,6)}</b>，两者相差 <b>${nf(diff,6)}</b>、夹角 <b>${ang.toFixed(2)}°</b>。` +
+    `h→0 时割线绕 A 点转动并趋向切线，差商就收敛到导数 <b>${nf(m1,6)}</b>。${closing}`;
+}
+
+/* ---------- 交互 ---------- */
+document.getElementById('sh').addEventListener('input', render);
+document.getElementById('bq').addEventListener('click', () => {
+  cur='q'; fns=FNS.q;
+  document.getElementById('bq').classList.add('on'); document.getElementById('bc').classList.remove('on');
+  document.querySelector('h1 small').textContent = 'f(x)=x²，在 x₀=1 处';
+  render();
+});
+document.getElementById('bc').addEventListener('click', () => {
+  cur='c'; fns=FNS.c;
+  document.getElementById('bc').classList.add('on'); document.getElementById('bq').classList.remove('on');
+  document.querySelector('h1 small').textContent = 'f(x)=x³，在 x₀=1 处';
+  render();
+});
+render();
+</script>
+</body>
+</html>

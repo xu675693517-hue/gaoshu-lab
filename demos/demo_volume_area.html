@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>定积分应用 · 曲边梯形面积与旋转体体积</title>
+<link rel="stylesheet" href="../assets/katex/katex.min.css">
+<script src="../assets/katex/katex.min.js"></script>
+<style>
+:root{
+  --bg:#f7f4ef; --surface:#ffffff; --ink:#2a2f2e; --ink2:#535a59;
+  --muted:#8a908e; --line:#e5dfd6; --p:#6e8b7b; --p-deep:#4e6a5b;
+  --p-soft:#e8efeb; --ok:#5c8a6a; --warn:#bf8a3c; --bad:#b5705f; --info:#6b8899;
+}
+*{box-sizing:border-box}
+html{overflow-x:hidden}
+body{margin:0;background:var(--bg);color:var(--ink);overflow-x:hidden;
+  font-family:"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+  font-size:13px;line-height:1.45;-webkit-font-smoothing:antialiased}
+.wrap{max-width:860px;margin:0 auto;padding:8px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;
+  padding:10px 14px 9px;box-shadow:0 1px 3px rgba(42,47,46,.05)}
+.head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+h1{margin:0;font-size:16px;font-weight:600;letter-spacing:.2px}
+h1 small{font-weight:400;color:var(--muted);font-size:12px;margin-left:6px}
+.btns{display:flex;gap:6px;flex-wrap:wrap}
+button{font-family:inherit;font-size:12.5px;color:var(--ink);background:#f1eee8;
+  border:1px solid var(--line);border-radius:8px;padding:3px 10px;cursor:pointer}
+button:hover{background:#eae5dc}
+button.on{background:var(--p-deep);border-color:var(--p-deep);color:#fbfbf8}
+.strip{min-height:24px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  margin:5px 0 3px;font-size:13px}
+.strip .lbl{font-size:11.5px;color:var(--muted);white-space:nowrap}
+.strip .fb{font-family:Consolas,monospace;font-size:12.5px}
+#plot{display:block;width:100%;height:auto;background:#fffdfa;border:1px solid var(--line);
+  border-radius:10px;touch-action:none;cursor:ew-resize}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:11px;color:var(--muted);margin:4px 0 0}
+.legend i{display:inline-block;width:15px;height:0;border-top-width:2.5px;border-top-style:solid;
+  vertical-align:middle;margin-right:3px}
+.legend b{font-weight:600}
+.sw{display:inline-block;width:14px;height:9px;border-radius:2px;vertical-align:-1px;
+  margin-right:3px;border:1px solid #d9d2c6}
+.ctrl{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:5px 0 3px}
+.slot{display:flex;align-items:center;gap:8px;flex:1 1 300px;min-width:250px}
+.slot label{font-size:12px;color:var(--muted);white-space:nowrap}
+input[type=range]{flex:1 1 auto;min-width:90px;height:20px;accent-color:var(--p-deep);
+  background:transparent;cursor:pointer}
+.val{font-family:Consolas,"Courier New",monospace;font-size:12.5px;color:var(--p-deep);
+  min-width:52px;text-align:right;font-variant-numeric:tabular-nums}
+.read{display:flex;gap:10px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);
+  margin:0 0 3px;align-items:center;min-height:19px}
+.read b{font-family:Consolas,"Courier New",monospace;color:var(--ink);font-weight:600;
+  font-variant-numeric:tabular-nums}
+.fml{min-height:22px;display:flex;align-items:center;gap:8px;font-size:13px;flex-wrap:wrap;
+  margin:0 0 2px}
+.fml .tag{font-size:11.5px;color:var(--muted);white-space:nowrap}
+.fml .fb{font-family:Consolas,monospace;font-size:12px}
+.concl{border-left:3px solid var(--p-deep);background:#eaece7;border-radius:0 8px 8px 0;
+  padding:7px 11px;font-size:12.8px;line-height:1.5;margin-top:3px}
+.concl b{font-family:Consolas,"Courier New",monospace;color:var(--p-deep);font-weight:600}
+.concl .k{color:var(--p-deep);font-weight:600}
+svg text{font-family:"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+</style>
+</head>
+<body>
+<div class="wrap"><div class="card">
+  <div class="head">
+    <h1>定积分应用<small id="sub">拖 a、b —— 曲边梯形面积 S 与绕组轴旋转的体积 V 实时联动</small></h1>
+    <div class="btns">
+      <button id="bS" class="on">f(x)=√x</button>
+      <button id="bQ">f(x)=x²</button>
+      <button id="bFull">取满整个区间</button>
+    </div>
+  </div>
+
+  <div class="strip">
+    <span class="lbl">两个公式</span>
+    <span id="tDef"></span>
+  </div>
+
+  <svg id="plot" viewBox="0 0 860 184" preserveAspectRatio="xMidYMid meet" role="img"
+       aria-label="曲边梯形面积与旋转体体积示意图">
+    <defs><clipPath id="clip"><rect id="clipR" x="44" y="10" width="798" height="132"></rect></clipPath></defs>
+    <g id="gGrid"></g>
+    <g clip-path="url(#clip)">
+      <path id="pBody" fill="#e7eef2" stroke="none"></path>
+      <path id="pArea" fill="#dfeadf" stroke="none"></path>
+      <g id="gDisk"></g>
+      <path id="pOutline" fill="none" stroke="#6b8899" stroke-width="1.4" stroke-dasharray="5 4"></path>
+      <path id="pCurveDim" fill="none" stroke="#c9c1b5" stroke-width="2.2" stroke-linejoin="round"></path>
+      <path id="pCurve" fill="none" stroke="#6e8b7b" stroke-width="3" stroke-linejoin="round"></path>
+      <line id="lA" stroke="#b5705f" stroke-width="1.4" stroke-dasharray="4 3"></line>
+      <line id="lB" stroke="#b5705f" stroke-width="1.4" stroke-dasharray="4 3"></line>
+      <g id="gPts"></g>
+    </g>
+    <g id="gAxes"></g>
+    <g id="gLabels"></g>
+  </svg>
+
+  <div class="legend">
+    <span><i style="border-top-color:#6e8b7b"></i>曲线 y=f(x)（粗绿段＝积分区间 [a,b]）</span>
+    <span><span class="sw" style="background:#dfeadf"></span>曲边梯形面积 S</span>
+    <span><span class="sw" style="background:#e7eef2"></span>旋转体剖面（曲线绕 x 轴翻折）</span>
+    <span><i style="border-top-color:#6b8899;border-top-style:dashed"></i>旋转体轮廓与圆盘切片</span>
+  </div>
+
+  <div class="ctrl">
+    <div class="slot">
+      <label for="sa">下限 a =</label>
+      <input id="sa" type="range" min="0" max="6" step="0.01" value="1">
+      <span class="val" id="va">1.00</span>
+    </div>
+    <div class="slot">
+      <label for="sb">上限 b =</label>
+      <input id="sb" type="range" min="0" max="6" step="0.01" value="4">
+      <span class="val" id="vb">4.00</span>
+    </div>
+  </div>
+
+  <div class="read">
+    <span>Δx = b − a = <b id="rdx">—</b></span>
+    <span id="pill">—</span>
+    <span>S = <b id="rS">—</b>（面积）</span>
+    <span>V = <b id="rV">—</b>（体积）</span>
+  </div>
+
+  <div class="fml">
+    <span class="tag">面积解析式</span><span id="tS"></span>
+  </div>
+  <div class="fml">
+    <span class="tag">体积解析式</span><span id="tV"></span>
+  </div>
+
+  <div class="concl" id="concl">—</div>
+</div></div>
+
+<script>
+/* ---------- 工具 ---------- */
+function tex(el, s, fb){
+  try{
+    if(typeof katex === 'undefined' || typeof katex.renderToString !== 'function')
+      throw new Error('katex unavailable');
+    el.innerHTML = katex.renderToString(s, {throwOnError:false, displayMode:false});
+  }catch(e){ el.className = 'fb'; el.textContent = fb; }
+}
+function sf(v, d){
+  if(!isFinite(v)) return '—';
+  if(Math.abs(v) < 5e-10) v = 0;
+  return (v < 0 ? '−' : '') + Math.abs(v).toFixed(d);
+}
+function niceTicks(lo, hi, n){
+  const span = hi - lo;
+  if(!(span > 0) || !isFinite(span)) return [lo];
+  const raw = span/n, mag = Math.pow(10, Math.floor(Math.log10(raw))), nm = raw/mag;
+  let st = nm <= 1 ? 1 : nm <= 2 ? 2 : nm <= 2.5 ? 2.5 : nm <= 5 ? 5 : 10;
+  st *= mag;
+  const out = [];
+  for(let v = Math.ceil(lo/st)*st; v <= hi + 1e-9; v += st) out.push(+(v.toFixed(10)));
+  return out;
+}
+const NS = 'http://www.w3.org/2000/svg';
+function el(tag, attrs, txt){
+  const e = document.createElementNS(NS, tag);
+  for(const k in attrs) e.setAttribute(k, attrs[k]);
+  if(txt != null) e.textContent = txt;
+  return e;
+}
+const $ = id => document.getElementById(id);
+
+/* ---------- 素材：两个函数，面积/体积均有闭式原函数（数值经 Python 校验）
+     f=√x：S=(2/3)(b^{3/2}−a^{3/2})，V=π∫x dx=(π/2)(b²−a²)
+     f=x²：S=(b³−a³)/3，            V=π∫x⁴dx=(π/5)(b⁵−a⁵)          ---------- */
+const PI = Math.PI;
+const MODE = {
+  sqrt: {
+    key:'sqrt', name:'f(x)=√x', f: x => Math.sqrt(x), ftex:'\\sqrt{x}',
+    f2tex:'x', f2: x => x,
+    xmax: 6, ymax: 3.0, sa:1, sb:4,
+    /* 解析式：向量化文本由 render 组装 */
+    S: (a,b) => (2/3)*(Math.pow(b,1.5) - Math.pow(a,1.5)),
+    V: (a,b) => PI*(b*b - a*a)/2,
+    Stex: (a,b) => '\\frac{2}{3}\\left(b^{3/2}-a^{3/2}\\right)',
+    Vtex: (a,b) => '\\frac{\\pi}{2}\\left(b^{2}-a^{2}\\right)',
+    Ssub: (a,b) => '\\frac{2}{3}\\left(' + b.toFixed(2) + '^{3/2}-' + a.toFixed(2) + '^{3/2}\\right)',
+    Vsub: (a,b) => '\\frac{\\pi}{2}\\left(' + b.toFixed(2) + '^{2}-' + a.toFixed(2) + '^{2}\\right)'
+  },
+  square: {
+    key:'square', name:'f(x)=x²', f: x => x*x, ftex:'x^{2}',
+    f2tex:'x^{4}', f2: x => x*x*x*x,
+    xmax: 3, ymax: 11.0, sa:1, sb:2,
+    S: (a,b) => (b*b*b - a*a*a)/3,
+    V: (a,b) => PI*(Math.pow(b,5) - Math.pow(a,5))/5,
+    Stex: (a,b) => '\\frac{b^{3}-a^{3}}{3}',
+    Vtex: (a,b) => '\\frac{\\pi}{5}\\left(b^{5}-a^{5}\\right)',
+    Ssub: (a,b) => '\\frac{' + b.toFixed(2) + '^{3}-' + a.toFixed(2) + '^{3}}{3}',
+    Vsub: (a,b) => '\\frac{\\pi}{5}\\left(' + b.toFixed(2) + '^{5}-' + a.toFixed(2) + '^{5}\\right)'
+  }
+};
+let M = MODE.sqrt;
+
+const W = 860, H = 184, ML = 44, MR = 18, MT = 10, PY1 = 142;
+const X0 = ML, X1 = W - MR;
+let xMin = 0, xMax = 6, yMin = -3, yMax = 3;
+
+const xp = x => X0 + (x - xMin)/(xMax - xMin)*(X1 - X0);
+const yp = y => PY1 - (y - yMin)/(yMax - yMin)*(PY1 - MT);
+
+function drawStatic(){
+  const gG = $('gGrid'), gA = $('gAxes'), gL = $('gLabels');
+  [gG, gA, gL].forEach(g => { while(g.firstChild) g.removeChild(g.firstChild); });
+  $('clipR').setAttribute('width', X1 - X0);
+  $('clipR').setAttribute('height', PY1 - MT);
+
+  /* 网格 */
+  niceTicks(xMin, xMax, 6).forEach(v => {
+    const x = xp(v);
+    if(v > 1e-9)
+      gG.appendChild(el('line', {x1:x, y1:MT, x2:x, y2:PY1, stroke:'#f4efe7', 'stroke-width':1}));
+    gA.appendChild(el('text', {x:x, y:PY1 + 12, 'text-anchor':'middle',
+      'font-size':10, fill:'#8a908e'}, v.toFixed(v % 1 ? 1 : 0)));
+  });
+  niceTicks(yMin, yMax, 4).forEach(v => {
+    if(Math.abs(v) < 1e-9) return;
+    const y = yp(v);
+    gG.appendChild(el('line', {x1:X0, y1:y, x2:X1, y2:y, stroke:'#f6f1e9', 'stroke-width':1}));
+    gA.appendChild(el('text', {x:X0 - 5, y:y + 3.5, 'text-anchor':'end',
+      'font-size':10, fill:'#8a908e'}, sf(v, 0)));
+  });
+
+  /* 旋转轴（x 轴）—— 这是旋转所绕的轴，加粗强调 */
+  const y0 = yp(0);
+  gA.appendChild(el('line', {x1:X0, y1:y0, x2:X1, y2:y0, stroke:'#b0a99d', 'stroke-width':2}));
+  gA.appendChild(el('text', {x:X1 - 2, y:y0 - 6, 'text-anchor':'end',
+    'font-size':10.5, fill:'#8a908e'}, '旋转轴（x 轴）'));
+  gA.appendChild(el('text', {x:X0 - 6, y:MT + 10, 'text-anchor':'end',
+    'font-size':10.5, fill:'#8a908e'}, 'y'));
+}
+
+function render(){
+  drawStatic();
+
+  const a = +$('sa').value, b = +$('sb').value;
+  const S = M.S(a, b), V = M.V(a, b);
+
+  const y0 = yp(0);
+  const XA = xp(a), XB = xp(b);
+
+  /* 曲线：区间内粗绿、区间外淡灰 */
+  let pIn = '', pOut = '', inStart = true, outStart = true;
+  const N = 320;
+  for(let i = 0; i <= N; i++){
+    const x = xMin + (xMax - xMin)*i/N;
+    const px = xp(x).toFixed(2), py = yp(M.f(x)).toFixed(2);
+    if(x >= a - 1e-9 && x <= b + 1e-9){ pIn += (inStart ? 'M' : 'L') + px + ' ' + py; inStart = false; }
+    else { pOut += (outStart ? 'M' : 'L') + px + ' ' + py; outStart = false; }
+  }
+  $('pCurve').setAttribute('d', pIn);
+  $('pCurveDim').setAttribute('d', pOut);
+
+  /* 曲边梯形（上半）：沿曲线 a→b，再沿 x 轴回到 a，闭合 */
+  let area = 'M' + XA.toFixed(2) + ' ' + y0.toFixed(2);
+  for(let i = 0; i <= 80; i++){
+    const t = a + (b - a)*i/80;
+    area += 'L' + xp(t).toFixed(2) + ' ' + yp(M.f(t)).toFixed(2);
+  }
+  area += 'L' + XB.toFixed(2) + ' ' + y0.toFixed(2) + 'Z';
+  $('pArea').setAttribute('d', area);
+
+  /* 旋转体剖面（下半）：关于 x 轴翻折得到的镜像区域，与上半合起来就是旋转体的轴截面 */
+  let body = 'M' + XA.toFixed(2) + ' ' + y0.toFixed(2);
+  for(let i = 0; i <= 80; i++){
+    const t = a + (b - a)*i/80;
+    body += 'L' + xp(t).toFixed(2) + ' ' + yp(-M.f(t)).toFixed(2);
+  }
+  body += 'L' + XB.toFixed(2) + ' ' + y0.toFixed(2) + 'Z';
+  $('pBody').setAttribute('d', body);
+
+  /* 轮廓：上半曲线 + 下半镜像，构成旋转体的“轴截面” */
+  let out = '';
+  for(let i = 0; i <= 80; i++){
+    const t = a + (b - a)*i/80;
+    out += (i ? 'L' : 'M') + xp(t).toFixed(2) + ' ' + yp(M.f(t)).toFixed(2);
+  }
+  for(let i = 80; i >= 0; i--){
+    const t = a + (b - a)*i/80;
+    out += 'L' + xp(t).toFixed(2) + ' ' + yp(-M.f(t)).toFixed(2);
+  }
+  out += 'Z';
+  $('pOutline').setAttribute('d', out);
+
+  /* 圆盘切片：在每个 x 处，旋转得到半径 f(x) 的圆，画成椭圆示意 */
+  const gD = $('gDisk');
+  while(gD.firstChild) gD.removeChild(gD.firstChild);
+  const ND = 9;
+  for(let i = 1; i < ND; i++){
+    const t = a + (b - a)*i/ND;
+    const r = Math.abs(yp(M.f(t)) - y0);
+    gD.appendChild(el('ellipse', {cx:xp(t).toFixed(2), cy:y0.toFixed(2),
+      rx:6, ry:r.toFixed(2), fill:'none', stroke:'#6b8899',
+      'stroke-width':1.1, 'stroke-dasharray':'3 3', opacity:0.72}));
+  }
+
+  /* a、b 处的界线与端点 */
+  const lA = $('lA'), lB = $('lB');
+  const topA = yp(Math.max(M.f(a), 0)), botA = yp(-M.f(a));
+  const topB = yp(Math.max(M.f(b), 0)), botB = yp(-M.f(b));
+  lA.setAttribute('x1', XA); lA.setAttribute('x2', XA);
+  lA.setAttribute('y1', Math.min(topA, botA)); lA.setAttribute('y2', Math.max(topA, botA));
+  lB.setAttribute('x1', XB); lB.setAttribute('x2', XB);
+  lB.setAttribute('y1', Math.min(topB, botB)); lB.setAttribute('y2', Math.max(topB, botB));
+
+  const gPt = $('gPts');
+  while(gPt.firstChild) gPt.removeChild(gPt.firstChild);
+  [[a, M.f(a)], [b, M.f(b)]].forEach(p => {
+    gPt.appendChild(el('circle', {cx:xp(p[0]), cy:yp(p[1]), r:4.6, fill:'#fffdfa',
+      stroke:'#b5705f', 'stroke-width':2}));
+  });
+
+  /* 数值与文字 */
+  $('va').textContent = a.toFixed(2);
+  $('vb').textContent = b.toFixed(2);
+  $('rdx').textContent = sf(b - a, 2);
+  $('rS').textContent = sf(S, 4);
+  $('rV').textContent = sf(V, 4);
+  $('pill').textContent = 'f(x)=' + (M.key === 'sqrt' ? '√x' : 'x²') + '，' + a.toFixed(2) + ' ≤ x ≤ ' + b.toFixed(2);
+
+  tex($('tDef'), 'S=\\int_{a}^{b}f(x)\\,dx=\\int_{' + a.toFixed(2) + '}^{' + b.toFixed(2) + '}'
+    + M.ftex + '\\,dx,\\qquad V=\\pi\\int_{a}^{b}f^{2}(x)\\,dx=\\pi\\int_{' + a.toFixed(2) + '}^{'
+    + b.toFixed(2) + '}' + M.f2tex + '\\,dx',
+    'S=∫f dx, V=π∫f² dx');
+
+  tex($('tS'), M.Stex(a, b) + '=' + M.Ssub(a, b) + '=' + sf(S, 4),
+    'S = ' + sf(S, 4));
+  tex($('tV'), M.Vtex(a, b) + '=' + M.Vsub(a, b) + '=' + sf(V, 4),
+    'V = ' + sf(V, 4));
+
+  /* 底部「一句话本质」 */
+  const C = $('concl');
+  const wide = (b - a) > 0.6*(xMax - xMin);
+  const near = (b - a) < 0.2*(xMax - xMin);
+  let tip = '';
+  if(near) tip = ' <span class="k">区间很窄时 S≈f(a)Δx、V≈πf(a)²Δx，正是微元法的原型。</span>';
+  else if(wide) tip = ' <span class="k">已取满整个定义域，S、V 达到这段曲线上的最大值。</span>';
+  const ratio = S > 1e-12 ? sf(V/(S*PI), 3) : '—';
+  C.innerHTML = '<span class="k">一句话本质：</span>S=∫f 量的是面积、V=π∫f² 量的是体积：'
+    + '同一段 [a,b] 上 V 多了一个 π、积分的是 f²，所以 f 越大、区间越长，体积涨得越快。'
+    + '本例 V/(πS)=<b>' + ratio + '</b>（旋转体的平均半径平方）。' + tip;
+}
+
+/* ---------- 交互：滑块 + 图上直接拖 a / b ---------- */
+const svg = $('plot');
+let drag = null;
+function applyBounds(src){
+  let a = +$('sa').value, b = +$('sb').value;
+  const GAP = 0.05;
+  if(a > b - GAP){ if(src === 'a') a = b - GAP; else b = a + GAP; }
+  a = Math.max(0, Math.min(M.xmax - GAP, a));
+  b = Math.max(GAP, Math.min(M.xmax, b));
+  if(b - a < GAP) b = Math.min(M.xmax, a + GAP);
+  $('sa').value = a; $('sb').value = b;
+  render();
+}
+function setBound(which, x){
+  x = Math.max(0, Math.min(M.xmax, x));
+  x = Math.round(x*100)/100;
+  $(which === 'a' ? 'sa' : 'sb').value = x;
+  applyBounds(which);
+}
+function clientToX(cx){
+  const r = svg.getBoundingClientRect();
+  const vx = (cx - r.left)/r.width*W;
+  return xMin + (vx - X0)/(X1 - X0)*(xMax - xMin);
+}
+svg.addEventListener('pointerdown', e => {
+  const x = clientToX(e.clientX);
+  const a = +$('sa').value, b = +$('sb').value;
+  drag = Math.abs(x - a) <= Math.abs(x - b) ? 'a' : 'b';
+  try{ svg.setPointerCapture(e.pointerId); }catch(err){}
+  setBound(drag, x);
+});
+svg.addEventListener('pointermove', e => { if(drag) setBound(drag, clientToX(e.clientX)); });
+svg.addEventListener('pointerup', e => {
+  drag = null;
+  try{ svg.releasePointerCapture(e.pointerId); }catch(err){}
+});
+svg.addEventListener('pointercancel', () => { drag = null; });
+svg.addEventListener('pointerleave', () => { drag = null; });
+
+$('sa').addEventListener('input', () => applyBounds('a'));
+$('sb').addEventListener('input', () => applyBounds('b'));
+$('bFull').addEventListener('click', () => {
+  $('sa').value = 0; $('sb').value = M.xmax; render();
+});
+function setMode(k){
+  M = MODE[k];
+  xMax = M.xmax; yMin = -M.ymax; yMax = M.ymax;
+  const sa = $('sa'), sb = $('sb');
+  sa.max = xMax; sb.max = xMax;
+  sa.value = M.sa; sb.value = M.sb;
+  $('bS').className = k === 'sqrt' ? 'on' : '';
+  $('bQ').className = k === 'square' ? 'on' : '';
+  render();
+}
+$('bS').addEventListener('click', () => setMode('sqrt'));
+$('bQ').addEventListener('click', () => setMode('square'));
+
+setMode('sqrt');
+window.__demoReady = true;
+</script>
+</body>
+</html>

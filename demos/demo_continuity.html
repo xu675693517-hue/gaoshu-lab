@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>连续与间断点 · 三个条件逐条判定</title>
+<link rel="stylesheet" href="../assets/katex/katex.min.css">
+<script src="../assets/katex/katex.min.js"></script>
+<style>
+:root{
+  --bg:#f7f4ef;--surface:#ffffff;--ink:#2a2f2e;--ink2:#535a59;--muted:#8a908e;
+  --line:#e5dfd6;--p:#6e8b7b;--p-deep:#4e6a5b;--p-soft:#e8efeb;--ok:#5c8a6a;
+  --warn:#bf8a3c;--bad:#b5705f;--info:#6b8899;
+}
+*{box-sizing:border-box}
+html,body{overflow-x:hidden}
+body{margin:0;background:var(--bg);color:var(--ink);overflow-x:hidden;
+  font-family:"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:860px;margin:0 auto;padding:8px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;
+  padding:10px 14px 9px;box-shadow:0 1px 3px rgba(47,53,55,.05)}
+.head{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+h1{margin:0;font-size:15.5px;font-weight:600;letter-spacing:.2px}
+h1 small{font-weight:400;color:var(--muted);font-size:12px;margin-left:6px}
+.btns{display:flex;gap:5px;flex-wrap:wrap}
+button{font-family:inherit;font-size:12px;color:var(--ink);background:#f1eee8;
+  border:1px solid var(--line);border-radius:8px;padding:3px 9px;cursor:pointer}
+button:hover{background:#eae5dc}
+button.on{background:var(--p-deep);border-color:var(--p-deep);color:#fbfbf8}
+.strip{min-height:30px;display:flex;align-items:center;gap:10px;margin:5px 0 3px;
+  padding:3px 9px;background:var(--p-soft);border:1px solid #dbe4de;border-radius:9px;
+  font-size:13px;overflow:hidden;white-space:nowrap;flex-wrap:wrap}
+.strip .katex{font-size:1em}
+#stripTxt{font-size:12px;color:var(--ink2)}
+.fb{font-family:Consolas,"Courier New",monospace;font-size:12px;color:var(--ink2)}
+#plot{display:block;width:100%;height:170px;background:#fffdfa;border:1px solid var(--line);
+  border-radius:10px}
+.chips{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:6px 0 4px}
+.chip{border:1px solid var(--line);border-radius:8px;padding:3px 8px;font-size:11.5px;
+  background:#f8f5f0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chip b{font-family:Consolas,"Courier New",monospace;font-size:12px;margin-right:3px}
+.chip.yes{background:#eaf1eb;border-color:#cfe0d3;color:var(--ok)}
+.chip.no{background:#f7ece8;border-color:#e7d2cb;color:var(--bad)}
+.chip .mk{font-weight:700}
+.read{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin:0 0 6px}
+.kv{background:#f6f3ed;border:1px solid var(--line);border-radius:8px;padding:3px 7px;
+  font-size:11.5px;color:var(--muted);overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.kv b{display:block;font-family:Consolas,"Courier New",monospace;font-size:12.5px;
+  color:var(--ink);font-weight:600;margin-top:1px}
+.ctrl{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:6px 0 4px}
+.slot{display:flex;align-items:center;gap:7px;flex:1 1 280px;min-width:210px}
+.slot label{font-size:12.5px;color:var(--ink2);white-space:nowrap}
+input[type=range]{flex:1 1 auto;min-width:80px;height:18px;accent-color:var(--p-deep);
+  background:transparent;cursor:pointer}
+.val{font-family:Consolas,"Courier New",monospace;font-size:12.5px;color:var(--p-deep);
+  min-width:50px;text-align:right}
+.concl{border-left:3px solid var(--p-deep);background:var(--p-soft);border-radius:0 8px 8px 0;
+  padding:7px 11px;font-size:12.5px;line-height:1.5;min-height:44px}
+.concl b{font-family:Consolas,"Courier New",monospace;color:var(--p-deep)}
+.concl .tag{color:var(--bad);font-weight:600}
+@media(max-width:560px){.read{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .chips{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap"><div class="card">
+  <div class="head">
+    <h1>连续与间断点 · 三个条件逐条判定<small id="sub">可去间断：(x²−1)/(x−1) 在 x₀=1</small></h1>
+    <div class="btns">
+      <button id="m0" class="on">可去</button>
+      <button id="m1">跳跃</button>
+      <button id="m2">无穷</button>
+      <button id="m3">振荡</button>
+      <button id="m4">对比：连续</button>
+      <button id="bdef">补定义 f(x₀)=2</button>
+    </div>
+  </div>
+
+  <div class="strip"><span id="stripTex">—</span><span id="stripTxt"></span></div>
+
+  <canvas id="plot" role="img" aria-label="间断点类型的图像与三条连续条件"></canvas>
+
+  <div class="chips">
+    <div class="chip" id="c1">① f(x₀) 有定义</div>
+    <div class="chip" id="c2">② 极限存在</div>
+    <div class="chip" id="c3">③ 极限 = f(x₀)</div>
+  </div>
+
+  <div class="read">
+    <div class="kv">左极限 f(x₀⁻)<b id="rl">—</b></div>
+    <div class="kv">右极限 f(x₀⁺)<b id="rr">—</b></div>
+    <div class="kv">f(x₀) 实际取值<b id="rf">—</b></div>
+    <div class="kv">判定结论<b id="rc">—</b></div>
+  </div>
+
+  <div class="ctrl">
+    <div class="slot">
+      <label for="sR">观察窗口半宽 R =</label>
+      <input id="sR" type="range" min="0.02" max="2" step="0.01" value="1">
+      <span class="val" id="vR">1.00</span>
+    </div>
+    <span style="font-size:11.5px;color:var(--muted)">（R 拖小＝镜头推近 x₀，看函数在 x₀ 附近到底长什么样）</span>
+  </div>
+
+  <div class="concl" id="concl">—</div>
+</div></div>
+
+<script>
+/* ================= 工具 ================= */
+function tex(el, s, fb){
+  try{
+    if(typeof katex === 'undefined' || typeof katex.renderToString !== 'function')
+      throw new Error('katex unavailable');
+    el.className = '';
+    el.innerHTML = katex.renderToString(s, {throwOnError:false, displayMode:false});
+  }catch(e){ el.className = 'fb'; el.textContent = fb; }
+}
+function nf(v, d){
+  if(v === null || v === undefined || !isFinite(v)) return '—';
+  if(Math.abs(v) < 5e-13) v = 0;
+  return v.toFixed(d);
+}
+
+/* ================= 五个素材（真值由函数本身算） ================= */
+/* add = 人为补定义时给 f(x₀) 的值 */
+const CASES = [
+  { key:'可去', sub:'可去间断：(x²−1)/(x−1) 在 x₀=1',
+    tex:'f(x)=\\dfrac{x^{2}-1}{x-1}', fb:'f(x)=(x²−1)/(x−1)',
+    f:x => (x*x-1)/(x-1), x0:1, add:2, yClamp:6 },
+  { key:'跳跃', sub:'跳跃间断：f(x)=x/|x| 在 x₀=0',
+    tex:'f(x)=\\dfrac{x}{|x|}\\quad(x\\neq0)', fb:'f(x)=x/|x| (x≠0)',
+    f:x => x/Math.abs(x), x0:0, add:1, yClamp:3 },
+  { key:'无穷', sub:'无穷间断：f(x)=1/x 在 x₀=0',
+    tex:'f(x)=\\dfrac{1}{x}\\quad(x\\neq0)', fb:'f(x)=1/x (x≠0)',
+    f:x => 1/x, x0:0, add:0, yClamp:3 },
+  { key:'振荡', sub:'振荡间断：f(x)=sin(1/x) 在 x₀=0',
+    tex:'f(x)=\\sin\\dfrac{1}{x}\\quad(x\\neq0)', fb:'f(x)=sin(1/x) (x≠0)',
+    f:x => Math.sin(1/x), x0:0, add:0, yClamp:1.6 },
+  { key:'连续', sub:'对比：f(x)=x² 在 x₀=0 处连续',
+    tex:'f(x)=x^{2}', fb:'f(x)=x²',
+    f:x => x*x, x0:0, add:0, yClamp:6 }
+];
+let C = CASES[0], patch = false;   /* patch: 是否人为补定义 */
+
+/* ---------- 单侧极限的数值判定（不靠人眼） ---------- */
+/* 判据：把 h 依次缩到 1e-8，若最后两步的变化量已经降到 0 附近，就认定收敛；
+   若数值在成倍增大就认定为无穷；否则认定为振荡（永远定不下来）。 */
+function limitAt(f, x0, dir){
+  const hs = [1e-2, 1e-3, 1e-4, 1e-5, 1e-6, 1e-7, 1e-8];
+  const v = hs.map(h => f(x0 + dir*h));
+  const n = v.length;
+  for(let i=0;i<n;i++)
+    if(!isFinite(v[i])) return {kind:'inf', val:v[i], sign:(v[i]>0?1:-1)};
+  const last = v[n-1], prev = v[n-2], prev2 = v[n-3];
+  const step1 = Math.abs(last - prev), step2 = Math.abs(prev - prev2);
+  if(step1 < 1e-6*Math.max(1, Math.abs(last)) && step2 < 1e-3)
+    return {kind:'ok', val:last};
+  if(Math.abs(last) > 5*Math.abs(prev) && Math.abs(last) > 20)
+    return {kind:'inf', val:last, sign:(last>0?1:-1)};
+  return {kind:'osc', val:last};
+}
+function limText(o){
+  if(o.kind === 'ok')  return nf(o.val, 4);
+  if(o.kind === 'inf') return (o.sign > 0 ? '+∞' : '−∞');
+  return '不存在（振荡）';
+}
+function fAtX0(){ const s = C.f(C.x0); return isFinite(s) ? s : (patch ? C.add : NaN); }
+function valText(){
+  const s = C.f(C.x0);
+  if(isFinite(s)) return nf(s, 4);
+  return patch ? nf(C.add, 4) + '（人为补上）' : '无定义';
+}
+
+/* ================= 画布 ================= */
+const cv = document.getElementById('plot'), ctx = cv.getContext('2d');
+let CW = 860, CH = 170;
+function fitCanvas(){
+  const dpr = window.devicePixelRatio || 1;
+  CW = Math.max(320, cv.clientWidth || 830);
+  CH = cv.clientHeight || 170;
+  cv.width = Math.round(CW*dpr); cv.height = Math.round(CH*dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+window.addEventListener('resize', () => { fitCanvas(); render(); });
+
+function draw(R, info){
+  const x0 = C.x0, xa = x0 - R, xb = x0 + R;
+  const PL = 46, PR = 14, PT = 10, PB = 28;
+  const px0 = PL, px1 = CW - PR, py0 = PT, py1 = CH - PB;
+  const cl = C.yClamp;
+
+  /* --- y 范围：窗口内采样，按 yClamp 截断 --- */
+  let lo = Infinity, hi = -Infinity;
+  const N = 1400, dxx = (xb-xa)/N;
+  for(let i=0;i<=N;i++){
+    const x = xa + dxx*i;
+    if(Math.abs(x-x0) < dxx*0.4) continue;
+    const v = C.f(x);
+    if(isFinite(v)){ if(v<lo) lo=v; if(v>hi) hi=v; }
+  }
+  if(!isFinite(lo)){ lo = -1; hi = 1; }
+  lo = Math.max(lo, -cl); hi = Math.min(hi, cl);
+  let span = hi - lo;
+  if(span < 0.36){ const c = (lo+hi)/2; lo = c - 0.18; hi = c + 0.18; span = 0.36; }
+  const pad = span*0.12; lo -= pad; hi += pad;
+  const gv = fAtX0();
+  if(isFinite(gv) && gv <= cl && gv >= -cl){
+    if(gv < lo) lo = gv - 0.06;
+    if(gv > hi) hi = gv + 0.06;
+  }
+
+  const X = x => px0 + (x-xa)/(xb-xa)*(px1-px0);
+  const Y = y => py1 - (y-lo)/(hi-lo)*(py1-py0);
+
+  /* --- 背景 --- */
+  ctx.clearRect(0,0,CW,CH);
+  ctx.fillStyle = '#fffdfa'; ctx.fillRect(0,0,CW,CH);
+  ctx.lineWidth = 1; ctx.strokeStyle = '#ece7de';
+  const nx = Math.max(2, Math.round(CW/110));
+  for(let i=0;i<=nx;i++){
+    const s = X(xa + (xb-xa)*i/nx);
+    ctx.beginPath(); ctx.moveTo(s, py0); ctx.lineTo(s, py1); ctx.stroke();
+  }
+  const ny = 4;
+  for(let i=0;i<=ny;i++){
+    const s = Y(lo + (hi-lo)*i/ny);
+    ctx.beginPath(); ctx.moveTo(px0, s); ctx.lineTo(px1, s); ctx.stroke();
+  }
+  /* --- 坐标轴 --- */
+  ctx.strokeStyle = '#c8c0b4'; ctx.lineWidth = 1.3;
+  if(lo < 0 && hi > 0){ ctx.beginPath(); ctx.moveTo(px0, Y(0)); ctx.lineTo(px1, Y(0)); ctx.stroke(); }
+  if(xa < 0 && xb > 0){ ctx.beginPath(); ctx.moveTo(X(0), py0); ctx.lineTo(X(0), py1); ctx.stroke(); }
+  /* --- 刻度 --- */
+  ctx.fillStyle = '#8a908e'; ctx.font = '10.5px "Segoe UI","Microsoft YaHei",sans-serif';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  for(let i=0;i<=nx;i++){
+    const x = xa + (xb-xa)*i/nx;
+    ctx.fillText(Math.abs(x)<1e-9 ? '0' : x.toFixed(xb-xa < 0.4 ? 3 : 2), X(x), py1+6);
+  }
+  ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+  for(let i=0;i<=ny;i++){
+    const y = lo + (hi-lo)*i/ny;
+    ctx.fillText(y.toFixed(Math.abs(hi-lo) < 3 ? 2 : 0), px0-6, Y(y));
+  }
+  /* --- x₀ 竖虚线 --- */
+  ctx.save();
+  ctx.setLineDash([4,4]); ctx.strokeStyle = '#b5705f'; ctx.lineWidth = 1.3;
+  ctx.beginPath(); ctx.moveTo(X(x0), py0); ctx.lineTo(X(x0), py1); ctx.stroke();
+  ctx.restore();
+
+  /* --- 曲线：只在 f(x₀) 真无定义处断开；超出画框的点交给 clip 去裁，
+         这样 1/x 这类函数即使整窗口都在框外，也能画出冲向边缘的分支 --- */
+  const breakAt = !isFinite(C.f(x0));
+  ctx.save();
+  ctx.beginPath(); ctx.rect(px0, py0, px1-px0, py1-py0); ctx.clip();
+  ctx.strokeStyle = '#6e8b7b'; ctx.lineWidth = 2.3; ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+  const arrows = [];
+  let started = false, prevIn = null, sawOut = false;
+  const YC = v => Math.max(py0-2000, Math.min(py1+2000, Y(v)));
+  ctx.beginPath();
+  for(let i=0;i<=N;i++){
+    const x = xa + dxx*i;
+    if(breakAt && Math.abs(X(x) - X(x0)) < 5){ started = false; prevIn = null; continue; }
+    const v = C.f(x);
+    if(!isFinite(v)){ started = false; prevIn = null; continue; }
+    const inFrame = (v <= hi && v >= lo);
+    if(!inFrame) sawOut = true;
+    /* 曲线冲出画框的那一刻，插一个箭头，提示「这里奔向无穷」 */
+    if(prevIn === true && !inFrame && arrows.length < 6)
+      arrows.push({x:X(x), up: v > hi});
+    const sx = X(x), sy = YC(v);
+    if(!started){ ctx.moveTo(sx, sy); started = true; }
+    else ctx.lineTo(sx, sy);
+    prevIn = inFrame;
+    if(i % 4 === 0){ ctx.stroke(); ctx.beginPath(); ctx.moveTo(sx, sy); }
+  }
+  ctx.stroke();
+  /* 整个窗口都落在框外（R 拖得极小）时，在 x₀ 两侧各补一个箭头 */
+  if(arrows.length === 0 && sawOut){
+    [[x0 - R*0.35, -1], [x0 + R*0.35, 1]].forEach(([x, s]) => {
+      const v = C.f(x);
+      if(isFinite(v) && v > hi) arrows.push({x:X(x), up:true});
+      if(isFinite(v) && v < lo) arrows.push({x:X(x), up:false});
+    });
+  }
+  arrows.forEach(a => {
+    const y = a.up ? py0 + 4 : py1 - 4, s = a.up ? 1 : -1;
+    ctx.beginPath();
+    ctx.moveTo(a.x - 4.5, y + s*7); ctx.lineTo(a.x, y); ctx.lineTo(a.x + 4.5, y + s*7);
+    ctx.strokeStyle = '#b5705f'; ctx.lineWidth = 2; ctx.stroke();
+  });
+  ctx.restore();
+
+  /* --- x₀ 处：空心点（洞）/ 实心点 --- */
+  if(isFinite(gv) && gv <= cl && gv >= -cl){
+    ctx.beginPath(); ctx.arc(X(x0), Y(gv), 5.2, 0, Math.PI*2);
+    ctx.fillStyle = patch ? '#4e6a5b' : '#ffffff';
+    ctx.fill(); ctx.strokeStyle = '#4e6a5b'; ctx.lineWidth = 2; ctx.stroke();
+  }
+  if(breakAt && isFinite(gv)){
+    ctx.fillStyle = patch ? '#5c8a6a' : '#b5705f';
+    ctx.font = '11.5px "Segoe UI","Microsoft YaHei",sans-serif';
+    ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+    ctx.fillText(patch ? '已补定义 → 连续' : '此处断裂（空心＝洞）', X(x0) + 9, Y(gv) - 13);
+  }
+  /* --- 极限水平参考线（只在左右极限相等、极限存在时画） --- */
+  if(info.exist2 && info.val >= lo && info.val <= hi){
+    ctx.save(); ctx.setLineDash([7,5]); ctx.strokeStyle = '#bf8a3c'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(px0, Y(info.val)); ctx.lineTo(px1, Y(info.val)); ctx.stroke();
+    ctx.restore();
+    const lt = '虚线：极限值 ' + nf(info.val,4);
+    ctx.font = '11px "Segoe UI","Microsoft YaHei",sans-serif';
+    ctx.textAlign = 'right'; ctx.textBaseline = 'bottom';
+    ctx.lineJoin = 'round'; ctx.strokeStyle = '#fffdfa'; ctx.lineWidth = 3;
+    ctx.strokeText(lt, px1 - 3, Y(info.val) - 3);
+    ctx.fillStyle = '#bf8a3c'; ctx.fillText(lt, px1 - 3, Y(info.val) - 3);
+  }
+  /* --- x₀ 标签（带白色描边，放在竖线右上方，避免与曲线、刻度打架） --- */
+  const xlab = 'x₀ = ' + (Math.abs(x0)<1e-9 ? '0' : x0);
+  ctx.font = '11px "Segoe UI","Microsoft YaHei",sans-serif';
+  ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+  ctx.lineJoin = 'round'; ctx.strokeStyle = '#fffdfa'; ctx.lineWidth = 3;
+  ctx.strokeText(xlab, X(x0) + 5, py0 + 3);
+  ctx.fillStyle = '#b5705f'; ctx.fillText(xlab, X(x0) + 5, py0 + 3);
+}
+
+/* ================= 渲染（图 + 表 + 结论） ================= */
+function render(){
+  const R = +document.getElementById('sR').value;
+  const x0 = C.x0;
+  const L = limitAt(C.f, x0, -1), Rr = limitAt(C.f, x0, 1);
+  const defined = isFinite(fAtX0());
+  const exist2 = (L.kind === 'ok' && Rr.kind === 'ok' && Math.abs(L.val - Rr.val) < 1e-3);
+  const val = exist2 ? (L.val + Rr.val)/2 : NaN;
+  const eq = exist2 && defined && Math.abs(val - fAtX0()) < 1e-3;
+  const cont = defined && exist2 && eq;
+
+  /* --- 公式条：KaTeX 只放数学，中文单独用 span --- */
+  let mid;
+  if(exist2)      mid = `\\lim_{x\\to x_0}f(x) = ${nf(val,4)}`;
+  else if(L.kind === 'inf' || Rr.kind === 'inf')
+                  mid = `\\lim_{x\\to x_0^{\\pm}} f(x) = \\infty\\quad\\text{(DNE)}`;
+  else if(L.kind === 'osc' || Rr.kind === 'osc')
+                  mid = `\\lim_{x\\to x_0} f(x)\\quad\\text{(DNE: oscillates)}`;
+  else            mid = `f(x_0^{-}) = ${nf(L.val,4)} \\;\\neq\\; ${nf(Rr.val,4)} = f(x_0^{+})`;
+  tex(document.getElementById('stripTex'),
+      `${C.tex},\\quad x_0 = ${Math.abs(x0)<1e-9?'0':x0}:\\quad ${mid}`,
+      `${C.fb}，x0=${x0}：${limText(L)} / ${limText(Rr)}`);
+  document.getElementById('stripTxt').textContent = exist2
+    ? `左右极限都等于 ${nf(val,4)}，极限存在`
+    : (L.kind === 'inf' || Rr.kind === 'inf' ? '极限不存在：两侧趋于无穷'
+       : (L.kind === 'osc' || Rr.kind === 'osc' ? '极限不存在：在 −1 与 1 之间无限次摆动'
+          : '左右极限都存在，但不相等'));
+
+  /* --- 三个条件 --- */
+  const mk = (id, no, text, yes, sub) => {
+    const e = document.getElementById(id);
+    e.className = 'chip ' + (yes ? 'yes' : 'no');
+    e.innerHTML = `<span class="mk">${yes ? '✓' : '✗'}</span> ${no} ${text}` +
+                  (sub ? ` <span style="opacity:.8">${sub}</span>` : '');
+  };
+  mk('c1', '①', 'f(x₀) 有定义', defined, defined ? '=' + nf(fAtX0(),4) : '无定义');
+  mk('c2', '②', '极限存在', exist2,
+     exist2 ? '=' + nf(val,4) : (L.kind === 'inf' || Rr.kind === 'inf' ? '趋于 ±∞'
+       : (L.kind === 'osc' || Rr.kind === 'osc' ? '振荡不定' : '左右不等')));
+  mk('c3', '③', '极限 = f(x₀)', eq, eq ? '相等' : (exist2 && defined ? '不相等' : '前提不成立'));
+
+  /* --- 数值面板 --- */
+  document.getElementById('vR').textContent = R.toFixed(2);
+  document.getElementById('rl').textContent = limText(L);
+  document.getElementById('rr').textContent = limText(Rr);
+  document.getElementById('rf').textContent = valText();
+  document.getElementById('rc').textContent = cont ? '连续' : (C.key + '间断');
+
+  /* --- 结论条 --- */
+  let kind, why;
+  if(cont){
+    kind = '在 x₀ 连续';
+    why = ' 三个条件同时成立，图像在 x₀ 处一笔画得下来、没有断点。';
+  }else if(C.key === '可去'){
+    kind = '可去间断点（第一类）';
+    why = ' ② 成立、① 不成立（f(1) 无定义），图像上只有一个「洞」；' +
+          (patch ? '补上定义后洞被填平 → 三条件全中。'
+                 : '点右上角「补定义 f(x₀)=2」把洞填上，立刻变连续——这就是「可去」。');
+  }else if(C.key === '跳跃'){
+    kind = '跳跃间断点（第一类）';
+    why = ' 左右极限都存在，但分别是 ' + nf(L.val,0) + ' 和 ' + nf(Rr.val,0) +
+          '，不相等 → ② 不成立，图像在 x₀ 处跳了一格；补定义也救不回来。';
+  }else if(C.key === '无穷'){
+    kind = '无穷间断点（第二类）';
+    why = ' 一侧冲向 +∞、另一侧冲向 −∞，极限不存在（也不是有限值）→ ② 不成立。';
+  }else if(C.key === '振荡'){
+    kind = '振荡间断点（第二类）';
+    why = ' 把 R 拖小，曲线在 x₀ 附近摆动得越来越密，函数值始终在 −1 与 1 之间乱跳、定不下来 → 极限不存在。';
+  }else{ kind = '不连续'; why = ''; }
+
+  document.getElementById('concl').innerHTML =
+    `<b>${C.key}</b>：窗口 x₀±${R.toFixed(2)} 内，左极限 = <b>${limText(L)}</b>、` +
+    `右极限 = <b>${limText(Rr)}</b>、f(x₀) = <b>${valText()}</b> → 判定：<b>${kind}</b>。<br>` +
+    `<span class="tag">一句话本质：</span>` +
+    (cont ? '三个条件全中，函数在 x₀ 处连续。'
+          : '间断点只看两件事：左右极限是否存在、是否相等。') + why;
+
+  draw(R, {exist2:exist2, val:val});
+}
+
+/* ================= 交互 ================= */
+document.getElementById('sR').addEventListener('input', render);
+function pick(i){
+  C = CASES[i]; patch = false;
+  for(let k=0;k<5;k++)
+    document.getElementById('m'+k).classList.toggle('on', k === i);
+  document.getElementById('sub').textContent = C.sub;
+  const bb = document.getElementById('bdef');
+  bb.textContent = '补定义 f(x₀)=' + C.add;
+  bb.classList.remove('on');
+  bb.disabled = isFinite(C.f(C.x0));
+  bb.style.opacity = bb.disabled ? '0.45' : '1';
+  render();
+}
+for(let k=0;k<5;k++)
+  document.getElementById('m'+k).addEventListener('click', () => pick(k));
+document.getElementById('bdef').addEventListener('click', () => {
+  patch = !patch;
+  document.getElementById('bdef').classList.toggle('on', patch);
+  render();
+});
+fitCanvas();
+pick(0);
+</script>
+</body>
+</html>

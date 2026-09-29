@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>等价无穷小 · 比值趋近 1</title>
+<link rel="stylesheet" href="../assets/katex/katex.min.css">
+<style>
+:root{--page:#f7f4ef;--surface:#ffffff;--ink:#2a2f2e;--muted:#8a908e;--line:#e5dfd6;--sage:#6e8b7b;--sage-deep:#4e6a5b;--blue:#6b8899;--sand:#b39a6e;--rose:#b5705f;--mauve:#93899c;}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;overflow-x:hidden;background:var(--page);color:var(--ink);font-family:"Segoe UI","Microsoft YaHei",sans-serif;font-size:14px;line-height:1.45}
+.wrap{max-width:860px;margin:0 auto;padding:10px 14px 12px}
+h1{font-size:16px;margin:0 0 2px;font-weight:600;letter-spacing:.2px}
+.sub{font-size:12px;color:var(--muted);margin:0}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px}
+.bar{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:7px 0;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:6px 10px}
+.bar label{font-size:12px;color:var(--muted)}
+button{font:inherit;font-size:12px;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:2px 7px;cursor:pointer}
+button:hover{background:#eef1ec;border-color:var(--sage)}
+input[type=range]{-webkit-appearance:none;appearance:none;height:22px;background:transparent;flex:1;min-width:150px;margin:0}
+input[type=range]::-webkit-slider-runnable-track{height:5px;background:var(--line);border-radius:3px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;margin-top:-5px;border-radius:50%;background:var(--sage-deep);border:2px solid var(--surface);box-shadow:0 1px 2px rgba(0,0,0,.18)}
+input[type=range]::-moz-range-track{height:5px;background:var(--line);border-radius:3px}
+input[type=range]::-moz-range-thumb{width:14px;height:14px;border:2px solid var(--surface);border-radius:50%;background:var(--sage-deep)}
+.val{font-variant-numeric:tabular-nums;font-weight:600;color:var(--sage-deep)}
+#c1{display:block;width:100%;height:124px}
+.tip{font-size:11.5px;color:var(--muted);margin:2px 0 6px 2px}
+.tab{margin-top:2px}
+.hd,.row{display:grid;grid-template-columns:1.6fr 1fr .95fr .55fr 1.05fr;gap:6px;align-items:center;padding:2px 6px;border-radius:6px}
+.hd>*,.row>*{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hd{font-size:11px;color:var(--muted);border-bottom:1px solid var(--line);padding-bottom:3px;margin-bottom:3px}
+.row{border-left:3px solid transparent;margin-bottom:1px}
+.row.max{background:rgba(175,133,130,.16);border-left-color:var(--rose)}
+.nm{font-size:11.5px;display:flex;align-items:center;gap:5px;min-width:0}
+.nm .tex{font-size:12px;white-space:nowrap}
+.nm .eq{font-size:10.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.badge{display:none;font-size:10px;color:#fff;background:var(--rose);border-radius:4px;padding:0 4px;white-space:nowrap}
+.row.max .badge{display:inline-block}
+.cell{font-size:11.5px;font-variant-numeric:tabular-nums}
+.track{position:relative;height:13px;background:#efece5;border:1px solid var(--line);border-radius:3px;overflow:hidden;
+  background-image:repeating-linear-gradient(to right,var(--line) 0,var(--line) 1px,transparent 1px,transparent 11.111%);}
+.track i{position:absolute;left:0;top:2px;bottom:2px;width:0;border-radius:2px;transition:width .06s linear}
+.concl{margin-top:7px;background:#eef1ec;border:1px solid var(--line);border-left:3px solid var(--sage-deep);border-radius:8px;padding:6px 9px;font-size:12.4px}
+.concl b{color:var(--sage-deep)}
+.warn{color:var(--rose)}
+@media (max-width:620px){
+  .hd,.row{grid-template-columns:1.5fr 1fr .95fr 1.1fr}
+  .hd .horder,.row .order{display:none}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>等价无穷小 · 比值趋近 1</h1>
+  <p class="sub">x→0 时若 <span class="tex" data-tex="f(x)/g(x)\to 1"></span> 就记作 f(x) ~ g(x)：下表每个比值都在实时算，<b>误差越小，替换越放心</b>。</p>
+
+  <div class="bar">
+    <label>x =</label><span class="val" id="xv">0.0100</span>
+    <label>log₁₀x =</label><span class="val" id="lv">-2.000</span>
+    <input type="range" id="xx" min="-3" max="0" step="0.001" value="-2">
+    <button data-x="-1">x=0.1</button>
+    <button data-x="-2">x=0.01</button>
+    <button data-x="-3">x=0.001</button>
+  </div>
+
+  <div class="card" style="padding:5px"><canvas id="c1"></canvas></div>
+  <div class="tip">横轴对数刻度（10⁻³ → 10⁰）：x 越靠近 0，各比值越挤到 <b>r = 1</b> 这条线上——这就是「可以互相替换」的画面（竖线=当前 x）。</div>
+
+  <div class="tab">
+    <div class="hd"><div>比值 / 等价替换</div><div>比值 r</div><div>误差 |r−1|</div><div class="horder" title="仅在 x ≤ 0.1 时显示：|r−1| 随 x→0 的幂次（≈x¹ 为一阶，≈x² 为二阶）">误差阶</div><div title="对数刻度：左端 10⁻⁹，右端 10⁰">误差条 10⁻⁹→10⁰</div></div>
+    <div id="rows"></div>
+  </div>
+
+  <div class="concl"><b>一句话本质：</b><span id="ctxt">—</span></div>
+</div>
+
+<script src="../assets/katex/katex.min.js"></script>
+<script>
+(function(){
+  "use strict";
+  var C={ink:'#2a2f2e',muted:'#8a908e',line:'#e5dfd6',sage:'#6e8b7b',sageDeep:'#4e6a5b',blue:'#6b8899',sand:'#b39a6e',rose:'#b5705f',mauve:'#93899c'};
+  var $=function(s){return document.querySelector(s);};
+
+  /* ---------- KaTeX 兜底 ---------- */
+  function kt(el){
+    if(!el) return;
+    var s=el.getAttribute('data-tex'); if(s===null) return;
+    try{
+      if(window.katex && typeof katex.renderToString==='function'){
+        el.innerHTML=katex.renderToString(s,{displayMode:el.hasAttribute('data-display'),throwOnError:false,strict:false});
+        return;
+      }
+    }catch(e){}
+    el.textContent=s.replace(/\\[a-zA-Z]+/g,' ').replace(/[{}]/g,'').replace(/\s+/g,' ').trim();
+  }
+  function renderTex(root){ var n=(root||document).querySelectorAll('.tex'); for(var i=0;i<n.length;i++) kt(n[i]); }
+
+  var SUP={'-':'\u207B','0':'\u2070','1':'\u00B9','2':'\u00B2','3':'\u00B3','4':'\u2074','5':'\u2075','6':'\u2076','7':'\u2077','8':'\u2078','9':'\u2079'};
+  function sup(n){ return String(n).split('').map(function(c){return SUP[c]||c;}).join(''); }
+  function fmtMag(v){                       /* 只给数值大小，如 4.97×10⁻³ */
+    v=Math.abs(v);
+    if(!isFinite(v)) return '—';
+    if(v===0) return '0';
+    var e=Math.floor(Math.log10(v)), m=v/Math.pow(10,e);
+    if(e>=-1 && e<=0) return v.toFixed(4);
+    return m.toFixed(2)+'\u00D710'+sup(e);
+  }
+  function fmtErr(v){                       /* 带符号，如 −4.97×10⁻³ */
+    if(v===0) return '0';
+    return (v>0?'+':'\u2212')+fmtMag(v);
+  }
+  function fmtR(r){                         /* 比值：靠近 1 时改写成 1±小数 */
+    var d=r-1;
+    if(Math.abs(d)>=5e-4) return r.toFixed(6);
+    if(d===0) return '1';
+    return '1 '+(d<0?'\u2212':'+')+' '+fmtMag(d);
+  }
+  function fit(cv){
+    var dpr=Math.max(1,window.devicePixelRatio||1);
+    var w=cv.clientWidth||600, h=cv.clientHeight||142;
+    cv.width=Math.round(w*dpr); cv.height=Math.round(h*dpr);
+    var ctx=cv.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,w,h);
+    return {ctx:ctx,w:w,h:h};
+  }
+  function mono(ctx,s){ ctx.font=s+'px "Segoe UI","Microsoft YaHei",sans-serif'; }
+
+  /* ---------- 6 个常用比值 ---------- */
+  var ROWS=[
+    {k:'sin', tex:'\\sin x/x',  eq:'sin x ~ x',        color:C.sage,     r:function(x){return Math.sin(x)/x;} },
+    {k:'tan', tex:'\\tan x/x',  eq:'tan x ~ x',        color:C.sageDeep, r:function(x){return Math.tan(x)/x;} },
+    {k:'ln',  tex:'\\ln(1+x)/x',eq:'ln(1+x) ~ x',      color:C.blue,     r:function(x){return Math.log1p(x)/x;} },
+    {k:'cos', tex:'(1-\\cos x)/(x^{2}/2)', eq:'1\u2212cos x ~ x\u00B2/2', color:C.sand, r:function(x){return (1-Math.cos(x))/(x*x/2);} },
+    {k:'asi', tex:'\\arcsin x/x',eq:'arcsin x ~ x',    color:C.mauve,    r:function(x){return Math.asin(Math.min(1,x))/x;} },
+    {k:'exp', tex:'(e^{x}-1)/x',  eq:'e\u02E3\u22121 ~ x', color:C.rose,   r:function(x){return Math.expm1(x)/x;} }
+  ];
+  var x=0.01, cur={};
+
+  /* 构建表格行 */
+  var host=$('#rows');
+  ROWS.forEach(function(R){
+    var d=document.createElement('div');
+    d.className='row'; d.id='row_'+R.k;
+    d.innerHTML='<div class="nm"><span class="tex" data-tex="'+R.tex+'"></span>'
+      +'<span class="badge">误差最大</span><span class="eq">'+R.eq+'</span></div>'
+      +'<div class="cell" id="r_'+R.k+'">—</div>'
+      +'<div class="cell" id="e_'+R.k+'">—</div>'
+      +'<div class="cell order" id="o_'+R.k+'">—</div>'
+      +'<div class="track"><i id="b_'+R.k+'" style="background:'+R.color+'"></i></div>';
+    host.appendChild(d);
+    var t=d.querySelector('.tex'); if(t) t.style.color=R.color;
+  });
+
+  /* ---------- 收敛图（横轴对数） ---------- */
+  function drawChart(){
+    var g=fit($('#c1')), ctx=g.ctx, w=g.w, h=g.h;
+    var m={l:38,r:14,t:24,b:22};
+    var LO=-3, HI=0, YLO=0.6, YHI=1.75;
+    var X=function(v){ return m.l+(Math.log10(v)-LO)/(HI-LO)*(w-m.l-m.r); };   // v>0
+    var Y=function(v){ var t=(Math.max(YLO,Math.min(YHI,v))-YLO)/(YHI-YLO); return h-m.b-t*(h-m.t-m.b); };
+
+    ctx.strokeStyle=C.line; ctx.lineWidth=1; mono(ctx,10);
+    var dec=[-3,-2,-1,0], i, j;
+    for(i=0;i<dec.length;i++){
+      var vv=Math.pow(10,dec[i]);
+      ctx.beginPath(); ctx.moveTo(X(vv),Y(YLO)); ctx.lineTo(X(vv),Y(YHI)); ctx.stroke();
+      ctx.fillStyle=C.muted; ctx.textAlign='center';
+      ctx.fillText(dec[i]===0?'1':'10'+sup(dec[i]),X(vv),h-m.b+13);
+    }
+    var yt=[0.6,0.8,1.0,1.2,1.4,1.6];
+    for(i=0;i<yt.length;i++){
+      ctx.beginPath(); ctx.moveTo(X(0.001),Y(yt[i])); ctx.lineTo(X(1),Y(yt[i])); ctx.stroke();
+      ctx.fillStyle=C.muted; ctx.textAlign='right'; ctx.fillText(yt[i].toFixed(1),X(0.001)-4,Y(yt[i])+3.5);
+    }
+    // r = 1 基准线
+    ctx.strokeStyle=C.sand; ctx.lineWidth=1.6; ctx.setLineDash([5,3]);
+    ctx.beginPath(); ctx.moveTo(X(0.001),Y(1)); ctx.lineTo(X(1),Y(1)); ctx.stroke();
+    ctx.setLineDash([]);
+
+    // 6 条曲线
+    var NPT=260;
+    ROWS.forEach(function(R){
+      ctx.strokeStyle=R.color; ctx.lineWidth=1.7; ctx.beginPath();
+      for(j=0;j<=NPT;j++){
+        var lx=LO+(HI-LO)*j/NPT, vx=Math.pow(10,lx), rv=R.r(vx);
+        if(j===0) ctx.moveTo(X(vx),Y(rv)); else ctx.lineTo(X(vx),Y(rv));
+      }
+      ctx.stroke();
+    });
+    // 当前 x
+    ctx.strokeStyle=C.rose; ctx.lineWidth=1.4; ctx.setLineDash([4,3]);
+    ctx.beginPath(); ctx.moveTo(X(x),Y(YLO)); ctx.lineTo(X(x),Y(YHI)); ctx.stroke();
+    ctx.setLineDash([]);
+    ROWS.forEach(function(R){
+      var rv=R.r(x);
+      ctx.fillStyle=R.color; ctx.beginPath(); ctx.arc(X(x),Y(rv),3.4,0,Math.PI*2); ctx.fill();
+    });
+    mono(ctx,10.5); ctx.fillStyle=C.ink; ctx.textAlign='left';
+    ctx.fillText('各比值 r(x) 随 x\u21920 全部汇向 r = 1',X(0.001)-26,14);
+    ctx.fillStyle=C.rose; ctx.textAlign='center';
+    var lx2=Math.min(Math.max(X(x),m.l+34),w-36);
+    ctx.fillText('x='+(x<0.01?x.toFixed(5):x.toFixed(3)),lx2,Y(YHI)+11);
+  }
+
+  /* ---------- 数值 + 结论 ---------- */
+  function update(){
+    $('#xv').textContent=(x<0.01? x.toFixed(5) : x.toFixed(4));
+    $('#lv').textContent=Math.log10(x).toFixed(3);
+    var worst=null, worstE=-1, under1pct=0, arr=[];
+    ROWS.forEach(function(R){
+      var r=R.r(x), d=r-1, ad=Math.abs(d);
+      $('#r_'+R.k).textContent=fmtR(r);
+      $('#r_'+R.k).title='r = '+r.toFixed(12);
+      $('#e_'+R.k).textContent=fmtErr(d);
+      // 误差阶（log-log 局部斜率），只在 x≤0.1 时有意义
+      if(x<=0.1 && ad>0){
+        var x2=Math.min(1,x*2), d2=Math.abs(R.r(x2)-1);
+        var sl=(d2>0)? Math.log10(d2/ad)/Math.log10(2) : NaN;
+        $('#o_'+R.k).textContent=isFinite(sl)? ('\u2248 x'+sup(Math.max(0,Math.round(sl)))) : '—';
+      } else { $('#o_'+R.k).textContent='—'; }
+      // 对数误差条：10^-9 -> 10^0
+      var pos=(ad>0)? (Math.log10(ad)+9)/9 : 0;
+      pos=Math.max(0,Math.min(1,pos));
+      $('#b_'+R.k).style.width=(pos*100).toFixed(2)+'%';
+      if(ad<0.01) under1pct++;
+      if(ad>worstE){ worstE=ad; worst=R; }
+      arr.push({R:R,d:d,r:r});
+    });
+    ROWS.forEach(function(R){ $('#row_'+R.k).classList.toggle('max', R===worst); });
+
+    // 结论：挑 2 个和 1 最接近的做榜样
+    var sorted=arr.slice().sort(function(a,b){return Math.abs(a.d)-Math.abs(b.d);});
+    var best1=sorted[0], best2=sorted[1];
+    var txt='当前 x='+$('#xv').textContent+'：'+ROWS.length+' 个比值'+(under1pct===ROWS.length?'全部':'中有 '+under1pct+' 个')
+      +'与 1 相差不到 1%（最准 '+best1.R.eq.split('~')[0].trim()+'，差 '+fmtMag(best1.d)
+      +'；最不准 '+worst.eq.split('~')[0].trim()+'，差 '+fmtMag(worstE)+'）。'
+      +'把 x 继续拉小，所有比值都被压到 1 上——这正是 '+best1.R.eq+'、'+best2.R.eq.replace('~','~')
+      +' 可以互相替换的理由。注意：等价替换只在乘除里用，加减法里直接换会丢阶。';
+    $('#ctxt').textContent=txt;
+
+    drawChart();
+  }
+
+  var slider=$('#xx');
+  function fromSlider(){ x=Math.pow(10,parseFloat(slider.value)); update(); }
+  slider.addEventListener('input',fromSlider);
+  slider.addEventListener('change',fromSlider);
+  Array.prototype.forEach.call(document.querySelectorAll('button[data-x]'),function(b){
+    b.addEventListener('click',function(){
+      slider.value=b.getAttribute('data-x'); fromSlider();
+    });
+  });
+  window.addEventListener('resize',drawChart);
+
+  var boot=function(){ renderTex(document); update(); if(window.requestAnimationFrame) requestAnimationFrame(drawChart); };
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();
+  window.addEventListener('load',function(){ renderTex(document); update(); });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>单调有界准则 · 点列一定找到归宿</title>
+<link rel="stylesheet" href="../assets/katex/katex.min.css">
+<script src="../assets/katex/katex.min.js"></script>
+<style>
+:root{
+  --bg:#f7f4ef;--surface:#ffffff;--ink:#2a2f2e;--ink2:#535a59;--muted:#8a908e;
+  --line:#e5dfd6;--p:#6e8b7b;--p-deep:#4e6a5b;--p-soft:#e8efeb;--ok:#5c8a6a;
+  --warn:#bf8a3c;--bad:#b5705f;--info:#6b8899;
+}
+*{box-sizing:border-box}
+html,body{overflow-x:hidden}
+body{margin:0;background:var(--bg);color:var(--ink);overflow-x:hidden;
+  font-family:"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:860px;margin:0 auto;padding:8px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;
+  padding:10px 14px 9px;box-shadow:0 1px 3px rgba(47,53,55,.05)}
+.head{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+h1{margin:0;font-size:15.5px;font-weight:600;letter-spacing:.2px}
+h1 small{font-weight:400;color:var(--muted);font-size:12px;margin-left:6px}
+.btns{display:flex;gap:6px;flex-wrap:wrap}
+button{font-family:inherit;font-size:12px;color:var(--ink);background:#f1eee8;
+  border:1px solid var(--line);border-radius:8px;padding:3px 10px;cursor:pointer}
+button:hover{background:#eae5dc}
+button.on{background:var(--p-deep);border-color:var(--p-deep);color:#fbfbf8}
+.strip{min-height:30px;display:flex;align-items:center;gap:10px;margin:5px 0 3px;
+  padding:3px 9px;background:var(--p-soft);border:1px solid #dbe4de;border-radius:9px;
+  font-size:13px;overflow:hidden;white-space:nowrap;flex-wrap:wrap}
+.strip .katex{font-size:1em}
+#stripTxt{font-size:12px;color:var(--ink2)}
+.fb{font-family:Consolas,"Courier New",monospace;font-size:12px;color:var(--ink2)}
+#plot{display:block;width:100%;height:186px;background:#fffdfa;border:1px solid var(--line);
+  border-radius:10px}
+.read{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin:6px 0 4px}
+.kv{background:#f6f3ed;border:1px solid var(--line);border-radius:8px;padding:3px 7px;
+  font-size:11.5px;color:var(--muted);overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.kv b{display:block;font-family:Consolas,"Courier New",monospace;font-size:12.5px;
+  color:var(--ink);font-weight:600;margin-top:1px}
+.terms{font-family:Consolas,"Courier New",monospace;font-size:11.5px;color:var(--ink2);
+  background:#f8f5f0;border:1px solid var(--line);border-radius:8px;padding:3px 8px;
+  white-space:nowrap;overflow:hidden;margin:0 0 4px}
+.ctrl{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:4px 0 4px}
+.slot{display:flex;align-items:center;gap:7px;flex:1 1 320px;min-width:230px}
+.slot label{font-size:12.5px;color:var(--ink2);white-space:nowrap}
+input[type=range]{flex:1 1 auto;min-width:70px;height:18px;accent-color:var(--p-deep);
+  background:transparent;cursor:pointer}
+.val{font-family:Consolas,"Courier New",monospace;font-size:12.5px;color:var(--p-deep);
+  min-width:50px;text-align:right}
+.concl{border-left:3px solid var(--p-deep);background:var(--p-soft);border-radius:0 8px 8px 0;
+  padding:7px 11px;font-size:12.5px;line-height:1.5;min-height:44px}
+.concl b{font-family:Consolas,"Courier New",monospace;color:var(--p-deep)}
+.concl .tag{color:var(--bad);font-weight:600}
+@media(max-width:560px){.read{grid-template-columns:repeat(2,minmax(0,1fr))}}
+</style>
+</head>
+<body>
+<div class="wrap"><div class="card">
+  <div class="head">
+    <h1>单调有界准则 · 点列一定找到归宿<small id="sub">aₙ₊₁ = √(2+aₙ)，初值 a₁=1</small></h1>
+    <div class="btns">
+      <button id="ma" class="on">aₙ₊₁ = √(2+aₙ)</button>
+      <button id="mb">aₙ₊₁ = cos(aₙ)</button>
+    </div>
+  </div>
+
+  <div class="strip"><span id="stripTex">—</span><span id="stripTxt"></span></div>
+
+  <canvas id="plot" role="img"
+    aria-label="左边是点列的折线图，右边是同一个递推式的蛛网图"></canvas>
+
+  <div class="read">
+    <div class="kv">单调性<b id="rmono">—</b></div>
+    <div class="kv">有界性（上界 M / 下界 m）<b id="rbnd">—</b></div>
+    <div class="kv">第 n 项 aₙ / 与不动点之差<b id="ran">—</b></div>
+    <div class="kv">不动点 L（解 L = f(L)）<b id="rL">—</b></div>
+  </div>
+  <div class="terms" id="terms">—</div>
+
+  <div class="ctrl">
+    <div class="slot">
+      <label for="sa">初值 a₁ =</label>
+      <input id="sa" type="range" min="-1.95" max="6" step="0.05" value="1">
+      <span class="val" id="va">1.00</span>
+    </div>
+    <div class="slot" style="flex:0 1 260px">
+      <label for="sn">显示项数 n =</label>
+      <input id="sn" type="range" min="3" max="30" step="1" value="12">
+      <span class="val" id="vn">12</span>
+    </div>
+  </div>
+
+  <div class="concl" id="concl">—</div>
+</div></div>
+
+<script>
+/* ================= 工具 ================= */
+function tex(el, s, fb){
+  try{
+    if(typeof katex === 'undefined' || typeof katex.renderToString !== 'function')
+      throw new Error('katex unavailable');
+    el.className = '';
+    el.innerHTML = katex.renderToString(s, {throwOnError:false, displayMode:false});
+  }catch(e){ el.className = 'fb'; el.textContent = fb; }
+}
+function nf(v, d){
+  if(v === null || v === undefined || !isFinite(v)) return '—';
+  if(Math.abs(v) < 5e-13) v = 0;
+  return v.toFixed(d);
+}
+/* 单调方向判定：'inc' | 'dec' | 'const' | 'none' */
+function monoDir(arr){
+  let up = true, dn = true;
+  for(let i=1;i<arr.length-1;i++){
+    const d = arr[i+1] - arr[i];
+    if(d < -1e-13) up = false;
+    if(d >  1e-13) dn = false;
+  }
+  if(up && dn) return 'const';
+  if(up) return 'inc';
+  if(dn) return 'dec';
+  return 'none';
+}
+const DIRTXT = {inc:'递增 ↑', dec:'递减 ↓', const:'常数列 →', none:'不单调（来回摆）'};
+
+/* ================= 两个递推式 ================= */
+const CASES = {
+  a: { key:'sqrt', sub:'aₙ₊₁ = √(2+aₙ)，初值 a₁=1',
+       tex:'a_{n+1}=\\sqrt{2+a_n}', fb:'a(n+1) = √(2+aₙ)',
+       f:a => Math.sqrt(2+a), fp0:0, aMin:-1.95, aMax:6, aStep:0.05, a1:1,
+       bound:(a1) => [Math.min(a1,2), Math.max(a1,2)], exactL:'2' },
+  b: { key:'cos', sub:'aₙ₊₁ = cos(aₙ)，初值 a₁=1',
+       tex:'a_{n+1}=\\cos a_n', fb:'a(n+1) = cos(aₙ)',
+       f:a => Math.cos(a), fp0:0.5, aMin:-1, aMax:1, aStep:0.01, a1:1,
+       bound:() => [-1, 1], exactL:'解 L = cos L 得，约 0.739085' }
+};
+let C = CASES.a;
+
+/* 不动点：迭代到稳定（数值上真的解出来） */
+function fixedPoint(c){
+  let a = c.fp0;
+  for(let i=0;i<400;i++) a = c.f(a);
+  return a;
+}
+function seqOf(c, n){
+  const out = [c.a1];
+  let a = c.a1;
+  for(let i=0;i<n;i++){ a = c.f(a); out.push(a); }
+  return out;
+}
+
+/* ================= 画布 ================= */
+const cv = document.getElementById('plot'), ctx = cv.getContext('2d');
+let CW = 860, CH = 186;
+function fitCanvas(){
+  const dpr = window.devicePixelRatio || 1;
+  CW = Math.max(320, cv.clientWidth || 830);
+  CH = cv.clientHeight || 186;
+  cv.width = Math.round(CW*dpr); cv.height = Math.round(CH*dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+window.addEventListener('resize', () => { fitCanvas(); render(); });
+
+function draw(vlo, vhi, N, L){
+  ctx.clearRect(0,0,CW,CH);
+  ctx.fillStyle = '#fffdfa'; ctx.fillRect(0,0,CW,CH);
+  const PT = 12, PB = 26;
+  const RIGHTW = Math.max(200, Math.min(268, CW*0.32));
+  const gapx = 18;
+  /* ===== 左：点列折线图 ===== */
+  const lx0 = 40, lx1 = CW - RIGHTW - gapx, ly0 = PT, ly1 = CH - PB;
+  const seq = seqOf(C, N);
+  const X = n => lx0 + (n-1)/Math.max(1, N-1)*(lx1-lx0);
+  const Y = v => ly1 - (v-vlo)/(vhi-vlo)*(ly1-ly0);
+
+  ctx.strokeStyle = '#ece7de'; ctx.lineWidth = 1;
+  const yt = 4;
+  for(let i=0;i<=yt;i++){
+    const s = Y(vlo + (vhi-vlo)*i/yt);
+    ctx.beginPath(); ctx.moveTo(lx0, s); ctx.lineTo(lx1, s); ctx.stroke();
+  }
+  for(let n=1;n<=N;n+=Math.max(1, Math.round(N/6))){
+    const s = X(n);
+    ctx.beginPath(); ctx.moveTo(s, ly0); ctx.lineTo(s, ly1); ctx.stroke();
+  }
+  ctx.strokeStyle = '#c8c0b4'; ctx.lineWidth = 1.3;
+  ctx.beginPath(); ctx.moveTo(lx0, ly1); ctx.lineTo(lx1, ly1); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(lx0, ly0); ctx.lineTo(lx0, ly1); ctx.stroke();
+
+  /* 上界 / 下界 / 不动点 水平线 */
+  const [blo, bhi] = C.bound(C.a1);
+  const hline = (v, color, dash, label, atRight) => {
+    if(v < vlo || v > vhi) return;
+    ctx.save(); ctx.setLineDash(dash); ctx.strokeStyle = color; ctx.lineWidth = 1.4;
+    ctx.beginPath(); ctx.moveTo(lx0, Y(v)); ctx.lineTo(lx1, Y(v)); ctx.stroke(); ctx.restore();
+    ctx.fillStyle = color; ctx.font = '11px "Segoe UI","Microsoft YaHei",sans-serif';
+    ctx.textBaseline = 'bottom';
+    /* 左右分开放标签：上界常常正好等于极限，两条线会重合 */
+    if(atRight){ ctx.textAlign = 'right'; ctx.fillText(label, lx1 - 4, Y(v) - 2); }
+    else{ ctx.textAlign = 'left'; ctx.fillText(label, lx0 + 4, Y(v) - 2); }
+  };
+  hline(bhi, '#bf8a3c', [6,4], '上界 M=' + nf(bhi,2), false);
+  hline(blo, '#8a908e', [6,4], '下界 m=' + nf(blo,2), false);
+  hline(L,   '#b5705f', [2,3], '不动点 L=' + nf(L,6), true);
+
+  /* 点列 */
+  ctx.strokeStyle = '#6e8b7b'; ctx.lineWidth = 1.8;
+  ctx.beginPath();
+  seq.forEach((v,i) => { const s = X(i+1), y = Y(v); i ? ctx.lineTo(s,y) : ctx.moveTo(s,y); });
+  ctx.stroke();
+  seq.forEach((v,i) => {
+    ctx.beginPath(); ctx.arc(X(i+1), Y(v), 3.1, 0, Math.PI*2);
+    ctx.fillStyle = i === 0 ? '#b5705f' : '#4e6a5b'; ctx.fill();
+  });
+  /* 刻度文字 */
+  ctx.fillStyle = '#8a908e'; ctx.font = '10.5px "Segoe UI","Microsoft YaHei",sans-serif';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  for(let n=1;n<=N;n+=Math.max(1, Math.round(N/6)))
+    ctx.fillText(String(n), X(n), ly1 + 6);
+  ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+  for(let i=0;i<=yt;i++){
+    const v = vlo + (vhi-vlo)*i/yt;
+    ctx.fillText(v.toFixed(Math.abs(vhi-vlo) < 4 ? 2 : 1), lx0 - 5, Y(v));
+  }
+  ctx.fillStyle = '#535a59'; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+  ctx.font = '11.5px "Segoe UI","Microsoft YaHei",sans-serif';
+  ctx.fillText('点列 aₙ 随 n 的走向', lx0 + 4, ly0 - 1);
+
+  /* ===== 右：蛛网图 ===== */
+  const rx0 = CW - RIGHTW + 22, rx1 = CW - 12, ry0 = PT, ry1 = CH - PB;
+  const RX = v => rx0 + (v-vlo)/(vhi-vlo)*(rx1-rx0);
+  const RY = v => ry1 - (v-vlo)/(vhi-vlo)*(ry1-ry0);
+  ctx.strokeStyle = '#ece7de'; ctx.lineWidth = 1;
+  for(let i=0;i<=3;i++){
+    const s = RY(vlo + (vhi-vlo)*i/3);
+    ctx.beginPath(); ctx.moveTo(rx0, s); ctx.lineTo(rx1, s); ctx.stroke();
+  }
+  ctx.strokeStyle = '#c8c0b4'; ctx.lineWidth = 1.3;
+  ctx.beginPath(); ctx.moveTo(rx0, ry1); ctx.lineTo(rx1, ry1); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(rx0, ry0); ctx.lineTo(rx0, ry1); ctx.stroke();
+  /* y = x */
+  ctx.save(); ctx.setLineDash([5,4]); ctx.strokeStyle = '#8a908e'; ctx.lineWidth = 1.3;
+  ctx.beginPath(); ctx.moveTo(RX(vlo), RY(vlo)); ctx.lineTo(RX(vhi), RY(vhi)); ctx.stroke();
+  ctx.restore();
+  /* y = f(x) */
+  ctx.save();
+  ctx.beginPath(); ctx.rect(rx0-2, ry0-2, rx1-rx0+4, ry1-ry0+4); ctx.clip();
+  ctx.strokeStyle = '#6e8b7b'; ctx.lineWidth = 2;
+  ctx.beginPath();
+  let first = true;
+  for(let i=0;i<=400;i++){
+    const x = vlo + (vhi-vlo)*i/400, v = C.f(x);
+    if(!isFinite(v) || v < vlo - 0.3 || v > vhi + 0.3){ first = true; continue; }
+    const s = RX(x), y = RY(v);
+    if(first){ ctx.moveTo(s,y); first = false; } else ctx.lineTo(s,y);
+  }
+  ctx.stroke();
+  /* 蛛网阶梯 */
+  const K = Math.min(N, 12);
+  ctx.strokeStyle = '#6b8899'; ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  let a = C.a1;
+  ctx.moveTo(RX(a), RY(a));
+  for(let k=0;k<K;k++){
+    const b = C.f(a);
+    ctx.lineTo(RX(a), RY(b));   /* 竖：走到 y=f(a) */
+    ctx.lineTo(RX(b), RY(b));   /* 横：回到 y=x 上 */
+    a = b;
+  }
+  ctx.stroke();
+  ctx.beginPath(); ctx.arc(RX(C.a1), RY(C.a1), 3.4, 0, Math.PI*2);
+  ctx.fillStyle = '#b5705f'; ctx.fill();
+  ctx.restore();
+  /* 不动点交点 + 标注 */
+  ctx.beginPath(); ctx.arc(RX(L), RY(L), 3.6, 0, Math.PI*2);
+  ctx.fillStyle = '#b5705f'; ctx.fill();
+  ctx.fillStyle = '#535a59'; ctx.font = '11px "Segoe UI","Microsoft YaHei",sans-serif';
+  ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+  ctx.fillText('蛛网图：aₙ 与 aₙ₊₁', rx0 + 2, ry0 - 1);
+  ctx.fillStyle = '#6e8b7b'; ctx.textAlign = 'right'; ctx.textBaseline = 'bottom';
+  ctx.fillText('y = f(x)', rx1 - 3, ry0 + 12);
+  ctx.fillStyle = '#8a908e'; ctx.textAlign = 'right';
+  ctx.fillText('y = x', rx1 - 3, ry1 - 3);
+}
+
+/* ================= 渲染 ================= */
+function render(){
+  const N = +document.getElementById('sn').value;
+  const L = fixedPoint(C);
+  const seq = seqOf(C, Math.max(N, 60));          /* 内部多算几步，用于判单调/有界 */
+  const shown = seq.slice(0, N+1);
+  const d = monoDir(shown);
+  const [blo, bhi] = C.bound(C.a1);
+  const aN = shown[shown.length-1];
+  const gap = Math.abs(aN - L);
+
+  /* --- 视窗范围 --- */
+  let vlo = Math.min(blo, Math.min.apply(null, shown));
+  let vhi = Math.max(bhi, Math.max.apply(null, shown));
+  const pad = Math.max(0.12, (vhi-vlo)*0.1);
+  vlo -= pad; vhi += pad;
+
+  /* --- 公式条 --- */
+  tex(document.getElementById('stripTex'),
+      `${C.tex},\\quad a_1 = ${nf(C.a1,2)},\\quad L = \\lim_{n\\to\\infty}a_n\\;\\text{满足}\\;L = f(L)`,
+      `${C.fb}，a1=${nf(C.a1,2)}，不动点 L 满足 L=f(L)`);
+  document.getElementById('stripTxt').textContent =
+    '不动点 L = ' + nf(L,6) + '（' + C.exactL + '）';
+
+  /* --- 面板 --- */
+  document.getElementById('va').textContent = nf(C.a1,2);
+  document.getElementById('vn').textContent = N;
+  document.getElementById('rL').textContent = nf(L,6);
+  document.getElementById('ran').textContent = nf(aN,6) + ' / ' + nf(gap,6);
+  document.getElementById('rbnd').textContent = 'M=' + nf(bhi,2) + '  m=' + nf(blo,2);
+
+  let monoTxt;
+  if(d === 'none'){
+    const oddS  = shown.filter((_,i) => i % 2 === 0);   /* a₁,a₃,a₅,… */
+    const evenS = shown.filter((_,i) => i % 2 === 1);   /* a₂,a₄,a₆,… */
+    monoTxt = '整体不单调；{a₁,a₃,a₅,…}' + DIRTXT[monoDir(oddS)] +
+              '、{a₂,a₄,a₆,…}' + DIRTXT[monoDir(evenS)];
+  }else monoTxt = DIRTXT[d];
+  document.getElementById('rmono').textContent = monoTxt;
+
+  /* --- 前几项 --- */
+  const head = shown.slice(0, Math.min(6, shown.length))
+    .map((v,i) => 'a' + sub(i+1) + '=' + v.toFixed(4)).join('  ');
+  document.getElementById('terms').textContent =
+    head + (shown.length > 6 ? '  …  a' + sub(shown.length) + '=' + aN.toFixed(6) : '');
+
+  /* --- 结论条 --- */
+  const bounded = (aN <= bhi + 1e-9 && aN >= blo - 1e-9);
+  let body, essence;
+  if(C.key === 'sqrt'){
+    if(Math.abs(C.a1 - 2) < 1e-9){
+      body = `初值 a₁ = 2 恰好就是不动点：由 aₙ₊₁ = √(2+2) = 2 知这是常数列，单调且有界，极限当然还是 L = 2。`;
+    }else if(d === 'inc'){
+      body = `初值 a₁ = ${nf(C.a1,2)} < 2：若 aₙ < 2 则 aₙ₊₁ = √(2+aₙ) < √4 = 2，所以 aₙ 恒小于 2（有上界 M = 2）；` +
+             `又 aₙ₊₁ − aₙ = (2+aₙ−aₙ²)/(√(2+aₙ)+aₙ) > 0，故单调递增。` +
+             `单调递增 + 有上界 → 由单调有界准则 {aₙ} 收敛；把 aₙ₊₁ = √(2+aₙ) 两边取极限得 L = √(2+L)，解得 L = 2。`;
+    }else{
+      body = `初值 a₁ = ${nf(C.a1,2)} > 2：若 aₙ > 2 则 aₙ₊₁ = √(2+aₙ) > 2，所以 aₙ 恒大于 2（有下界 m = 2）；` +
+             `又 aₙ₊₁ − aₙ < 0，故单调递减。` +
+             `单调递减 + 有下界 → 由单调有界准则 {aₙ} 收敛；对递推式取极限得 L = √(2+L)，解得 L = 2。`;
+    }
+    essence = `从 a₁ = ${nf(C.a1,2)} 出发的点列` +
+              (d === 'inc' ? '一直往上爬' : d === 'dec' ? '一直往下滑' : '一动不动') +
+              `，却始终被关在 [${nf(blo,2)}, ${nf(bhi,2)}] 这个笼子里，所以它必须停在某个确定的数上（L = ${nf(L,6)}）。` +
+              `一句话本质：单调给出方向、有界给出笼子，方向 + 笼子 ⇒ 必有极限，而极限由 L = f(L) 直接解出。`;
+  }else{
+    body = `cos 把任何初值都拉进 [−1,1]，所以 aₙ 有界（M = 1、m = −1）；` +
+           `但整体${d === 'none' ? '并不单调（在 L 两侧一上一下交替）' : '单调'}：` +
+           `{a₁,a₃,a₅,…} 与 {a₂,a₄,a₆,…} 各自单调且都有界，于是这两个子列都收敛，` +
+           `而它们的极限都满足 L = cos L。解 L = cos L 得唯一不动点 L = ${nf(L,6)}，故 {aₙ} 收敛到它。`;
+    essence = `a₁ = ${nf(C.a1,2)} 的点列被 cos 拉进 [−1,1]（有界），虽不整体单调，但两个子列各自单调；` +
+              `子列都收敛到同一个 L = ${nf(L,6)}，整列自然也收敛到它。` +
+              `一句话本质：有界是笼子、单调是方向，凑齐就有归宿——哪怕要拆成两个子列分别看。`;
+  }
+  document.getElementById('concl').innerHTML =
+    `a₁ = <b>${nf(C.a1,2)}</b>：单调性 = <b>${monoTxt}</b>，有界性 = <b>${bounded ? '有界' : '越界'}</b>` +
+    `（M = <b>${nf(bhi,2)}</b>，m = <b>${nf(blo,2)}</b>），第 ${shown.length} 项 aₙ = <b>${nf(aN,6)}</b>，` +
+    `与不动点只差 <b>${nf(gap,6)}</b> → 收敛到 L = <b>${nf(L,6)}</b>。<br>${body}<br>` +
+    `<span class="tag">一句话本质：</span>${essence}`;
+
+  draw(vlo, vhi, N, L);
+}
+function sub(k){
+  const m = {'0':'₀','1':'₁','2':'₂','3':'₃','4':'₄','5':'₅','6':'₆','7':'₇','8':'₈','9':'₉'};
+  return String(k).split('').map(c => m[c] || c).join('');
+}
+
+/* ================= 交互 ================= */
+document.getElementById('sa').addEventListener('input', e => { C.a1 = +e.target.value; render(); });
+document.getElementById('sn').addEventListener('input', render);
+function pick(k){
+  C = CASES[k];
+  document.getElementById('ma').classList.toggle('on', k === 'a');
+  document.getElementById('mb').classList.toggle('on', k === 'b');
+  document.getElementById('sub').textContent = C.sub;
+  const s = document.getElementById('sa');
+  s.min = C.aMin; s.max = C.aMax; s.step = C.aStep; s.value = C.a1;
+  render();
+}
+document.getElementById('ma').addEventListener('click', () => pick('a'));
+document.getElementById('mb').addEventListener('click', () => pick('b'));
+fitCanvas();
+pick('a');
+</script>
+</body>
+</html>

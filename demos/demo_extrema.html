@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>单调性与极值 · f′(x) 的符号决定增减</title>
+<link rel="stylesheet" href="../assets/katex/katex.min.css">
+<script src="../assets/katex/katex.min.js"></script>
+<style>
+:root{
+  --bg:#f7f4ef; --surface:#ffffff; --ink:#2a2f2e; --ink2:#535a59;
+  --muted:#8a908e; --line:#e5dfd6; --p:#6e8b7b; --p-deep:#4e6a5b;
+  --p-soft:#e8efeb; --ok:#5c8a6a; --warn:#bf8a3c; --bad:#b5705f; --info:#6b8899;
+}
+*{box-sizing:border-box}
+html{overflow-x:hidden}
+body{margin:0;background:var(--bg);color:var(--ink);overflow-x:hidden;
+  font-family:"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+  font-size:13px;line-height:1.45;-webkit-font-smoothing:antialiased}
+.wrap{max-width:860px;margin:0 auto;padding:8px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;
+  padding:10px 14px 9px;box-shadow:0 1px 3px rgba(42,47,46,.05)}
+.head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+h1{margin:0;font-size:16px;font-weight:600;letter-spacing:.2px}
+h1 small{font-weight:400;color:var(--muted);font-size:12px;margin-left:6px}
+.btns{display:flex;gap:6px;flex-wrap:wrap}
+button{font-family:inherit;font-size:12.5px;color:var(--ink);background:#f1eee8;
+  border:1px solid var(--line);border-radius:8px;padding:3px 10px;cursor:pointer}
+button:hover{background:#eae5dc}
+button.on{background:var(--p-deep);border-color:var(--p-deep);color:#fbfbf8}
+.strip{min-height:26px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  margin:5px 0 4px;font-size:13.5px}
+.strip .lbl{font-size:11.5px;color:var(--muted);white-space:nowrap}
+.strip .fb{font-family:Consolas,monospace;font-size:12.5px}
+.pill{display:inline-block;font-size:11.5px;border-radius:999px;padding:1px 8px;
+  border:1px solid var(--line);background:#f6f3ee;color:var(--ink2)}
+.pill.up{border-color:#cbdccf;background:var(--p-soft);color:var(--ok)}
+.pill.dn{border-color:#e4d2cc;background:#f6eeea;color:var(--bad)}
+.pill.zero{border-color:#dfd3bd;background:#f7f1e6;color:var(--warn)}
+#plot{display:block;width:100%;height:auto;background:#fffdfa;border:1px solid var(--line);
+  border-radius:10px;touch-action:none;cursor:ew-resize}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:11px;color:var(--muted);margin:4px 0 0}
+.legend i{display:inline-block;width:15px;height:0;border-top-width:2.5px;border-top-style:solid;
+  vertical-align:middle;margin-right:3px}
+.legend b{font-weight:600;color:var(--ink2)}
+.ctrl{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:5px 0 3px}
+.ctrl label{font-size:12px;color:var(--muted);white-space:nowrap}
+input[type=range]{flex:1 1 auto;min-width:120px;height:20px;accent-color:var(--p-deep);
+  background:transparent;cursor:pointer}
+.val{font-family:Consolas,"Courier New",monospace;font-size:12.5px;color:var(--p-deep);
+  min-width:62px;text-align:right;font-variant-numeric:tabular-nums}
+.read{display:flex;gap:9px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin:0 0 4px;
+  align-items:center}
+.read b{font-family:Consolas,"Courier New",monospace;color:var(--ink);font-weight:600;
+  font-variant-numeric:tabular-nums}
+.ivrow{display:flex;gap:5px;flex-wrap:wrap;align-items:center;font-size:11.5px;margin:0 0 5px}
+.ivrow .t{color:var(--muted);white-space:nowrap}
+.chip{border:1px solid var(--line);border-radius:7px;padding:1px 7px;background:#faf8f4;
+  color:var(--ink2);white-space:nowrap}
+.chip.act{border-color:var(--p-deep);background:var(--p-soft);color:var(--p-deep);font-weight:600}
+.chip .s{margin-left:3px}
+.chip .s.up{color:var(--ok)} .chip .s.dn{color:var(--bad)}
+.concl{border-left:3px solid var(--p-deep);background:#eaece7;border-radius:0 8px 8px 0;
+  padding:7px 11px;font-size:12.8px;line-height:1.5}
+.concl b{font-family:Consolas,"Courier New",monospace;color:var(--p-deep);font-weight:600}
+.concl .k{color:var(--p-deep);font-weight:600}
+svg text{font-family:"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+</style>
+</head>
+<body>
+<div class="wrap"><div class="card">
+  <div class="head">
+    <h1>单调性与极值<small id="sub">拖点或拖滑块：先看 f′(x₀) 的符号，再判增减与极值</small></h1>
+    <div class="btns">
+      <button id="bA" class="on">f(x)=x³−3x</button>
+      <button id="bB">f(x)=x⁴−4x²</button>
+      <button id="bSnap">吸附到驻点</button>
+    </div>
+  </div>
+
+  <div class="strip">
+    <span class="lbl">函数与导数</span>
+    <span id="tF"></span>
+    <span id="tD"></span>
+    <span id="tAt"></span>
+  </div>
+
+  <svg id="plot" viewBox="0 0 860 196" preserveAspectRatio="xMidYMid meet" role="img"
+       aria-label="单调性与极值交互示意图">
+    <defs><clipPath id="clip"><rect id="clipR" x="44" y="12" width="798" height="138"></rect></clipPath></defs>
+    <g id="gGrid"></g>
+    <g id="gAxes"></g>
+    <g id="gBand"></g>
+    <g clip-path="url(#clip)">
+      <path id="pCurve" fill="none" stroke="#6e8b7b" stroke-width="2.6" stroke-linejoin="round"></path>
+      <path id="pTan" fill="none" stroke="#6b8899" stroke-width="2" stroke-dasharray="7 4"></path>
+      <line id="lDrop" stroke="#8a908e" stroke-width="1.2" stroke-dasharray="3 3"></line>
+      <g id="gCrit"></g>
+      <circle id="cPt" r="6" fill="#4e6a5b" stroke="#fffdfa" stroke-width="2"></circle>
+    </g>
+    <g id="gLabels"></g>
+  </svg>
+
+  <div class="legend">
+    <span><i style="border-top-color:#6e8b7b"></i>曲线 y=f(x)</span>
+    <span><i style="border-top-color:#6b8899;border-top-style:dashed"></i>x₀ 处的切线（斜率 = f′(x₀)）</span>
+    <span><b style="color:#bf8a3c">●</b> 极大值点</span>
+    <span><b style="color:#6b8899">●</b> 极小值点</span>
+    <span><b style="color:#5c8a6a">▬</b> f′&gt;0 递增</span>
+    <span><b style="color:#b5705f">▬</b> f′&lt;0 递减</span>
+  </div>
+
+  <div class="ctrl">
+    <label for="sx">拖动 x₀ =</label>
+    <input id="sx" type="range" min="-2.4" max="2.4" step="0.001" value="-1">
+    <span class="val" id="vx">-1.000</span>
+    <span id="pillD" class="pill zero">f′=0</span>
+  </div>
+
+  <div class="read">
+    <span>f(x₀) = <b id="rF">—</b></span>
+    <span>f′(x₀) = <b id="rD">—</b></span>
+    <span>左侧 x&lt;x₀：<b id="rL">—</b></span>
+    <span>右侧 x&gt;x₀：<b id="rR">—</b></span>
+    <span id="pillE" class="pill">—</span>
+  </div>
+
+  <div class="ivrow">
+    <span class="t">f′ 符号表（分界点＝驻点）：</span>
+    <span id="ivs"></span>
+  </div>
+
+  <div class="concl" id="concl">—</div>
+</div></div>
+
+<script>
+/* ---------- 工具 ---------- */
+function tex(el, s, fb){
+  try{
+    if(typeof katex === 'undefined' || typeof katex.renderToString !== 'function')
+      throw new Error('katex unavailable');
+    el.innerHTML = katex.renderToString(s, {throwOnError:false, displayMode:false});
+  }catch(e){ el.className = 'fb'; el.textContent = fb; }
+}
+function nf(v, d){
+  if(!isFinite(v)) return '—';
+  if(Math.abs(v) < 5e-10) v = 0;
+  return (v < 0 ? '−' : '') + Math.abs(v).toFixed(d);
+}
+function sf(v, d){ if(Math.abs(v) < 5e-10) v = 0; return (v < 0 ? '−' : '') + Math.abs(v).toFixed(d); }
+function niceTicks(lo, hi, n){
+  const span = hi - lo;
+  if(!(span > 0) || !isFinite(span)) return [lo];
+  const raw = span / n, mag = Math.pow(10, Math.floor(Math.log10(raw))), nm = raw / mag;
+  let st = nm <= 1 ? 1 : nm <= 2 ? 2 : nm <= 2.5 ? 2.5 : nm <= 5 ? 5 : 10;
+  st *= mag;
+  const out = [];
+  for(let v = Math.ceil(lo/st)*st; v <= hi + 1e-9; v += st) out.push(+(v.toFixed(10)));
+  return out;
+}
+const NS = 'http://www.w3.org/2000/svg';
+function el(tag, attrs, txt){
+  const e = document.createElementNS(NS, tag);
+  for(const k in attrs) e.setAttribute(k, attrs[k]);
+  if(txt != null) e.textContent = txt;
+  return e;
+}
+const $ = id => document.getElementById(id);
+
+/* ---------- 素材：两个函数（导数为解析式，数值已用 Python 校验） ---------- */
+const FN = {
+  cubic: {
+    label:'f(x)=x³−3x', texF:'f(x)=x^{3}-3x', texD:"f'(x)=3x^{2}-3",
+    f: x => x*x*x - 3*x, d: x => 3*x*x - 3,
+    crit:[-1, 1], xa:-2.4, xb:2.4, ya:-4.4, yb:4.4,
+    /* x=−1: f=2 极大；x=1: f=−2 极小 */
+    sub:'f(x)=x³−3x：驻点 x=±1'
+  },
+  quartic: {
+    label:'f(x)=x⁴−4x²', texF:'f(x)=x^{4}-4x^{2}', texD:"f'(x)=4x^{3}-8x",
+    f: x => Math.pow(x,4) - 4*x*x, d: x => 4*Math.pow(x,3) - 8*x,
+    crit:[-Math.SQRT2, 0, Math.SQRT2], xa:-2.1, xb:2.1, ya:-5.0, yb:2.6,
+    /* x=−√2: f=−4 极小；x=0: f=0 极大；x=√2: f=−4 极小 */
+    sub:'f(x)=x⁴−4x²：驻点 x=0、±√2（多极值）'
+  }
+};
+const KEY = { cubic:'cubic', quartic:'quartic' };
+let cur = 'cubic';
+
+/* 由驻点把定义域分成若干区间，逐区间取中点定 f′ 的符号 */
+function buildIntervals(F){
+  const ext = [F.xa - 2].concat(F.crit, [F.xb + 2]);
+  const iv = [];
+  for(let i = 0; i < ext.length - 1; i++){
+    const lo = ext[i], hi = ext[i+1], mid = (lo + hi)/2;
+    iv.push({lo:lo, hi:hi, s: Math.sign(F.d(mid))});
+  }
+  return iv;
+}
+/* 每个驻点的极值判定：看 f′ 是否变号 */
+function classify(F, iv){
+  const out = [];
+  for(let j = 0; j < F.crit.length; j++){
+    const before = iv[j].s, after = iv[j+1].s;
+    out.push({
+      x: F.crit[j], kind: before > 0 && after < 0 ? 'max'
+                  : before < 0 && after > 0 ? 'min' : 'none',
+      value: F.f(F.crit[j])
+    });
+  }
+  return out;
+}
+
+/* ---------- 画布几何 ---------- */
+const W = 860, H = 196, ML = 44, MR = 18, MT = 12, PY1 = 150;
+const BAND_T = 166, BAND_B = 186, TICKY = 161;
+const X0 = ML, X1 = W - MR;
+
+let F = FN.cubic, IV = buildIntervals(F), CR = classify(F, IV);
+let xMin = F.xa, xMax = F.xb, yMin = F.ya, yMax = F.yb;
+
+const xp = x => X0 + (x - xMin)/(xMax - xMin)*(X1 - X0);
+const yp = y => PY1 - (y - yMin)/(yMax - yMin)*(PY1 - MT);
+
+let x0 = -1;
+
+function drawStatic(){
+  const gG = $('gGrid'), gA = $('gAxes'), gB = $('gBand'), gL = $('gLabels');
+  [gG, gA, gB, gL].forEach(g => { while(g.firstChild) g.removeChild(g.firstChild); });
+  $('clipR').setAttribute('width', X1 - X0);
+  $('clipR').setAttribute('height', PY1 - MT);
+
+  /* 网格 */
+  niceTicks(yMin, yMax, 4).forEach(v => {
+    if(Math.abs(v) < 1e-9) return;
+    const y = yp(v);
+    gG.appendChild(el('line', {x1:X0, y1:y, x2:X1, y2:y, stroke:'#efe9e0', 'stroke-width':1}));
+    gG.appendChild(el('text', {x:X0 - 5, y:y + 3.5, 'text-anchor':'end',
+      'font-size':10, fill:'#8a908e'}, sf(v, 1)));
+  });
+  niceTicks(xMin, xMax, 6).forEach(v => {
+    if(Math.abs(v) < 1e-9) return;
+    const x = xp(v);
+    gG.appendChild(el('line', {x1:x, y1:MT, x2:x, y2:PY1, stroke:'#f4efe7', 'stroke-width':1}));
+    gG.appendChild(el('text', {x:x, y:TICKY, 'text-anchor':'middle',
+      'font-size':10, fill:'#8a908e'}, sf(v, 1)));
+  });
+
+  /* 坐标轴 */
+  if(yMin < 0 && yMax > 0){
+    const y = yp(0);
+    gA.appendChild(el('line', {x1:X0, y1:y, x2:X1, y2:y, stroke:'#c9c1b5', 'stroke-width':1.4}));
+  }
+  gA.appendChild(el('line', {x1:xp(0), y1:MT, x2:xp(0), y2:PY1, stroke:'#d8d1c6', 'stroke-width':1.4}));
+  gA.appendChild(el('text', {x:X1 - 2, y:yp(0) - 5, 'text-anchor':'end',
+    'font-size':10.5, fill:'#8a908e'}, 'x'));
+  gA.appendChild(el('text', {x:xp(0) + 5, y:MT + 10, 'font-size':10.5, fill:'#8a908e'}, 'y'));
+
+  /* 底部 f′ 符号色带：一段区间一个色块 */
+  IV.forEach((seg, i) => {
+    const a = Math.max(seg.lo, xMin - 1), b = Math.min(seg.hi, xMax + 1);
+    if(b <= xMin || a >= xMax) return;
+    const xa = xp(Math.max(a, xMin)), xb = xp(Math.min(b, xMax));
+    const up = seg.s > 0;
+    gB.appendChild(el('rect', {x:xa + 0.6, y:BAND_T, width:Math.max(0, xb - xa - 1.2),
+      height:BAND_B - BAND_T, rx:4, 'data-iv':i,
+      fill:up ? '#e8efeb' : '#f6eeea', stroke:up ? '#cbdccf' : '#e4d2cc', 'stroke-width':1}));
+    gB.appendChild(el('text', {x:(xa + xb)/2, y:BAND_T + 14, 'text-anchor':'middle',
+      'data-iv':i, 'font-size':11.5, 'font-weight':600,
+      fill:up ? '#5c8a6a' : '#b5705f'},
+      (up ? "f′>0" : "f′<0")));
+  });
+
+  /* 驻点标注 */
+  const gC = $('gCrit');
+  while(gC.firstChild) gC.removeChild(gC.firstChild);
+  CR.forEach(p => {
+    const isMax = p.kind === 'max', isMin = p.kind === 'min';
+    const col = isMax ? '#bf8a3c' : isMin ? '#6b8899' : '#8a908e';
+    gC.appendChild(el('circle', {cx:xp(p.x), cy:yp(p.value), r:4.6, fill:'#fffdfa',
+      stroke:col, 'stroke-width':2}));
+    const lab = isMax ? '极大值' : isMin ? '极小值' : '非极值';
+    const up = isMax;  /* 极大值标签写在点上方 */
+    gL.appendChild(el('text', {x:xp(p.x), y:yp(p.value) + (up ? -9 : 15), 'text-anchor':'middle',
+      'font-size':10.5, fill:col, 'font-weight':600,
+      stroke:'#fffdfa', 'stroke-width':3, 'paint-order':'stroke'}, lab));
+    gL.appendChild(el('text', {x:xp(p.x), y:yp(p.value) + (up ? -20 : 26), 'text-anchor':'middle',
+      'font-size':10, fill:'#8a908e',
+      stroke:'#fffdfa', 'stroke-width':3, 'paint-order':'stroke'}, 'x=' + sf(p.x, 3) ));
+  });
+}
+
+function render(){
+  drawStatic();
+  $('sub').textContent = F.sub;
+
+  /* 软吸附：靠近驻点就贴上去，让 f′(x₀)=0 的情形看得清 */
+  const raw = parseFloat($('sx').value);
+  let cv = raw, snapped = false;
+  F.crit.forEach(c => { if(Math.abs(c - raw) < 0.02){ cv = c; snapped = true; } });
+
+  const fc = F.f(cv), dc = F.d(cv);
+
+  /* 位于哪个区间 → 右侧/左侧的增减 */
+  let i0 = 0;
+  for(let i = 0; i < IV.length; i++) if(cv >= IV[i].lo && cv <= IV[i].hi) i0 = i;
+  const atCrit = snapped || F.crit.some(c => Math.abs(c - cv) < 1e-9);
+  const eps = 1e-4;
+  const sL = atCrit ? Math.sign(F.d(cv - eps)) : IV[i0].s;
+  const sR = atCrit ? Math.sign(F.d(cv + eps)) : IV[i0].s;
+  const isExt = atCrit && sL > 0 && sR < 0 ? 'max'
+              : atCrit && sL < 0 && sR > 0 ? 'min'
+              : atCrit ? 'saddle' : 'no';
+
+  /* 文本与数值 */
+  $('vx').textContent = (cv < 0 ? '−' : '') + Math.abs(cv).toFixed(3);
+  $('rF').textContent = sf(fc, 3);
+  $('rD').textContent = sf(dc, 3);
+  $('rL').textContent = sL > 0 ? '递增' : sL < 0 ? '递减' : '—';
+  $('rR').textContent = sR > 0 ? '递增' : sR < 0 ? '递减' : '—';
+
+  const pd = $('pillD');
+  pd.className = 'pill ' + (Math.abs(dc) < 1e-9 ? 'zero' : dc > 0 ? 'up' : 'dn');
+  pd.textContent = Math.abs(dc) < 1e-9 ? "f′(x₀)=0 驻点" : dc > 0 ? "f′(x₀)>0" : "f′(x₀)<0";
+
+  const pe = $('pillE');
+  if(isExt === 'max'){ pe.className = 'pill zero'; pe.textContent = '✅ 极大值点 f( ' + sf(cv,3) + ' ) = ' + sf(fc,3); }
+  else if(isExt === 'min'){ pe.className = 'pill up'; pe.textContent = '✅ 极小值点 f( ' + sf(cv,3) + ' ) = ' + sf(fc,3); }
+  else if(isExt === 'saddle'){ pe.className = 'pill dn'; pe.textContent = '⚠ 驻点但 f′ 不变号 → 不是极值点'; }
+  else { pe.className = 'pill'; pe.textContent = 'f′(x₀)≠0 → 一定不是极值点'; }
+
+  /* 符号表 chips */
+  const box = $('ivs');
+  while(box.firstChild) box.removeChild(box.firstChild);
+  IV.forEach((seg, i) => {
+    const lt = i === 0 ? '−∞' : sf(seg.lo, 3);
+    const rt = i === IV.length - 1 ? '+∞' : sf(seg.hi, 3);
+    const c = document.createElement('span');
+    c.className = 'chip' + (i === i0 ? ' act' : '');
+    c.innerHTML = '(' + lt + ', ' + rt + ')<span class="s ' + (seg.s > 0 ? 'up' : 'dn') + '">'
+      + (seg.s > 0 ? "f′>0 递增" : "f′<0 递减") + '</span>';
+    box.appendChild(c);
+  });
+
+  /* 图上动态元素 */
+  const line = x => F.f(cv) + dc*(x - cv);
+  let px = '';
+  for(let i = 0; i <= 120; i++){
+    const x = xMin + (xMax - xMin)*i/120;
+    px += (i ? 'L' : 'M') + xp(x).toFixed(2) + ' ' + yp(line(x)).toFixed(2);
+  }
+  $('pTan').setAttribute('d', px);
+
+  let pc = '';
+  for(let i = 0; i <= 480; i++){
+    const x = xMin + (xMax - xMin)*i/480;
+    pc += (i ? 'L' : 'M') + xp(x).toFixed(2) + ' ' + yp(F.f(x)).toFixed(2);
+  }
+  $('pCurve').setAttribute('d', pc);
+
+  const ld = $('lDrop');
+  ld.setAttribute('x1', xp(cv)); ld.setAttribute('x2', xp(cv));
+  ld.setAttribute('y1', yp(0));  ld.setAttribute('y2', yp(fc));
+
+  const cp = $('cPt');
+  cp.setAttribute('cx', xp(cv)); cp.setAttribute('cy', yp(fc));
+  cp.setAttribute('fill', isExt === 'max' ? '#bf8a3c' : isExt === 'min' ? '#6b8899' : '#4e6a5b');
+
+  /* 底部「一句话本质」 */
+  const C = $('concl');
+  if(Math.abs(dc) < 1e-9 && isExt === 'max')
+    C.innerHTML = '<span class="k">一句话本质：</span>在一阶导数为 <b>0</b> 的点上，'
+      + 'f′ 由 <b>正</b> 变 <b>负</b>（先增后减），所以 x₀=' + sf(cv,3) + ' 是<b>极大值点</b>，'
+      + '极大值 f(' + sf(cv,3) + ')=' + sf(fc,3) + '。<span class="k">f′(x₀)=0 只是“候选”，变号才是“当选”。</span>';
+  else if(Math.abs(dc) < 1e-9 && isExt === 'min')
+    C.innerHTML = '<span class="k">一句话本质：</span>在一阶导数为 <b>0</b> 的点上，'
+      + 'f′ 由 <b>负</b> 变 <b>正</b>（先减后增），所以 x₀=' + sf(cv,3) + ' 是<b>极小值点</b>，'
+      + '极小值 f(' + sf(cv,3) + ')=' + sf(fc,3) + '。<span class="k">f′(x₀)=0 只是“候选”，变号才是“当选”。</span>';
+  else if(isExt === 'saddle')
+    C.innerHTML = '<span class="k">一句话本质：</span>x₀=' + sf(cv,3) + ' 处 f′=0，但 f′ 左右<b>同号</b>'
+      + '（曲线只是一瞬间“停顿”后继续沿原方向走），所以它是<b>驻点却不是极值点</b>。';
+  else if(dc > 0)
+    C.innerHTML = '<span class="k">一句话本质：</span>f′(' + sf(cv,3) + ')=<b>' + sf(dc,3)
+      + '</b>&gt;0 ⇒ 曲线在此处<b>上升（单调递增）</b>。'
+      + '<span class="k">极值只可能出现在 f′=0 的驻点上，此刻所在区间是递增区间，找不到极值。</span>';
+  else
+    C.innerHTML = '<span class="k">一句话本质：</span>f′(' + sf(cv,3) + ')=<b>' + sf(dc,3)
+      + '</b>&lt;0 ⇒ 曲线在此处<b>下降（单调递减）</b>。'
+      + '<span class="k">极值只可能出现在 f′=0 的驻点上，此刻所在区间是递减区间，找不到极值。</span>';
+
+  /* KaTeX 条 */
+  const sgnTxt = Math.abs(dc) < 1e-9 ? "f'(x_0)=0\\;(\\text{驻点})"
+    : (dc > 0 ? "f'(x_0)>0\\;(\\text{递增})" : "f'(x_0)<0\\;(\\text{递减})");
+  tex($('tF'), F.texF + ",\\qquad x_0=" + sf(cv, 3), F.label + '，x0=' + sf(cv, 3));
+  tex($('tD'), F.texD, "f'(x)=" + (cur === 'cubic' ? '3x^2-3' : '4x^3-8x'));
+  tex($('tAt'), sgnTxt + ",\\qquad f'(x_0)=" + sf(dc, 3), 'f\'(x0)=' + sf(dc, 3));
+}
+
+/* ---------- 交互 ---------- */
+const svg = $('plot');
+let dragging = false;
+
+function setFromClientX(cx){
+  const r = svg.getBoundingClientRect();
+  const vx = (cx - r.left)/r.width*W;
+  let x = xMin + (vx - X0)/(X1 - X0)*(xMax - xMin);
+  x = Math.max(xMin, Math.min(xMax, x));
+  x = Math.round(x*1000)/1000;
+  $('sx').value = x;
+  render();
+}
+
+function setFn(k){
+  cur = k; F = FN[k];
+  IV = buildIntervals(F); CR = classify(F, IV);
+  xMin = F.xa; xMax = F.xb; yMin = F.ya; yMax = F.yb;
+  const s = $('sx');
+  s.min = xMin; s.max = xMax;
+  const mid = k === 'cubic' ? -1 : 0;
+  s.value = mid; x0 = mid;
+  $('bA').className = k === 'cubic' ? 'on' : '';
+  $('bB').className = k === 'quartic' ? 'on' : '';
+  render();
+}
+
+$('sx').addEventListener('input', render);
+$('bA').addEventListener('click', () => setFn('cubic'));
+$('bB').addEventListener('click', () => setFn('quartic'));
+$('bSnap').addEventListener('click', () => {
+  const raw = parseFloat($('sx').value);
+  let best = F.crit[0], bd = Infinity;
+  F.crit.forEach(c => { const dd = Math.abs(c - raw); if(dd < bd){ bd = dd; best = c; } });
+  $('sx').value = Math.round(best*1000)/1000;
+  render();
+});
+
+svg.addEventListener('pointerdown', e => {
+  dragging = true;
+  try{ svg.setPointerCapture(e.pointerId); }catch(err){}
+  setFromClientX(e.clientX);
+});
+svg.addEventListener('pointermove', e => { if(dragging) setFromClientX(e.clientX); });
+svg.addEventListener('pointerup', e => {
+  dragging = false;
+  try{ svg.releasePointerCapture(e.pointerId); }catch(err){}
+});
+svg.addEventListener('pointercancel', () => { dragging = false; });
+svg.addEventListener('pointerleave', () => { dragging = false; });
+
+setFn('cubic');
+window.__demoReady = true;
+</script>
+</body>
+</html>
